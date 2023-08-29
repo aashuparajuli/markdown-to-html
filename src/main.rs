@@ -41,11 +41,11 @@ pub mod file_io {
     }
 }
 
-pub mod parse_line_starters {
-    use crate::file_io;
+pub mod parse_line_formatting {
+    use crate::{file_io, parse_text_formatting};
     /**
-     * Module to parse markdown selectors that appear at the start of lines: Headers, list elements
-     * Currently supports: h1, h2, h3, and unordered list
+     * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
+     * Currently supports: h1, h2, h3, unordered list, and unordered list
      */
 
     #[derive(PartialEq)]
@@ -74,6 +74,8 @@ pub mod parse_line_starters {
             let (parsed_line, new_line_state) = determine_line_type(line);
             //format the other text in the string
 
+            //parse and format the italics
+            let parsed_line = parse_text_formatting::process_italics(parsed_line);
             //add the line-level tags at the end
             let prefix = start_end_lists(&current_line_state, &new_line_state);
             let parsed_line: String = match new_line_state {
@@ -134,7 +136,6 @@ pub mod parse_line_starters {
             (line, LineType::Other)
         }
     }
-
     /*
     Parse all of the lines in the file
     for each line:
@@ -183,51 +184,54 @@ pub mod parse_line_starters {
     }
 }
 
-fn process_italics(str: String) -> String {
-    let mut result = String::new();
-    let mut stack: Vec<&str> = Vec::new();
-    let mut buffer: String = String::new();
+pub mod parse_text_formatting {
 
-    for c in str.chars() {
-        /*
-        cases:
-        - not in italics, adding a char
-        - switching into italics
-        - in italics, adding a char
-        - switching out of italics
-        */
+    pub fn process_italics(str: String) -> String {
+        let mut result: String = String::new();
+        let mut stack: Vec<&str> = Vec::new();
+        let mut buffer: String = String::new();
 
-        if c == '*' {
-            //switching in or out of italics
-            //if top of stack is *, then we are switching out
-            if stack.last() == Some(&"*") {
-                //pop the asterisk, update the buffer correctly
+        for c in str.chars() {
+            /*
+            cases:
+            - not in italics, adding a char
+            - switching into italics
+            - in italics, adding a char
+            - switching out of italics
+            */
+            //two consecutive '*' should convert to plaintext
+            if c == '*' {
+                //switching in or out of italics
+                //if top of stack is *, then we are switching out of italics
+                if stack.last() == Some(&"*") {
+                    //pop the asterisk, update the buffer correctly
+                    stack.pop();
+                    //update the buffer with italicized text
+                    buffer = format!("<i>{buffer}</i>");
+                } else {
+                    //else, we are switching into italics
+                    stack.push("*"); //update the stack
+                }
+                result.push_str(buffer.as_str()); //push the current contents of the buffer
+                buffer = String::new(); //reset the buffer to being empty
+            } else if stack.last() == Some(&"*") && buffer.is_empty() && c == ' ' {
+                //if top of stack is '*' and buffer is empty and current char is space, then we need to escape italics
                 stack.pop();
-                //update the buffer with italicized text
-                buffer = format!("<i>{buffer}</i>");
+                buffer.push('*');
+                buffer.push(' ');
             } else {
-                //else, we are switching into italics
-                stack.push("*"); //update the stack
+                buffer.push(c);
             }
-            result.push_str(buffer.as_str()); //push the current contents of the buffer
-            buffer = String::new(); //reset the buffer to being empty
-        } else if stack.last() == Some(&"*") && buffer.is_empty() && c == ' ' {
-            //if top of stack is '*' and buffer is empty and current char is space, then we need to escape italics
-            stack.pop();
-            buffer.push('*');
-            buffer.push(' ');
-        } else {
-            buffer.push(c);
         }
-    }
-    result.push_str(&buffer);
-    if !stack.is_empty() {
-        //push remaining characters onto the stack
-        for substring in stack {
-            result.push_str(substring);
+        result.push_str(&buffer);
+        if !stack.is_empty() {
+            //push remaining characters onto the stack
+            for substring in stack {
+                result.push_str(substring);
+            }
         }
+        result
     }
-    result
 }
 
 // The output is wrapped in a Result to allow matching on errors
@@ -235,17 +239,19 @@ fn process_italics(str: String) -> String {
 
 fn main() {
     let input_file_name = "./input/input.txt";
-    let output_file_name = "./output.html";
+    let output_file_name = "./output/output.html";
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
-    let output_lines = parse_line_starters::parse_all_lines(input_lines); //process the lines
+    let output_lines = parse_line_formatting::parse_all_lines(input_lines); //process the lines
 
     for line in output_lines.clone() {
         println!("{}", line); //display the lines
     }
     file_io::write_line_to_file_true(&output_lines, output_file_name);
 
-    let _italics_result: String = process_italics(String::from("new *string*"));
-    let _header_result: String = parse_line_starters::process_headers(String::from("# new string"));
+    let _italics_result: String =
+        parse_text_formatting::process_italics(String::from("new *string*"));
+    let _header_result: String =
+        parse_line_formatting::process_headers(String::from("# new string"));
     // File hosts.txt must exist in the current path
 }
 
@@ -257,18 +263,18 @@ mod header_tests {
         //valid string should receive tags
         let input_str = String::from("# Here is a header");
         let expected_result = String::from("<h1>Here is a header</h1>");
-        let actual_result = parse_line_starters::process_headers(input_str);
+        let actual_result = parse_line_formatting::process_headers(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_improper_h1_header() {
         //string with space before pound sign should not be converted
         let input_str = String::from(" # Here is a header");
-        let actual_result: String = parse_line_starters::process_headers(input_str.clone());
+        let actual_result: String = parse_line_formatting::process_headers(input_str.clone());
         assert_eq!(actual_result, input_str);
 
         let input_str_2 = String::from("#Here is a header");
-        let actual_result_2: String = parse_line_starters::process_headers(input_str_2.clone());
+        let actual_result_2: String = parse_line_formatting::process_headers(input_str_2.clone());
         assert_eq!(actual_result_2, input_str_2);
     }
     #[test]
@@ -276,18 +282,18 @@ mod header_tests {
         //valid string should receive tags
         let input_str = String::from("## Here is a header");
         let expected_result = String::from("<h2>Here is a header</h2>");
-        let actual_result = parse_line_starters::process_headers(input_str);
+        let actual_result = parse_line_formatting::process_headers(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_improper_h2_header() {
         //string with space before pound sign should not be converted
         let input_str = String::from(" ## Here is a header");
-        let actual_result: String = parse_line_starters::process_headers(input_str.clone());
+        let actual_result: String = parse_line_formatting::process_headers(input_str.clone());
         assert_eq!(actual_result, input_str);
 
         let input_str_2 = String::from("##Here is a header");
-        let actual_result_2: String = parse_line_starters::process_headers(input_str_2.clone());
+        let actual_result_2: String = parse_line_formatting::process_headers(input_str_2.clone());
         assert_eq!(actual_result_2, input_str_2);
     }
 }
@@ -300,7 +306,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text*");
         let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_italics(input_str);
+        let actual_result = parse_text_formatting::process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -308,7 +314,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some * text *");
         let expected_result = String::from("some * text *");
-        let actual_result: String = process_italics(input_str);
+        let actual_result: String = parse_text_formatting::process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
 }
@@ -329,7 +335,7 @@ mod unordered_list_test {
             String::from("<ul><li>list here</li>"),
             String::from("</ul>-end list"),
         ];
-        let actual_result = parse_line_starters::parse_all_lines(file_lines);
+        let actual_result = parse_line_formatting::parse_all_lines(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_result[0], expected_result[0]);
         assert_eq!(actual_result[1], expected_result[1]);
@@ -350,7 +356,7 @@ mod unordered_list_test {
             String::from("<li>another here</li>"),
             String::from("</ul>end list"),
         ];
-        let actual_result = parse_line_starters::parse_all_lines(file_lines);
+        let actual_result = parse_line_formatting::parse_all_lines(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_result[0], expected_result[0]);
         assert_eq!(actual_result[1], expected_result[1]);
