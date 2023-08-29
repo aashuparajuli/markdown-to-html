@@ -1,15 +1,20 @@
 # Current Features
 
-- parse header tags from String
-- parse italics from String
-- parse bold using asterisks(basic)
+- parse header tags from File
+- parse unordered list from File
+- parse italics from Strings
 
 # Future features
 
-- parse lines from file
-- parse ordered lists
-- parse unordered lists
+## Short-term
+
 - bold using underscore
-- bold using asterisks(advanced)
+- parse ordered lists
+- links
+
+## Long-term
+
+- images
+- bold using asterisks
 - italics using underscores
 - nested italics and bold
