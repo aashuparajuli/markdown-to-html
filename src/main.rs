@@ -14,8 +14,8 @@ pub mod file_io {
         let file = File::open(filename)?;
         Ok(io::BufReader::new(file).lines())
     }
-    pub fn get_file_lines() -> Vec<String> {
-        let filename = "./hosts.txt";
+    pub fn get_file_lines(filename: &str) -> Vec<String> {
+        //let filename = "./hosts.txt";
         let mut file_lines: Vec<String> = Vec::new();
         if let Ok(lines) = read_lines(filename) {
             // Consumes the iterator, returns an (Optional) String
@@ -27,9 +27,9 @@ pub mod file_io {
         file_lines
     }
 
-    pub fn write_line_to_file_true(str: &Vec<String>) {
+    pub fn write_line_to_file_true(str: &Vec<String>, filename: &str) {
         //let data = "Some data!";
-        let mut f = File::create("./output/output.html").expect("Unable to create file");
+        let mut f = File::create(filename).expect("Unable to create file");
         for s in str {
             f.write_all(s.as_bytes()).expect("Unable to write data");
         }
@@ -57,6 +57,14 @@ pub mod parse_line_starters {
         Header3,
         Other,
     }
+    /**
+     * Input: a Vec<String> - one String for each line in the input file
+     * For each String, check if there are any headers at the start of the file
+     * if there are: surround the remainder of the string with the correct tag
+     *
+     * Returns a Vec<String> where each String has been converted to HTML code
+     * Writes the resulting html to a file
+     */
     pub fn parse_all_lines(lines: Vec<String>) -> Vec<String> {
         let mut proxy_file: Vec<String> = Vec::new();
         let mut current_line_state: LineType = LineType::Other;
@@ -101,12 +109,13 @@ pub mod parse_line_starters {
             file_io::write_line_to_file(&parsed_line, &mut proxy_file);
         }
 
-        file_io::write_line_to_file_true(&proxy_file);
         proxy_file
     }
 
     fn determine_line_type(line: String) -> (String, LineType) {
-        if &line[0..2] == "# " {
+        if line.len() < 2 {
+            (line, LineType::Other)
+        } else if &line[0..2] == "# " {
             let remaining_str = &line[2..];
             (remaining_str.to_string(), LineType::Header1)
         } else if &line[0..3] == "## " {
@@ -225,12 +234,15 @@ fn process_italics(str: String) -> String {
 // Returns an Iterator to the Reader of the lines of the file.
 
 fn main() {
-    let inputs = file_io::get_file_lines(); //get the lines from the file
-    let output = parse_line_starters::parse_all_lines(inputs); //process the lines
+    let input_file_name = "./input/input.txt";
+    let output_file_name = "./output.html";
+    let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
+    let output_lines = parse_line_starters::parse_all_lines(input_lines); //process the lines
 
-    for val in output {
-        println!("{}", val); //display the lines
+    for line in output_lines.clone() {
+        println!("{}", line); //display the lines
     }
+    file_io::write_line_to_file_true(&output_lines, output_file_name);
 
     let _italics_result: String = process_italics(String::from("new *string*"));
     let _header_result: String = parse_line_starters::process_headers(String::from("# new string"));
