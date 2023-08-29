@@ -92,6 +92,15 @@ pub mod parse_line_starters {
             file_io::write_line_to_file(&parsed_line, &mut proxy_file);
             current_line_state = new_line_state;
         }
+        //close any tags that are still open:
+        if current_line_state == LineType::OrderedList {
+            let parsed_line = String::from("</ol>");
+            file_io::write_line_to_file(&parsed_line, &mut proxy_file);
+        } else if current_line_state == LineType::UnorderedList {
+            let parsed_line = String::from("</ul>");
+            file_io::write_line_to_file(&parsed_line, &mut proxy_file);
+        }
+
         file_io::write_line_to_file_true(&proxy_file);
         proxy_file
     }
