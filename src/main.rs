@@ -1,3 +1,4 @@
+
 fn process_headers(str: String) -> String{
     //if first characters are 'h1', then add the h1 tags
     if &str[0..2] == "# "{
@@ -19,9 +20,12 @@ fn process_headers(str: String) -> String{
 
 fn process_italics(str: String) -> String{
     let mut result = String::new();
-    let mut stack: Vec<char> = Vec::new();
+    let mut stack: Vec<&str> = Vec::new();
     let mut buffer: String = String::new();
-    for c in str.chars(){
+    let mut str_iter = str.chars();
+    
+    while let Some(c) = str_iter.next() {
+        println!("while");
         /*
          cases:
          - not in italics, adding a char
@@ -29,47 +33,89 @@ fn process_italics(str: String) -> String{
          - in italics, adding a char
          - switching out of italics
          */
-        if c == '*'{ //switching in or out of italics
+        if stack.last() == Some(&"*") && buffer.is_empty()&& c == '*'{
+            //if top of stack is '*' and buffer is empty and current char is *, then we need to escape italics to create bold
+            stack.pop();
+            stack.push("<b>");
+            println!("starting a bold tag")
+            //todo!("switch to bold if there are two consecutive occurences of '*' ");
+        } 
+        else if c == '*'{ //switching in or out of italics
+            //if the top of the stack is <b>, then we try to find a bold closing tag
+            if stack.last() == Some(&"<b>") {
+                println!("closing a bold tag");
+                //if there is a next character, check if it is a *
+                //if yes -> skip it, create a bold tag
+                //if no -> return to italics tag, add it to the queue
+                if let Some(next_character) = str_iter.next() { //if this works, then we can create a bold tag
+                    if next_character == '*' {//next char is *, so we can add a bold tag
+                        stack.pop();//pop the <b> tag
+                        
+                        buffer = format!("<b>{buffer}</b>");
+                        println!("closing a bold tag {}", stack.len());
+                        println!("current solution state 1: {}", result);
+                    }
+                    else{
+                        /* else
+                         - pop the bold tag
+                         - put the italics tag back on the stack, 
+                         - add italics string to buffer
+                        */
+                        println!("closing a bold tag with italics");
+                        stack.pop();
+                        stack.push("*");
+                        buffer = format!("<i>{buffer}</i>{next_character}");
+                    }
+                } else{
+                    println!("closing a bold tag with italics");
+                    stack.pop();
+                    buffer = format!("*<i>{buffer}</i>");
+                }
+            }
             //if top of stack is *, then we are switching out
-            if stack.last() == Some(&'*') {
+            else if stack.last() == Some(&"*") {
                 //pop the asterisk, update the buffer correctly
                 stack.pop();
                 //update the buffer with italicized text
                 buffer = format!("<i>{buffer}</i>");
             }
             else{//else, we are switching into italics
-                stack.push('*');//update the stack
+                stack.push("*");//update the stack
             }
             result.push_str(buffer.as_str());//push the current contents of the buffer
             buffer = String::new();//reset the buffer to being empty
         }
-        //if top of stack is '*' and buffer is empty and current char is space, then we need to escape italics
-        else if stack.last() == Some(&'*') && buffer.is_empty()&& c == ' '{
+        else if stack.last() == Some(&"*") && buffer.is_empty()&& c == ' '{
+            //if top of stack is '*' and buffer is empty and current char is space, then we need to escape italics
             stack.pop();
             buffer.push('*');
             buffer.push(' ');
-        }  else if stack.last() == Some(&'*') && buffer.is_empty()&& c == '*'{
-            //if top of stack is '*' and buffer is empty and current char is *, then we need to escape italics to create bold
-            todo!("switch to bold if there are two consecutive occurences of '*' ");
-            //stack.push('**');
         }  
         else{
             buffer.push(c);
         }
-        
+        println!("current solution state 3: {}", result);
     }
+    result.push_str(&buffer);
+    println!("current solution state 4: {}", result);
     if !stack.is_empty() {
         //push remaining characters onto the stack
-        for c in stack{
-            result.push(c);
+        for substring in stack{
+            if substring == "<b>"{
+               // result.push('*');
+               result.push_str("<b>");
+            } else{
+                result.push_str(substring);
+            }
         }
     }
+    println!("current solution state 5: {}", result);
     result
 }
 
 fn main() {
 
-   let italics_result: String = process_italics(String::from("new *string*"));
+   let italics_result: String = process_italics(String::from("new **string**"));
    let header_result: String = process_headers(String::from("# new string"));
    println!("{}", italics_result);
    println!("{}", header_result);
@@ -119,7 +165,7 @@ mod header_tests {
 }
 
 #[cfg(test)]
-mod italics_tests {
+mod italics_bold_tests {
     use super::*;
     #[test]
     fn convert_italics(){
@@ -134,6 +180,23 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str= String::from("some * text *");
         let expected_result =  String::from("some * text *");
+        let actual_result: String = process_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+
+    #[test]
+    fn convert_bold(){
+        //string with space before pound sign should not be converted
+        let input_str= String::from("some **text** a");
+        let expected_result =  String::from("some <b>text</b> a");
+        let actual_result = process_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_italics_mixed(){
+        //string with space before pound sign should not be converted
+        let input_str= String::from("some **text*");
+        let expected_result =  String::from("some *<i>text</i>");
         let actual_result = process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
