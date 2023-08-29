@@ -157,46 +157,6 @@ pub mod parse_line_starters {
         }
     }
 
-    /**
-     * Parses lines from the file, converting them into bulleted lists where needed
-     */
-    fn parse_all_lines_unordered_lists(lines: Vec<String>) -> Vec<String> {
-        let mut proxy_file: Vec<String> = Vec::new();
-        //iterate through all of the lines
-        let mut current_line_state: LineType = LineType::Other;
-
-        //process the current line, determine its state
-        for line in lines {
-            //parse the current line, determine the state
-            let (mut parsed_line, new_state) = process_unordered_lists(line);
-            //let new_state = LineState::UnorderedList;
-            if current_line_state != LineType::UnorderedList && new_state == LineType::UnorderedList
-            {
-                //we just started a bulleted list, so we need to insert a <ul> tag
-                parsed_line = format!("<ul>{}", parsed_line);
-            } else if current_line_state == LineType::UnorderedList
-                && new_state != LineType::UnorderedList
-            {
-                //we just exited a bulleted list, so we need to insert a </ul> tag
-                parsed_line = format!("</ul>{}", parsed_line);
-            }
-            file_io::write_line_to_file(&parsed_line, &mut proxy_file);
-            current_line_state = new_state;
-        }
-        proxy_file
-    }
-    fn process_unordered_lists(str: String) -> (String, LineType) {
-        if &str[0..2] == "- " {
-            let remaining_str = &str[2..];
-            (
-                format!("<li>{}</li>", remaining_str),
-                LineType::UnorderedList,
-            )
-        } else {
-            (str, LineType::Other)
-        }
-    }
-
     pub fn process_headers(str: String) -> String {
         //if first characters are 'h1', then add the h1 tags
         if &str[0..2] == "# " {
