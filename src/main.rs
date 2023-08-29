@@ -51,6 +51,7 @@ pub mod parse_line_starters {
     #[derive(PartialEq)]
     enum LineType {
         UnorderedList,
+        OrderedList,
         Header1,
         Header2,
         Header3,
@@ -66,9 +67,12 @@ pub mod parse_line_starters {
             //format the other text in the string
 
             //add the line-level tags at the end
-            let prefix = start_end_unordered_lists(&current_line_state, &new_line_state);
+            let prefix = start_end_lists(&current_line_state, &new_line_state);
             let parsed_line: String = match new_line_state {
                 LineType::UnorderedList => {
+                    format!("{}<li>{}</li>\n", prefix, parsed_line)
+                }
+                LineType::OrderedList => {
                     format!("{}<li>{}</li>\n", prefix, parsed_line)
                 }
                 LineType::Header1 => {
@@ -105,6 +109,9 @@ pub mod parse_line_starters {
         } else if &line[0..2] == "- " {
             let remaining_str = &line[2..];
             (remaining_str.to_string(), LineType::UnorderedList)
+        } else if &line[0..3] == "1. " {
+            let remaining_str = &line[2..];
+            (remaining_str.to_string(), LineType::OrderedList)
         } else {
             (line, LineType::Other)
         }
@@ -117,7 +124,7 @@ pub mod parse_line_starters {
         - return the struct containing the LineState
         - generate the correct string
      */
-    fn start_end_unordered_lists(current_line_state: &LineType, new_state: &LineType) -> String {
+    fn start_end_lists(current_line_state: &LineType, new_state: &LineType) -> String {
         if *current_line_state != LineType::UnorderedList && *new_state == LineType::UnorderedList {
             //we just started a bulleted list, so we need to insert a <ul> tag
             String::from("<ul>")
@@ -126,6 +133,16 @@ pub mod parse_line_starters {
         {
             //we just exited a bulleted list, so we need to insert a </ul> tag
             String::from("</ul>")
+        } else if *current_line_state != LineType::OrderedList
+            && *new_state == LineType::OrderedList
+        {
+            //we just exited a bulleted list, so we need to insert a </ul> tag
+            String::from("<ol>")
+        } else if *current_line_state == LineType::OrderedList
+            && *new_state != LineType::OrderedList
+        {
+            //we just exited a bulleted list, so we need to insert a </ul> tag
+            String::from("</ol>")
         } else {
             String::new()
         }
@@ -170,21 +187,21 @@ pub mod parse_line_starters {
             (str, LineType::Other)
         }
     }
-}
 
-fn process_headers(str: String) -> String {
-    //if first characters are 'h1', then add the h1 tags
-    if &str[0..2] == "# " {
-        let remaining_str = &str[2..];
-        format!("<h1>{}</h1>", remaining_str)
-    } else if &str[0..3] == "## " {
-        let remaining_str = &str[3..];
-        format!("<h2>{}</h2>", remaining_str)
-    } else if &str[0..4] == "### " {
-        let remaining_str = &str[4..];
-        format!("<h3>{}</h3>", remaining_str)
-    } else {
-        str
+    pub fn process_headers(str: String) -> String {
+        //if first characters are 'h1', then add the h1 tags
+        if &str[0..2] == "# " {
+            let remaining_str = &str[2..];
+            format!("<h1>{}</h1>", remaining_str)
+        } else if &str[0..3] == "## " {
+            let remaining_str = &str[3..];
+            format!("<h2>{}</h2>", remaining_str)
+        } else if &str[0..4] == "### " {
+            let remaining_str = &str[4..];
+            format!("<h3>{}</h3>", remaining_str)
+        } else {
+            str
+        }
     }
 }
 
@@ -247,7 +264,7 @@ fn main() {
     }
 
     let _italics_result: String = process_italics(String::from("new *string*"));
-    let _header_result: String = process_headers(String::from("# new string"));
+    let _header_result: String = parse_line_starters::process_headers(String::from("# new string"));
     // File hosts.txt must exist in the current path
 }
 
@@ -259,18 +276,18 @@ mod header_tests {
         //valid string should receive tags
         let input_str = String::from("# Here is a header");
         let expected_result = String::from("<h1>Here is a header</h1>");
-        let actual_result = process_headers(input_str);
+        let actual_result = parse_line_starters::process_headers(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_improper_h1_header() {
         //string with space before pound sign should not be converted
         let input_str = String::from(" # Here is a header");
-        let actual_result: String = process_headers(input_str.clone());
+        let actual_result: String = parse_line_starters::process_headers(input_str.clone());
         assert_eq!(actual_result, input_str);
 
         let input_str_2 = String::from("#Here is a header");
-        let actual_result_2: String = process_headers(input_str_2.clone());
+        let actual_result_2: String = parse_line_starters::process_headers(input_str_2.clone());
         assert_eq!(actual_result_2, input_str_2);
     }
     #[test]
@@ -278,18 +295,18 @@ mod header_tests {
         //valid string should receive tags
         let input_str = String::from("## Here is a header");
         let expected_result = String::from("<h2>Here is a header</h2>");
-        let actual_result = process_headers(input_str);
+        let actual_result = parse_line_starters::process_headers(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_improper_h2_header() {
         //string with space before pound sign should not be converted
         let input_str = String::from(" ## Here is a header");
-        let actual_result: String = process_headers(input_str.clone());
+        let actual_result: String = parse_line_starters::process_headers(input_str.clone());
         assert_eq!(actual_result, input_str);
 
         let input_str_2 = String::from("##Here is a header");
-        let actual_result_2: String = process_headers(input_str_2.clone());
+        let actual_result_2: String = parse_line_starters::process_headers(input_str_2.clone());
         assert_eq!(actual_result_2, input_str_2);
     }
 }
