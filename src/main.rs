@@ -20,7 +20,7 @@ fn process_headers(str: String) -> String{
 fn process_italics(str: String) -> String{
     let mut result = String::new();
     let mut stack: Vec<char> = Vec::new();
-    let mut buffer = String::new();
+    let mut buffer: String = String::new();
     for c in str.chars(){
         /*
          cases:
@@ -43,8 +43,25 @@ fn process_italics(str: String) -> String{
             result.push_str(buffer.as_str());//push the current contents of the buffer
             buffer = String::new();//reset the buffer to being empty
         }
+        //if top of stack is '*' and buffer is empty and current char is space, then we need to escape italics
+        else if stack.last() == Some(&'*') && buffer.is_empty()&& c == ' '{
+            stack.pop();
+            buffer.push('*');
+            buffer.push(' ');
+        }  else if stack.last() == Some(&'*') && buffer.is_empty()&& c == '*'{
+            //if top of stack is '*' and buffer is empty and current char is *, then we need to escape italics to create bold
+            todo!("switch to bold if there are two consecutive occurences of '*' ");
+            //stack.push('**');
+        }  
         else{
             buffer.push(c);
+        }
+        
+    }
+    if !stack.is_empty() {
+        //push remaining characters onto the stack
+        for c in stack{
+            result.push(c);
         }
     }
     result
@@ -59,7 +76,7 @@ fn main() {
 }
 
 #[cfg(test)]
-mod tests {
+mod header_tests {
     use super::*;
     #[test]
     fn convert_h1_header(){
@@ -99,11 +116,24 @@ mod tests {
         let actual_result_2: String = process_headers(input_str_2.clone());
         assert_eq!(actual_result_2, input_str_2);
     }
+}
+
+#[cfg(test)]
+mod italics_tests {
+    use super::*;
     #[test]
     fn convert_italics(){
         //string with space before pound sign should not be converted
         let input_str= String::from("some *text*");
         let expected_result =  String::from("some <i>text</i>");
+        let actual_result = process_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_italics_invalid(){
+        //string with space before pound sign should not be converted
+        let input_str= String::from("some * text *");
+        let expected_result =  String::from("some * text *");
         let actual_result = process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
