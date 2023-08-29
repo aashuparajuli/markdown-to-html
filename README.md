@@ -9,7 +9,6 @@
 
 ## Short-term
 
-- parse italics from file
 - bold using underscore
 - links
 
