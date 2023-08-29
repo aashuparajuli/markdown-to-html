@@ -92,39 +92,43 @@ fn process_italics(str: String) -> String{
     result
 }
 
-fn process_unordered_lists(str: String) -> (String, LineState){
+fn process_unordered_lists(str: String) -> (String, LineType){
     if &str[0..2] == "- "{
         let remaining_str = &str[2..];
-        (format!("<li>{}</li>", remaining_str), LineState::UnorderedList)
+        (format!("<li>{}</li>", remaining_str), LineType::UnorderedList)
     } else{
-        (str, LineState::Other)
+        (str, LineType::Other)
     }
 }
 #[derive(PartialEq)]
-enum LineState{
+
+
+
+enum LineType{
     UnorderedList,
+    Header,
     Other
 }
 
 /**
  * Parses lines from the file, converting them into bulleted lists where needed
  */
-fn parse_all_lines(lines: Vec<String>) -> Vec<String>{
+fn parse_all_lines_unordered_lists(lines: Vec<String>) -> Vec<String>{
     let mut proxy_file: Vec<String> = Vec::new();
     //iterate through all of the lines
-    let mut current_line_state :LineState = LineState::Other;
+    let mut current_line_state :LineType = LineType::Other;
     
     //process the current line, determine its state
     for line in lines {
         //parse the current line, determine the state
         let (mut parsed_line, new_state) = process_unordered_lists(line);
         //let new_state = LineState::UnorderedList;
-        if current_line_state != LineState::UnorderedList && new_state == LineState::UnorderedList {
+        if current_line_state != LineType::UnorderedList && new_state == LineType::UnorderedList {
 
             //we just started a bulleted list, so we need to insert a <ul> tag
             parsed_line = format!("<ul>{}", parsed_line);
 
-        } else if current_line_state == LineState::UnorderedList && new_state != LineState::UnorderedList{
+        } else if current_line_state == LineType::UnorderedList && new_state != LineType::UnorderedList{
             //we just exited a bulleted list, so we need to insert a </ul> tag
             parsed_line = format!("</ul>{}", parsed_line);
         }
@@ -144,7 +148,7 @@ fn write_line_to_file(str: String,  file: &mut Vec<String>) {//write a line to a
 
 fn main() {
     let inputs = file_io::get_file_lines();
-    parse_all_lines(inputs);
+    parse_all_lines_unordered_lists(inputs);
     let italics_result: String = process_italics(String::from("new **string**"));
     let header_result: String = process_headers(String::from("# new string"));
 
@@ -234,7 +238,7 @@ mod unordered_list_test{
         //string with space before pound sign should not be converted
         let file_lines: Vec<String> = vec![String::from("no list"),String::from("- list here"), String::from("end list")];
         let expected_result: Vec<String> =  vec![String::from("no list"),String::from("<ul><li>list here</li>"), String::from("</ul>end list")];
-        let actual_result = parse_all_lines(file_lines);
+        let actual_result = parse_all_lines_unordered_lists(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_result[0], expected_result[0]);
         assert_eq!(actual_result[1], expected_result[1]);
@@ -246,7 +250,7 @@ mod unordered_list_test{
         //string with space before pound sign should not be converted
         let file_lines: Vec<String> = vec![String::from("no list"),String::from("- list here"),String::from("- another here"), String::from("end list")];
         let expected_result: Vec<String> =  vec![String::from("no list"),String::from("<ul><li>list here</li>"),String::from("<li>another here</li>"), String::from("</ul>end list")];
-        let actual_result = parse_all_lines(file_lines);
+        let actual_result = parse_all_lines_unordered_lists(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_result[0], expected_result[0]);
         assert_eq!(actual_result[1], expected_result[1]);
