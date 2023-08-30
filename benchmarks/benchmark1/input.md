@@ -1,0 +1,1014 @@
+Intro
+
+- One of the main buildings blocks of aws
+- advertised as "infinitely scaling" storage
+- Many websites use amazon s3 as a backbone
+- many asws services use s3 as an integration as well
+
+# Amazon S3 Use cases
+
+- Backup and storage
+- Disaster Recovery
+- Archive
+- Hybrid Cloud storage - Application hosting
+- Media hosting
+- Data lakes & big data analytics - Software delivery
+- Static website
+
+# S3 - Buckets
+
+- S3 allows people to store objects(files) in "buckets" (directories)
+- Buckets MUST have a globally unique name (across all regions all accounts)
+- buckets are defined at the region level
+- S3 looks like a global service, but buckets are created in a region
+- Naming convention for buckets:
+  -No uppercase, No underscore
+  -3-63 characters long
+  -Not an IP address
+  -Must start with lowercase letter or number
+  -Must NOT start with the prefix **xn--**
+  -Must NOT end with the suffix **-s3alias**
+- buckets have encryption configured by default, objects are automatically encrypted
+
+# S3 - Objects
+
+- objects are a file that have a key
+- Objects(files) have a Key
+- the key: is the FULL path:
+  -s3://my-bucket/my_file.txt
+  -OR (if it is in a bucket)
+  -s3://my-bucket/my_folder1/another_folder/my_file.txt
+- the key is composed of a prefix + object name
+  -Ex:
+  -s3://my-bucket/my_file.txt => s3://my-bucket/my_folder1/ (prefix) + my_file.txt(object)
+- There's no concept of "directories" within buckets(but the UI will trick you to think otherwise)
+  -Just keys with long names that contain slashes "/"
+- Object values are the file content and the metadata
+  -Object values are the content of the body(a file)
+  -Max object size is 5TB
+  -if uploading more than 5 GB, must use "multi-part upload"
+  -Metadata (list of text key / value pairs – system or user metadata)
+  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Version ID (if versioning is enabled)
+
+# S3 - Security
+
+- User-Based
+  -- which API calls should be allowed for a specific user from IAM
+- Resource-Based
+  -Bucket Policies: bucket wide rules from the S3 console -
+  -ex: can allows cross account access(allowing a user from a different account to view our buckets)
+  -Object Access Control List(ACL): finer grain (can be disabled)
+  -Bucket Access Control List (ACL): less common(can be disabled)
+- Note: an IAM principal can access an S3 object if:
+  -the user's IAM permissions Allow it OR the resource policy allows it AND there's no explicit deny
+- Encryption: encrypts objects in Amazon S3 using encryption keys
+
+# S3 Bucket policies
+
+- JSON based policies - See: for something similar
+- Resources: buckets and objects(what to apply this policy to)
+- Effect: Allow or Deny
+- Actions: Set of API actions to allow or deny (what actions to allow or deny)
+- Principal: Account or user to apply the policy to (\* = all users and accounts)
+- Use S3 bucket for policy to:
+  -Grant public access to the bucket
+  -Force objects to the encrypted at upload
+  -Grant access to another account(Cross account)
+
+### Example situation: Public Access - Use Bucket policy
+
+- an anonymous visitor wants to access your bucket
+- once the bucket policy has been attached, the visitor can access the bucket
+
+### Example: User Access to S3 - IAM permissions
+
+- giving access to an IAM user
+- we assign an IAM policy to the IAM user. then they can access the S3 bucket
+
+### Example: EC2 Instance access - Use IAM roles
+
+- To allow an EC2 instance to read an S3 bucket:
+- Create an IAM role (an EC2 instance role in this case) to give permission to the EC2 instance
+
+### Advanced: Cross-account access - use bucket policy
+
+- if we want to allow a cross-account access from an IAM user:
+- Create an S3 bucket policy that allows cross-account access
+
+### Bucket settings for Block Public access
+
+- These settings were created to prevent company data leaks
+- if you know your bucket should never be public, leave these on
+- Can be set at the account level
+
+# S3 - Static Website Hosting
+
+- S3 can host static websites and have them accessible on the internet
+- The website URL will be:
+  -\http://bucket-name.s3-website-aws-region.amazonaws.com OR
+  -\http://bucket-name.s3-website.aws-region.amazonaws.com
+- need to have public reads available for this to work
+- If you get a 403 forbidden error: make sure the bucket policy allows public reads
+
+# S3 - Versioning
+
+- you can version your files in Amazon S3
+- it is enabled at the bucket level
+- Same key overwrite will change the "version": 1,2,3
+- It is best practice to version your buckets
+  - why?:
+  - Protect against unintended deletes(ability to restore a version)
+  - Fast roll back to previous versions
+- Notes
+  - any file that is not versioned prior to enabling versioning will have version "null"
+    -suspending version does NOT delete the previous versions
+
+# S3 - Replication(CRR & SRR)
+
+- Must **enable Versioning** in source and destination buckets
+- ## Goal: async replication of data from bucket to another
+- **Cross-Region Replication:**source and destination buckets are in different regions
+- **Same-Region Replication** source and destination buckets are in different regions
+- Buckets **can be in different AWS accounts**
+- Copying is asynchronous
+- Must give proper IAM permissions to S3
+- Use Cases:
+  - CRR - compliance, lower latency access, replication across accounts
+  - SRR - log aggregation, live replication between production and test accounts
+
+# S3 Durability and Availability
+
+- Durability
+  -High durability(Eleven 9s) of objects across multiple AZs
+  -Same for all storage classes
+  -If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years
+- Availability
+  - Measures how readily available a service is
+  - Varies depending on storage class
+  - Ex: S3 standard has 99.99% availability = not available 53 minutes a year
+
+# S3 Storage Classes
+
+All Storage classes:
+
+- Amazon S3 Standard - General Purpose
+- Amazon S3 Standard-Infrequent access (IA)
+- Amazon S3 One Zone-Infrequent access
+- Amazon S3 Glacier Instant Retrieval
+- Amazon S3 Glacier Flexible Retrieval
+- Amazon S3 Glacier Deep Archive
+- Amazon S3 Intelligent Tiering
+- Can move between classes manually or using S3 Lifecycle configurations
+
+## S3 Standard - General Purpose
+
+- Used for: frequently accessed data
+- low latency, high throughput
+- use cases: big data analytics, mobile & gaming applications, content distribution, etc
+
+## S3 Storage Classe: Infrequent Access
+
+- Used for: data that is less frequently accessed, but requires rapid access when needed
+- Cheaper than S3 standard
+- Amazon S3 Standard-Infrequent Access (S3 Standard-IA)
+  - 4 9s availability
+  - Use cases: Disaster recovery, backups
+- Amazon S3 One Zone-Infrequent Access (S3 One Zone-IA)
+  - High durability(Eleven 9s) in a single AZ, data lost when AZ is destroyed
+  - 99.5% availability
+  - Use cases: storing secondray backup copies of on-premise data, or data you can recreate
+
+## Amazon S3 Glacier Storage Classes
+
+- Low cost object storage
+- Used for: archiving/backup
+- Pricing: price for storage + object retrieval
+- Amazon S3 Glacier Instant Retrieval
+  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+- Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
+- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+- Minimum storage duration of 90 days
+- Amazon S3 Glacier Deep Archive – for long term storage:
+- Standard (12 hours), Bulk (48 hours)
+- Minimum storage duration of 180 days
+
+## S3 Intelligent-Tiering
+
+- function: Moves objects automatically between access tiers based on usage
+- No retrieval charges in S3 Intelligent-Tiering
+- Small monthly monitoring and auto-tiering fee
+- Frequent Access tier (automatic): default tier
+- Infrequent Access tier (automatic): objects not accessed for 30 days
+- Archive Instant Access tier (automatic): objects not accessed for 90 days
+- Archive Access tier (optional): configurable from 90 days to 700+ days
+- Deep Archive Access tier (optional): config. from 180 days to 700+ days
+
+## S3 Storage Classes Comparison
+
+## S3 Storage classes - Price Comparison example(us-east-1)
+
+## S3 Encryption
+
+# Shared Responsbility Model for S3
+
+- AWS: Infrastructure, Configuration, vulnerability analysis, compliance validation
+- User: S3 Versioning, S3 Bucket policies, S3 replication setup, Logging and monitoring, S3 storage classes
+- Data encryption and in transit
+
+# aws storage gateway
+
+## Hybrid Cloud for Storage
+
+- aws is pushing for "hybrid cloud": some infra on-prem and some infra in the cloud
+- Why hybrid?
+  -Long cloud migrations
+  -Security requirements
+  -Compliance requirements
+  -IT strategy
+- Problem: S3 is a propietary storage technology(unlike EFS/NFS) so how do you expose the S3 data on-premise?
+- Solution: aws storage gateway
+
+## aws storage gateway
+
+- Bridge between on-premise data and cloud-data in S3
+- Hybrid storage service to allow on-premises to seamlessly use the AWS Cloud
+- defn: hybrid solution to extend on-premises storage to S3
+- Use cases: disaster recovery, backup & restore, tiered storage
+- Don't need to know types of storage gateway
+
+## AWS Storage Cloud-Native Options
+
+# S3 - Summary
+
+- Buckets v. Objects
+- S3 security
+- S3 websites
+- S3 versioning
+- S3 replication
+- S3 replication
+- Snow Family
+- OpsHub
+- Storage Gateway
+
+Intro
+
+- One of the main buildings blocks of aws
+- advertised as "infinitely scaling" storage
+- Many websites use amazon s3 as a backbone
+- many asws services use s3 as an integration as well
+
+# Amazon S3 Use cases
+
+- Backup and storage
+- Disaster Recovery
+- Archive
+- Hybrid Cloud storage - Application hosting
+- Media hosting
+- Data lakes & big data analytics - Software delivery
+- Static website
+
+# S3 - Buckets
+
+- S3 allows people to store objects(files) in "buckets" (directories)
+- Buckets MUST have a globally unique name (across all regions all accounts)
+- buckets are defined at the region level
+- S3 looks like a global service, but buckets are created in a region
+- Naming convention for buckets:
+  -No uppercase, No underscore
+  -3-63 characters long
+  -Not an IP address
+  -Must start with lowercase letter or number
+  -Must NOT start with the prefix **xn--**
+  -Must NOT end with the suffix **-s3alias**
+- buckets have encryption configured by default, objects are automatically encrypted
+
+# S3 - Objects
+
+- objects are a file that have a key
+- Objects(files) have a Key
+- the key: is the FULL path:
+  -s3://my-bucket/my_file.txt
+  -OR (if it is in a bucket)
+  -s3://my-bucket/my_folder1/another_folder/my_file.txt
+- the key is composed of a prefix + object name
+  -Ex:
+  -s3://my-bucket/my_file.txt => s3://my-bucket/my_folder1/ (prefix) + my_file.txt(object)
+- There's no concept of "directories" within buckets(but the UI will trick you to think otherwise)
+  -Just keys with long names that contain slashes "/"
+- Object values are the file content and the metadata
+  -Object values are the content of the body(a file)
+  -Max object size is 5TB
+  -if uploading more than 5 GB, must use "multi-part upload"
+  -Metadata (list of text key / value pairs – system or user metadata)
+  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Version ID (if versioning is enabled)
+
+# S3 - Security
+
+- User-Based
+  -- which API calls should be allowed for a specific user from IAM
+- Resource-Based
+  -Bucket Policies: bucket wide rules from the S3 console -
+  -ex: can allows cross account access(allowing a user from a different account to view our buckets)
+  -Object Access Control List(ACL): finer grain (can be disabled)
+  -Bucket Access Control List (ACL): less common(can be disabled)
+- Note: an IAM principal can access an S3 object if:
+  -the user's IAM permissions Allow it OR the resource policy allows it AND there's no explicit deny
+- Encryption: encrypts objects in Amazon S3 using encryption keys
+
+# S3 Bucket policies
+
+- JSON based policies - See: for something similar
+  -Resources: buckets and objects(what to apply this policy to)
+  -Effect: Allow or Deny
+  -Actions: Set of API actions to allow or deny (what actions to allow or deny)
+  -Principal: Account or user to apply the policy to (\* = all users and accounts)
+- Use S3 bucket for policy to:
+  -Grant public access to the bucket
+  -Force objects to the encrypted at upload
+  -Grant access to another account(Cross account)
+
+### Example situation: Public Access - Use Bucket policy
+
+- an anonymous visitor wants to access your bucket
+- once the bucket policy has been attached, the visitor can access the bucket
+
+### Example: User Access to S3 - IAM permissions
+
+- giving access to an IAM user
+- we assign an IAM policy to the IAM user. then they can access the S3 bucket
+
+### Example: EC2 Instance access - Use IAM roles
+
+- To allow an EC2 instance to read an S3 bucket:
+- Create an IAM role (an EC2 instance role in this case) to give permission to the EC2 instance
+
+### Advanced: Cross-account access - use bucket policy
+
+- if we want to allow a cross-account access from an IAM user:
+- Create an S3 bucket policy that allows cross-account access
+
+### Bucket settings for Block Public access
+
+- These settings were created to prevent company data leaks
+- if you know your bucket should never be public, leave these on
+- Can be set at the account level
+
+# S3 - Static Website Hosting
+
+- S3 can host static websites and have them accessible on the internet
+- The website URL will be:
+  -\http://bucket-name.s3-website-aws-region.amazonaws.com OR
+  -\http://bucket-name.s3-website.aws-region.amazonaws.com
+- need to have public reads available for this to work
+- If you get a 403 forbidden error: make sure the bucket policy allows public reads
+
+# S3 - Versioning
+
+- you can version your files in Amazon S3
+- it is enabled at the bucket level
+- Same key overwrite will change the "version": 1,2,3
+- It is best practice to version your buckets
+  -why?:
+  -Protect against unintended deletes(ability to restore a version)
+  -Fast roll back to previous versions
+  -
+- Notes
+  -any file that is not versioned prior to enabling versioning will have version "null"
+  -suspending version does NOT delete the previous versions
+
+# S3 - Replication(CRR & SRR)
+
+- Must **enable Versioning** in source and destination buckets
+- ## Goal: async replication of data from bucket to another
+- **Cross-Region Replication: **source and destination buckets are in different regions
+- **Same-Region Replication** source and destination buckets are in different regions
+- Buckets **can be in different AWS accounts**
+- Copying is asynchronous
+- Must give proper IAM permissions to S3
+- Use Cases:
+  -CRR - compliance, lower latency access, replication across accounts
+  -SRR - log aggregation, live replication between production and test accounts
+
+# S3 Durability and Availability
+
+- Durability
+  -High durability(Eleven 9s) of objects across multiple AZs
+  -Same for all storage classes
+  -If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years
+- Availability
+  -Measures how readily available a service is
+  -Varies depending on storage class
+  -Ex: S3 standard has 99.99% availability = not available 53 minutes a year
+
+# S3 Storage Classes
+
+All Storage classes:
+
+- Amazon S3 Standard - General Purpose
+- Amazon S3 Standard-Infrequent access (IA)
+- Amazon S3 One Zone-Infrequent access
+- Amazon S3 Glacier Instant Retrieval
+- Amazon S3 Glacier Flexible Retrieval
+- Amazon S3 Glacier Deep Archive
+- Amazon S3 Intelligent Tiering
+- Can move between classes manually or using S3 Lifecycle configurations
+
+## S3 Standard - General Purpose
+
+- Used for: frequently accessed data
+- low latency, high throughput
+- use cases: big data analytics, mobile & gaming applications, content distribution, etc
+
+## S3 Storage Classe: Infrequent Access
+
+- Used for: data that is less frequently accessed, but requires rapid access when needed
+- Cheaper than S3 standard
+- Amazon S3 Standard-Infrequent Access (S3 Standard-IA)
+- 4 9s availability
+- Use cases: Disaster recovery, backups
+- Amazon S3 One Zone-Infrequent Access (S3 One Zone-IA)
+- High durability(Eleven 9s) in a single AZ, data lost when AZ is destroyed
+- 99.5% availability
+- Use cases: storing secondray backup copies of on-premise data, or data you can recreate
+
+## Amazon S3 Glacier Storage Classes
+
+- Low cost object storage
+- Used for: archiving/backup
+- Pricing: price for storage + object retrieval
+- Amazon S3 Glacier Instant Retrieval
+- Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+- Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
+- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+- Minimum storage duration of 90 days
+- Amazon S3 Glacier Deep Archive – for long term storage:
+- Standard (12 hours), Bulk (48 hours)
+- Minimum storage duration of 180 days
+
+## S3 Intelligent-Tiering
+
+- function: Moves objects automatically between access tiers based on usage
+- No retrieval charges in S3 Intelligent-Tiering
+- Small monthly monitoring and auto-tiering fee
+- Frequent Access tier (automatic): default tier
+- Infrequent Access tier (automatic): objects not accessed for 30 days
+- Archive Instant Access tier (automatic): objects not accessed for 90 days
+- Archive Access tier (optional): configurable from 90 days to 700+ days
+- Deep Archive Access tier (optional): config. from 180 days to 700+ days
+
+## S3 Storage Classes Comparison
+
+## S3 Storage classes - Price Comparison example(us-east-1)
+
+## S3 Encryption
+
+# Shared Responsbility Model for S3
+
+- AWS: Infrastructure, Configuration, vulnerability analysis, compliance validation
+- User: S3 Versioning, S3 Bucket policies, S3 replication setup, Logging and monitoring, S3 storage classes
+- Data encryption and in transit
+
+# aws storage gateway
+
+## Hybrid Cloud for Storage
+
+- aws is pushing for "hybrid cloud": some infra on-prem and some infra in the cloud
+- Why hybrid?
+- Long cloud migrations
+- Security requirements
+- Compliance requirements
+- IT strategy
+- Problem: S3 is a propietary storage technology(unlike EFS/NFS) so how do you expose the S3 data on-premise?
+- Solution: aws storage gateway
+
+## aws storage gateway
+
+- Bridge between on-premise data and cloud-data in S3
+- Hybrid storage service to allow on-premises to seamlessly use the AWS Cloud
+- defn: hybrid solution to extend on-premises storage to S3
+- Use cases: disaster recovery, backup & restore, tiered storage
+- Don't need to know types of storage gateway
+
+## AWS Storage Cloud-Native Options
+
+# S3 - Summary
+
+- Buckets v. Objects
+- S3 security
+- S3 websites
+- S3 versioning
+- S3 replication
+- S3 replication
+- Snow Family
+- OpsHub
+- Storage Gateway
+
+Intro
+
+- One of the main buildings blocks of aws
+- advertised as "infinitely scaling" storage
+- Many websites use amazon s3 as a backbone
+- many asws services use s3 as an integration as well
+
+# Amazon S3 Use cases
+
+- Backup and storage
+- Disaster Recovery
+- Archive
+- Hybrid Cloud storage - Application hosting
+- Media hosting
+- Data lakes & big data analytics - Software delivery
+- Static website
+
+# S3 - Buckets
+
+- S3 allows people to store objects(files) in "buckets" (directories)
+- Buckets MUST have a globally unique name (across all regions all accounts)
+- buckets are defined at the region level
+- S3 looks like a global service, but buckets are created in a region
+- Naming convention for buckets:
+- No uppercase, No underscore
+- 3-63 characters long
+- Not an IP address
+- Must start with lowercase letter or number
+- Must NOT start with the prefix **xn--**
+- Must NOT end with the suffix **-s3alias**
+- buckets have encryption configured by default, objects are automatically encrypted
+
+# S3 - Objects
+
+- objects are a file that have a key
+- Objects(files) have a Key
+- the key: is the FULL path:
+- s3://my-bucket/my_file.txt
+- OR (if it is in a bucket)
+- s3://my-bucket/my_folder1/another_folder/my_file.txt
+- the key is composed of a prefix + object name
+- Ex:
+- s3://my-bucket/my_file.txt => s3://my-bucket/my_folder1/ (prefix) + my_file.txt(object)
+- There's no concept of "directories" within buckets(but the UI will trick you to think otherwise)
+  -Just keys with long names that contain slashes "/"
+- Object values are the file content and the metadata
+  -Object values are the content of the body(a file)
+  -Max object size is 5TB
+  -if uploading more than 5 GB, must use "multi-part upload"
+  -Metadata (list of text key / value pairs – system or user metadata)
+  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Version ID (if versioning is enabled)
+
+# S3 - Security
+
+- User-Based
+  -- which API calls should be allowed for a specific user from IAM
+- Resource-Based
+  -Bucket Policies: bucket wide rules from the S3 console -
+  -ex: can allows cross account access(allowing a user from a different account to view our buckets)
+  -Object Access Control List(ACL): finer grain (can be disabled)
+  -Bucket Access Control List (ACL): less common(can be disabled)
+- Note: an IAM principal can access an S3 object if:
+  -the user's IAM permissions Allow it OR the resource policy allows it AND there's no explicit deny
+- Encryption: encrypts objects in Amazon S3 using encryption keys
+
+# S3 Bucket policies
+
+- JSON based policies - See: for something similar
+  -Resources: buckets and objects(what to apply this policy to)
+  -Effect: Allow or Deny
+  -Actions: Set of API actions to allow or deny (what actions to allow or deny)
+  -Principal: Account or user to apply the policy to (\* = all users and accounts)
+- Use S3 bucket for policy to:
+  -Grant public access to the bucket
+  -Force objects to the encrypted at upload
+  -Grant access to another account(Cross account)
+
+### Example situation: Public Access - Use Bucket policy
+
+- an anonymous visitor wants to access your bucket
+- once the bucket policy has been attached, the visitor can access the bucket
+
+### Example: User Access to S3 - IAM permissions
+
+- giving access to an IAM user
+- we assign an IAM policy to the IAM user. then they can access the S3 bucket
+
+### Example: EC2 Instance access - Use IAM roles
+
+- To allow an EC2 instance to read an S3 bucket:
+- Create an IAM role (an EC2 instance role in this case) to give permission to the EC2 instance
+
+### Advanced: Cross-account access - use bucket policy
+
+- if we want to allow a cross-account access from an IAM user:
+- Create an S3 bucket policy that allows cross-account access
+
+### Bucket settings for Block Public access
+
+- These settings were created to prevent company data leaks
+- if you know your bucket should never be public, leave these on
+- Can be set at the account level
+
+# S3 - Static Website Hosting
+
+- S3 can host static websites and have them accessible on the internet
+- The website URL will be:
+  -\http://bucket-name.s3-website-aws-region.amazonaws.com OR
+  -\http://bucket-name.s3-website.aws-region.amazonaws.com
+- need to have public reads available for this to work
+- If you get a 403 forbidden error: make sure the bucket policy allows public reads
+
+# S3 - Versioning
+
+- you can version your files in Amazon S3
+- it is enabled at the bucket level
+- Same key overwrite will change the "version": 1,2,3
+- It is best practice to version your buckets
+  -why?:
+  -Protect against unintended deletes(ability to restore a version)
+  -Fast roll back to previous versions
+  -
+- Notes
+  -any file that is not versioned prior to enabling versioning will have version "null"
+  -suspending version does NOT delete the previous versions
+
+# S3 - Replication(CRR & SRR)
+
+- Must **enable Versioning** in source and destination buckets
+- ## Goal: async replication of data from bucket to another
+- **Cross-Region Replication: **source and destination buckets are in different regions
+- **Same-Region Replication** source and destination buckets are in different regions
+- Buckets **can be in different AWS accounts**
+- Copying is asynchronous
+- Must give proper IAM permissions to S3
+- Use Cases:
+  -CRR - compliance, lower latency access, replication across accounts
+  -SRR - log aggregation, live replication between production and test accounts
+
+# S3 Durability and Availability
+
+- Durability
+  -High durability(Eleven 9s) of objects across multiple AZs
+  -Same for all storage classes
+  -If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years
+- Availability
+  -Measures how readily available a service is
+  -Varies depending on storage class
+  -Ex: S3 standard has 99.99% availability = not available 53 minutes a year
+
+# S3 Storage Classes
+
+All Storage classes:
+
+- Amazon S3 Standard - General Purpose
+- Amazon S3 Standard-Infrequent access (IA)
+- Amazon S3 One Zone-Infrequent access
+- Amazon S3 Glacier Instant Retrieval
+- Amazon S3 Glacier Flexible Retrieval
+- Amazon S3 Glacier Deep Archive
+- Amazon S3 Intelligent Tiering
+- Can move between classes manually or using S3 Lifecycle configurations
+
+## S3 Standard - General Purpose
+
+- Used for: frequently accessed data
+- low latency, high throughput
+- use cases: big data analytics, mobile & gaming applications, content distribution, etc
+
+## S3 Storage Classe: Infrequent Access
+
+- Used for: data that is less frequently accessed, but requires rapid access when needed
+- Cheaper than S3 standard
+- Amazon S3 Standard-Infrequent Access (S3 Standard-IA)
+  -4 9s availability
+  -Use cases: Disaster recovery, backups
+- Amazon S3 One Zone-Infrequent Access (S3 One Zone-IA)
+  -High durability(Eleven 9s) in a single AZ, data lost when AZ is destroyed
+  -99.5% availability
+  -Use cases: storing secondray backup copies of on-premise data, or data you can recreate
+
+## Amazon S3 Glacier Storage Classes
+
+- Low cost object storage
+- Used for: archiving/backup
+- Pricing: price for storage + object retrieval
+- Amazon S3 Glacier Instant Retrieval
+  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+- Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
+  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+  -Minimum storage duration of 90 days
+- Amazon S3 Glacier Deep Archive – for long term storage:
+  -Standard (12 hours), Bulk (48 hours)
+  -Minimum storage duration of 180 days
+
+## S3 Intelligent-Tiering
+
+- function: Moves objects automatically between access tiers based on usage
+- No retrieval charges in S3 Intelligent-Tiering
+- Small monthly monitoring and auto-tiering fee
+- Frequent Access tier (automatic): default tier
+- Infrequent Access tier (automatic): objects not accessed for 30 days
+- Archive Instant Access tier (automatic): objects not accessed for 90 days
+- Archive Access tier (optional): configurable from 90 days to 700+ days
+- Deep Archive Access tier (optional): config. from 180 days to 700+ days
+
+## S3 Storage Classes Comparison
+
+## S3 Storage classes - Price Comparison example(us-east-1)
+
+## S3 Encryption
+
+# Shared Responsbility Model for S3
+
+- AWS: Infrastructure, Configuration, vulnerability analysis, compliance validation
+- User: S3 Versioning, S3 Bucket policies, S3 replication setup, Logging and monitoring, S3 storage classes
+- Data encryption and in transit
+
+# aws storage gateway
+
+## Hybrid Cloud for Storage
+
+- aws is pushing for "hybrid cloud": some infra on-prem and some infra in the cloud
+- Why hybrid?
+  -Long cloud migrations
+  -Security requirements
+  -Compliance requirements
+  -IT strategy
+- Problem: S3 is a propietary storage technology(unlike EFS/NFS) so how do you expose the S3 data on-premise?
+- Solution: aws storage gateway
+
+## aws storage gateway
+
+- Bridge between on-premise data and cloud-data in S3
+- Hybrid storage service to allow on-premises to seamlessly use the AWS Cloud
+- defn: hybrid solution to extend on-premises storage to S3
+- Use cases: disaster recovery, backup & restore, tiered storage
+- Don't need to know types of storage gateway
+
+## AWS Storage Cloud-Native Options
+
+# S3 - Summary
+
+- Buckets v. Objects
+- S3 security
+- S3 websites
+- S3 versioning
+- S3 replication
+- S3 replication
+- Snow Family
+- OpsHub
+- Storage Gateway
+
+Intro
+
+- One of the main buildings blocks of aws
+- advertised as "infinitely scaling" storage
+- Many websites use amazon s3 as a backbone
+- many asws services use s3 as an integration as well
+
+# Amazon S3 Use cases
+
+- Backup and storage
+- Disaster Recovery
+- Archive
+- Hybrid Cloud storage - Application hosting
+- Media hosting
+- Data lakes & big data analytics - Software delivery
+- Static website
+
+# S3 - Buckets
+
+- S3 allows people to store objects(files) in "buckets" (directories)
+- Buckets MUST have a globally unique name (across all regions all accounts)
+- buckets are defined at the region level
+- S3 looks like a global service, but buckets are created in a region
+- Naming convention for buckets:
+  -No uppercase, No underscore
+  -3-63 characters long
+  -Not an IP address
+  -Must start with lowercase letter or number
+  -Must NOT start with the prefix **xn--**
+  -Must NOT end with the suffix **-s3alias**
+- buckets have encryption configured by default, objects are automatically encrypted
+
+# S3 - Objects
+
+- objects are a file that have a key
+- Objects(files) have a Key
+- the key: is the FULL path:
+  -s3://my-bucket/my_file.txt
+  -OR (if it is in a bucket)
+  -s3://my-bucket/my_folder1/another_folder/my_file.txt
+- the key is composed of a prefix + object name
+  -Ex:
+  -s3://my-bucket/my_file.txt => s3://my-bucket/my_folder1/ (prefix) + my_file.txt(object)
+- There's no concept of "directories" within buckets(but the UI will trick you to think otherwise)
+  -Just keys with long names that contain slashes "/"
+- Object values are the file content and the metadata
+  -Object values are the content of the body(a file)
+  -Max object size is 5TB
+  -if uploading more than 5 GB, must use "multi-part upload"
+  -Metadata (list of text key / value pairs – system or user metadata)
+  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Version ID (if versioning is enabled)
+
+# S3 - Security
+
+- User-Based
+  -- which API calls should be allowed for a specific user from IAM
+- Resource-Based
+  -Bucket Policies: bucket wide rules from the S3 console -
+  -ex: can allows cross account access(allowing a user from a different account to view our buckets)
+  -Object Access Control List(ACL): finer grain (can be disabled)
+  -Bucket Access Control List (ACL): less common(can be disabled)
+- Note: an IAM principal can access an S3 object if:
+  -the user's IAM permissions Allow it OR the resource policy allows it AND there's no explicit deny
+- Encryption: encrypts objects in Amazon S3 using encryption keys
+
+# S3 Bucket policies
+
+- JSON based policies - See: for something similar
+  -Resources: buckets and objects(what to apply this policy to)
+  -Effect: Allow or Deny
+  -Actions: Set of API actions to allow or deny (what actions to allow or deny)
+  -Principal: Account or user to apply the policy to (\* = all users and accounts)
+- Use S3 bucket for policy to:
+  -Grant public access to the bucket
+  -Force objects to the encrypted at upload
+  -Grant access to another account(Cross account)
+
+### Example situation: Public Access - Use Bucket policy
+
+- an anonymous visitor wants to access your bucket
+- once the bucket policy has been attached, the visitor can access the bucket
+
+### Example: User Access to S3 - IAM permissions
+
+- giving access to an IAM user
+- we assign an IAM policy to the IAM user. then they can access the S3 bucket
+
+### Example: EC2 Instance access - Use IAM roles
+
+- To allow an EC2 instance to read an S3 bucket:
+- Create an IAM role (an EC2 instance role in this case) to give permission to the EC2 instance
+
+### Advanced: Cross-account access - use bucket policy
+
+- if we want to allow a cross-account access from an IAM user:
+- Create an S3 bucket policy that allows cross-account access
+
+### Bucket settings for Block Public access
+
+- These settings were created to prevent company data leaks
+- if you know your bucket should never be public, leave these on
+- Can be set at the account level
+
+# S3 - Static Website Hosting
+
+- S3 can host static websites and have them accessible on the internet
+- The website URL will be:
+  -\http://bucket-name.s3-website-aws-region.amazonaws.com OR
+  -\http://bucket-name.s3-website.aws-region.amazonaws.com
+- need to have public reads available for this to work
+- If you get a 403 forbidden error: make sure the bucket policy allows public reads
+
+# S3 - Versioning
+
+- you can version your files in Amazon S3
+- it is enabled at the bucket level
+- Same key overwrite will change the "version": 1,2,3
+- It is best practice to version your buckets
+  - why?:
+  - Protect against unintended deletes(ability to restore a version)
+  - Fast roll back to previous versions
+  -
+- Notes
+  -any file that is not versioned prior to enabling versioning will have version "null"
+  -suspending version does NOT delete the previous versions
+
+# S3 - Replication(CRR & SRR)
+
+- Must **enable Versioning** in source and destination buckets
+- ## Goal: async replication of data from bucket to another
+- **Cross-Region Replication: **source and destination buckets are in different regions
+- **Same-Region Replication** source and destination buckets are in different regions
+- Buckets **can be in different AWS accounts**
+- Copying is asynchronous
+- Must give proper IAM permissions to S3
+- Use Cases:
+  -CRR - compliance, lower latency access, replication across accounts
+  -SRR - log aggregation, live replication between production and test accounts
+
+# S3 Durability and Availability
+
+- Durability
+  -High durability(Eleven 9s) of objects across multiple AZs
+  -Same for all storage classes
+  -If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years
+- Availability
+  -Measures how readily available a service is
+  -Varies depending on storage class
+  -Ex: S3 standard has 99.99% availability = not available 53 minutes a year
+
+# S3 Storage Classes
+
+All Storage classes:
+
+- Amazon S3 Standard - General Purpose
+- Amazon S3 Standard-Infrequent access (IA)
+- Amazon S3 One Zone-Infrequent access
+- Amazon S3 Glacier Instant Retrieval
+- Amazon S3 Glacier Flexible Retrieval
+- Amazon S3 Glacier Deep Archive
+- Amazon S3 Intelligent Tiering
+- Can move between classes manually or using S3 Lifecycle configurations
+
+## S3 Standard - General Purpose
+
+- Used for: frequently accessed data
+- low latency, high throughput
+- use cases: big data analytics, mobile & gaming applications, content distribution, etc
+
+## S3 Storage Classe: Infrequent Access
+
+- Used for: data that is less frequently accessed, but requires rapid access when needed
+- Cheaper than S3 standard
+- Amazon S3 Standard-Infrequent Access (S3 Standard-IA)
+  -4 9s availability
+  -Use cases: Disaster recovery, backups
+- Amazon S3 One Zone-Infrequent Access (S3 One Zone-IA)
+  -High durability(Eleven 9s) in a single AZ, data lost when AZ is destroyed
+  -99.5% availability
+  -Use cases: storing secondray backup copies of on-premise data, or data you can recreate
+
+## Amazon S3 Glacier Storage Classes
+
+- Low cost object storage
+- Used for: archiving/backup
+- Pricing: price for storage + object retrieval
+- Amazon S3 Glacier Instant Retrieval
+  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+- Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
+  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+  -Minimum storage duration of 90 days
+- Amazon S3 Glacier Deep Archive – for long term storage:
+  -Standard (12 hours), Bulk (48 hours)
+  -Minimum storage duration of 180 days
+
+## S3 Intelligent-Tiering
+
+- function: Moves objects automatically between access tiers based on usage
+- No retrieval charges in S3 Intelligent-Tiering
+- Small monthly monitoring and auto-tiering fee
+- Frequent Access tier (automatic): default tier
+- Infrequent Access tier (automatic): objects not accessed for 30 days
+- Archive Instant Access tier (automatic): objects not accessed for 90 days
+- Archive Access tier (optional): configurable from 90 days to 700+ days
+- Deep Archive Access tier (optional): config. from 180 days to 700+ days
+
+## S3 Storage Classes Comparison
+
+## S3 Storage classes - Price Comparison example(us-east-1)
+
+## S3 Encryption
+
+# Shared Responsbility Model for S3
+
+- AWS: Infrastructure, Configuration, vulnerability analysis, compliance validation
+- User: S3 Versioning, S3 Bucket policies, S3 replication setup, Logging and monitoring, S3 storage classes
+- Data encryption and in transit
+
+# aws storage gateway
+
+## Hybrid Cloud for Storage
+
+- aws is pushing for "hybrid cloud": some infra on-prem and some infra in the cloud
+- Why hybrid?
+  -Long cloud migrations
+  -Security requirements
+  -Compliance requirements
+  -IT strategy
+- Problem: S3 is a propietary storage technology(unlike EFS/NFS) so how do you expose the S3 data on-premise?
+- Solution: aws storage gateway
+
+## aws storage gateway
+
+- Bridge between on-premise data and cloud-data in S3
+- Hybrid storage service to allow on-premises to seamlessly use the AWS Cloud
+- defn: hybrid solution to extend on-premises storage to S3
+- Use cases: disaster recovery, backup & restore, tiered storage
+- Don't need to know types of storage gateway
+
+## AWS Storage Cloud-Native Options
+
+# S3 - Summary
+
+- Buckets v. Objects
+- S3 security
+- S3 websites
+- S3 versioning
+- S3 replication
+- S3 replication
+- Snow Family
+- OpsHub
+- Storage Gateway
