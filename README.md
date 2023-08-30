@@ -3,18 +3,21 @@
 - parse header tags from File
 - parse unordered list from File
 - parse ordered lists from File
-- parse italics from File
+- parse italics using asterisk from File
+- parse bold using underscore from File
 
 # Future features
 
 ## Short-term
 
-- bold using underscore
 - links
+- italics using underscore
 
 ## Long-term
 
 - images
+- use 2 line breaks to separate elements
+- nested bullet points
 - bold using asterisks
 - italics using underscores
 - nested italics and bold

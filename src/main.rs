@@ -75,9 +75,10 @@ pub mod parse_line_formatting {
             //format the other text in the string
 
             //parse and format the italics
+            let parsed_line = parse_text_formatting::process_bold(parsed_line);
             let parsed_line = parse_text_formatting::process_italics(parsed_line);
             //add the line-level tags at the end
-            let prefix = start_end_lists(&current_line_state, &new_line_state);
+            let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
             let parsed_line: String = match new_line_state {
                 LineType::UnorderedList => {
                     format!("{}<li>{}</li>\n", prefix, parsed_line)
@@ -143,7 +144,7 @@ pub mod parse_line_formatting {
         - return the struct containing the LineState
         - generate the correct string
      */
-    fn start_end_lists(current_line_state: &LineType, new_state: &LineType) -> String {
+    fn insert_list_start_or_end(current_line_state: &LineType, new_state: &LineType) -> String {
         if *current_line_state != LineType::UnorderedList && *new_state == LineType::UnorderedList {
             //we just started a bulleted list, so we need to insert a <ul> tag
             String::from("<ul>")
