@@ -300,6 +300,14 @@ pub mod parse_text_formatting {
                 state: TextStates::new(),
             }
         }
+        fn get_string(&self) -> String {
+            match self.state {
+                TextStates::Plaintext => self.buffer.clone(),
+                TextStates::BoldOne => format!("_{}", self.buffer),
+                TextStates::BoldTwo => format!("__{}", self.buffer),
+                TextStates::BoldThree => format!("__{}_", self.buffer),
+            }
+        }
         fn add_char(&mut self, c: char) -> String {
             let next_char: CharTypes = CharTypes::new(c);
             let mut return_string: String = String::new();
@@ -325,7 +333,7 @@ pub mod parse_text_formatting {
                     _ => {
                         println!("Line 321: BoldOne to Plaintext:{c}");
                         //escaping from underscore, return the current buffer to be displayed
-                        return_string = format!("_{}", self.buffer);
+                        return_string = format!("_{}{c}", self.buffer);
                         self.buffer = String::new();
                         TextStates::Plaintext
                     }
@@ -356,7 +364,7 @@ pub mod parse_text_formatting {
                             TextStates::Plaintext
                         }
                         CharTypes::Space | CharTypes::Text => {
-                            return_string = format!("__{}_", self.buffer);
+                            return_string = format!("__{}_{c}", self.buffer);
                             self.buffer = String::new();
                             TextStates::Plaintext
                         }
@@ -387,6 +395,8 @@ pub mod parse_text_formatting {
             //current_state.transition(CharTypes::new(c));
             println!("{:?}\n", buffer.state);
         }
+        //any data still in current_state should be output
+        result.push_str(&buffer.get_string());
         result
     }
 }
@@ -488,10 +498,18 @@ mod bold_tests {
         assert_eq!(actual_result, expected_result);
     }
     #[test]
-    fn convert_bold_invalid() {
+    fn convert_bold_invalid_one() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some __ text __");
-        let expected_result = String::from("some __ text __");
+        let input_str = String::from("some __ text_ _");
+        let expected_result = String::from("some __ text_ _");
+        let actual_result: String = parse_text_formatting::process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_bold_invalid_two() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _ _ text__");
+        let expected_result = String::from("some _ _ text__");
         let actual_result: String = parse_text_formatting::process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
