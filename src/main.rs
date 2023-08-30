@@ -232,6 +232,163 @@ pub mod parse_text_formatting {
         }
         result
     }
+
+    #[derive(PartialEq, Copy, Clone, Debug)]
+    enum TextStates {
+        BoldOne,
+        BoldTwo,
+        BoldThree,
+        Plaintext,
+    }
+    impl TextStates {
+        fn new() -> Self {
+            TextStates::Plaintext
+        }
+        fn transition(&mut self, next_char: CharTypes) {
+            *self = match *self {
+                TextStates::Plaintext => match next_char {
+                    CharTypes::Underscore => TextStates::BoldOne,
+                    _ => TextStates::Plaintext,
+                },
+                TextStates::BoldOne => match next_char {
+                    CharTypes::Underscore => TextStates::BoldTwo,
+                    _ => TextStates::Plaintext,
+                },
+                TextStates::BoldTwo => match next_char {
+                    CharTypes::Underscore => TextStates::BoldThree,
+                    CharTypes::NewLine => TextStates::Plaintext,
+                    CharTypes::Space | CharTypes::Text => *self,
+                },
+                TextStates::BoldThree => {
+                    match next_char {
+                        CharTypes::Underscore => {
+                            println!("Created a bold fragment");
+                            TextStates::Plaintext
+                        } //When this branch  is reached, it is time to generate the text, with the bold tag
+                        CharTypes::NewLine => TextStates::Plaintext,
+                        CharTypes::Space | CharTypes::Text => *self,
+                    }
+                }
+            };
+        }
+    }
+
+    enum CharTypes {
+        NewLine,
+        Space,
+        Underscore,
+        Text,
+    }
+    impl CharTypes {
+        fn new(c: char) -> Self {
+            match c {
+                ' ' => CharTypes::Space,
+                '_' => CharTypes::Underscore,
+                '\n' => CharTypes::NewLine,
+                _ => CharTypes::Text,
+            }
+        }
+    }
+    struct Buffer {
+        buffer: String,
+        state: TextStates,
+    }
+    impl Buffer {
+        fn new() -> Self {
+            Buffer {
+                buffer: String::new(),
+                state: TextStates::new(),
+            }
+        }
+        fn add_char(&mut self, c: char) -> String {
+            let next_char: CharTypes = CharTypes::new(c);
+            let mut return_string: String = String::new();
+            self.state = match self.state {
+                TextStates::Plaintext => match next_char {
+                    CharTypes::Underscore => {
+                        //flush the current buffer
+                        return_string = String::clone(&self.buffer);
+                        println!("Line 311: Plaintext to BoldOne:{}|", self.buffer);
+                        self.buffer = String::new();
+                        TextStates::BoldOne
+                    }
+                    _ => {
+                        self.buffer.push(c);
+                        TextStates::Plaintext
+                    }
+                },
+                TextStates::BoldOne => match next_char {
+                    CharTypes::Underscore => {
+                        println!("Line 318: BoldOne to BoldTwo:{c}");
+                        TextStates::BoldTwo
+                    }
+                    _ => {
+                        println!("Line 321: BoldOne to Plaintext:{c}");
+                        //escaping from underscore, return the current buffer to be displayed
+                        return_string = format!("_{}", self.buffer);
+                        self.buffer = String::new();
+                        TextStates::Plaintext
+                    }
+                },
+                TextStates::BoldTwo => match next_char {
+                    CharTypes::Underscore => TextStates::BoldThree,
+                    CharTypes::NewLine => {
+                        return_string = format!("__{}\n", self.buffer);
+                        self.buffer = String::new();
+                        TextStates::Plaintext
+                    }
+                    CharTypes::Space | CharTypes::Text => {
+                        self.buffer.push(c);
+                        TextStates::BoldTwo
+                    }
+                },
+                TextStates::BoldThree => {
+                    match next_char {
+                        CharTypes::Underscore => {
+                            println!("Created a bold fragment");
+                            return_string = format!("<b>{}</b>", self.buffer);
+                            self.buffer = String::new();
+                            TextStates::Plaintext
+                        } //When this branch  is reached, it is time to generate the text, with the bold tag
+                        CharTypes::NewLine => {
+                            return_string = format!("__{}_\n", self.buffer);
+                            self.buffer = String::new();
+                            TextStates::Plaintext
+                        }
+                        CharTypes::Space | CharTypes::Text => {
+                            return_string = format!("__{}_", self.buffer);
+                            self.buffer = String::new();
+                            TextStates::Plaintext
+                        }
+                    }
+                }
+            };
+            return_string
+        }
+    }
+    pub fn process_bold(str: String) -> String {
+        let mut result: String = String::new();
+        let mut _stack: Vec<&str> = Vec::new();
+        //let mut buffer: String = String::new();
+        let mut buffer = Buffer::new();
+        let mut _current_state = TextStates::new();
+        for c in str.chars() {
+            /*
+            cases:
+            - not in italics, adding a char
+            - switching into italics
+            - in italics, adding a char
+            - switching out of italics
+            */
+            //two consecutive '*' should convert to plaintext
+            println!("currState:{:?}, nextChar:{c}|", buffer.state);
+            let res = buffer.add_char(c);
+            result.push_str(&res);
+            //current_state.transition(CharTypes::new(c));
+            println!("{:?}\n", buffer.state);
+        }
+        result
+    }
 }
 
 // The output is wrapped in a Result to allow matching on errors
@@ -320,6 +477,27 @@ mod italics_tests {
 }
 
 #[cfg(test)]
+mod bold_tests {
+    use super::*;
+    #[test]
+    fn convert_bold() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some __text__");
+        let expected_result = String::from("some <b>text</b>");
+        let actual_result = parse_text_formatting::process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_bold_invalid() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some __ text __");
+        let expected_result = String::from("some __ text __");
+        let actual_result: String = parse_text_formatting::process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+}
+
+#[cfg(test)]
 mod unordered_list_test {
     use super::*;
     #[test]
@@ -331,9 +509,9 @@ mod unordered_list_test {
             String::from("-end list"),
         ];
         let expected_result: Vec<String> = vec![
-            String::from("no list"),
-            String::from("<ul><li>list here</li>"),
-            String::from("</ul>-end list"),
+            String::from("no list\n"),
+            String::from("<ul><li>list here</li>\n"),
+            String::from("</ul>-end list\n"),
         ];
         let actual_result = parse_line_formatting::parse_all_lines(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
@@ -351,10 +529,10 @@ mod unordered_list_test {
             String::from("end list"),
         ];
         let expected_result: Vec<String> = vec![
-            String::from("no list"),
-            String::from("<ul><li>list here</li>"),
-            String::from("<li>another here</li>"),
-            String::from("</ul>end list"),
+            String::from("no list\n"),
+            String::from("<ul><li>list here</li>\n"),
+            String::from("<li>another here</li>\n"),
+            String::from("</ul>end list\n"),
         ];
         let actual_result = parse_line_formatting::parse_all_lines(file_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
