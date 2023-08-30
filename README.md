@@ -12,10 +12,15 @@
 
 - links
 - italics using underscore
+- pass in filepaths using command-line arguments
 
 ## Long-term
 
+- create a bash script to run the file 100 times and average results, using command-line arguments for filepaths
+  - for bash script: use `command time`, not time
+  - automatically delete created files before and after testing
 - images
+- allow headers to be placed within list elements
 - use 2 line breaks to separate elements
 - nested bullet points
 - bold using asterisks
