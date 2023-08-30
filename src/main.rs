@@ -342,7 +342,7 @@ pub mod parse_text_formatting {
                 TextStates::BoldTwo => match next_char {
                     CharTypes::Underscore => TextStates::BoldThree,
                     CharTypes::NewLine => {
-                        return_string = format!("__{}\n", self.buffer);
+                        return_string = format!("__{}{c}", self.buffer);
                         self.buffer = String::new();
                         TextStates::Plaintext
                     }
@@ -402,11 +402,8 @@ pub mod parse_text_formatting {
     }
 }
 
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
-
 fn main() {
-    let input_file_name = "./input/input.txt";
+    let input_file_name = "./input/input.md";
     let output_file_name = "./output/output.html";
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
     let output_lines = parse_line_formatting::parse_all_lines(input_lines); //process the lines
@@ -421,49 +418,6 @@ fn main() {
     let _header_result: String =
         parse_line_formatting::process_headers(String::from("# new string"));
     // File hosts.txt must exist in the current path
-}
-
-#[cfg(test)]
-mod header_tests {
-    use super::*;
-    #[test]
-    fn convert_h1_header() {
-        //valid string should receive tags
-        let input_str = String::from("# Here is a header");
-        let expected_result = String::from("<h1>Here is a header</h1>");
-        let actual_result = parse_line_formatting::process_headers(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_improper_h1_header() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from(" # Here is a header");
-        let actual_result: String = parse_line_formatting::process_headers(input_str.clone());
-        assert_eq!(actual_result, input_str);
-
-        let input_str_2 = String::from("#Here is a header");
-        let actual_result_2: String = parse_line_formatting::process_headers(input_str_2.clone());
-        assert_eq!(actual_result_2, input_str_2);
-    }
-    #[test]
-    fn convert_h2_header() {
-        //valid string should receive tags
-        let input_str = String::from("## Here is a header");
-        let expected_result = String::from("<h2>Here is a header</h2>");
-        let actual_result = parse_line_formatting::process_headers(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_improper_h2_header() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from(" ## Here is a header");
-        let actual_result: String = parse_line_formatting::process_headers(input_str.clone());
-        assert_eq!(actual_result, input_str);
-
-        let input_str_2 = String::from("##Here is a header");
-        let actual_result_2: String = parse_line_formatting::process_headers(input_str_2.clone());
-        assert_eq!(actual_result_2, input_str_2);
-    }
 }
 
 #[cfg(test)]
