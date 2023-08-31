@@ -1,5 +1,5 @@
 mod parse_line_formatting;
-
+mod stack;
 pub mod file_io {
     /**
      * Functions to read/write lines from a file
@@ -61,100 +61,4 @@ fn main() {
     // let _header_result: String =
     //     parse_line_formatting::process_headers(String::from("# new string"));
     // File hosts.txt must exist in the current path
-}
-
-#[cfg(test)]
-mod italics_tests {
-    use super::*;
-    #[test]
-    fn convert_italics() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some *text*");
-        let expected_result = String::from("some <i>text</i>");
-        let actual_result = parse_text_formatting::process_italics(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_italics_invalid() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some * text *");
-        let expected_result = String::from("some * text *");
-        let actual_result: String = parse_text_formatting::process_italics(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-}
-
-#[cfg(test)]
-mod bold_tests {
-    use super::*;
-    #[test]
-    fn convert_bold() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some __text__");
-        let expected_result = String::from("some <b>text</b>");
-        let actual_result = parse_text_formatting::process_bold(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_one() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some __ text_ _");
-        let expected_result = String::from("some __ text_ _");
-        let actual_result: String = parse_text_formatting::process_bold(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_two() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some _ _ text__");
-        let expected_result = String::from("some _ _ text__");
-        let actual_result: String = parse_text_formatting::process_bold(input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-}
-
-#[cfg(test)]
-mod unordered_list_test {
-    use super::*;
-    #[test]
-    fn test_one_line_list() {
-        //string with space before pound sign should not be converted
-        let file_lines: Vec<String> = vec![
-            String::from("no list"),
-            String::from("- list here"),
-            String::from("-end list"),
-        ];
-        let expected_result: Vec<String> = vec![
-            String::from("no list\n"),
-            String::from("<ul><li>list here</li>\n"),
-            String::from("</ul>-end list\n"),
-        ];
-        let actual_result = parse_line_formatting::parse_all_lines(file_lines);
-        //assert_eq!(actual_result.len(), expected_result.len());
-        assert_eq!(actual_result[0], expected_result[0]);
-        assert_eq!(actual_result[1], expected_result[1]);
-        assert_eq!(actual_result[2], expected_result[2]);
-    }
-    #[test]
-    fn test_two_line_list() {
-        //string with space before pound sign should not be converted
-        let file_lines: Vec<String> = vec![
-            String::from("no list"),
-            String::from("- list here"),
-            String::from("- another here"),
-            String::from("end list"),
-        ];
-        let expected_result: Vec<String> = vec![
-            String::from("no list\n"),
-            String::from("<ul><li>list here</li>\n"),
-            String::from("<li>another here</li>\n"),
-            String::from("</ul>end list\n"),
-        ];
-        let actual_result = parse_line_formatting::parse_all_lines(file_lines);
-        //assert_eq!(actual_result.len(), expected_result.len());
-        assert_eq!(actual_result[0], expected_result[0]);
-        assert_eq!(actual_result[1], expected_result[1]);
-        assert_eq!(actual_result[2], expected_result[2]);
-        assert_eq!(actual_result[3], expected_result[3]);
-    }
 }
