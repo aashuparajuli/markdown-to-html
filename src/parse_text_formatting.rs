@@ -67,7 +67,7 @@ impl CharTypes {
     fn new(c: char) -> Self {
         match c {
             ' ' => CharTypes::Space,
-            '_' => CharTypes::Underscore,
+            '*' => CharTypes::Underscore,
             '\n' => CharTypes::NewLine,
             _ => CharTypes::Text,
         }
@@ -87,9 +87,9 @@ impl Buffer {
     fn get_string(&self) -> String {
         match self.state {
             TextStates::Plaintext => self.buffer.clone(),
-            TextStates::BoldOne => format!("_{}", self.buffer),
-            TextStates::BoldTwo => format!("__{}", self.buffer),
-            TextStates::BoldThree => format!("__{}_", self.buffer),
+            TextStates::BoldOne => format!("*{}", self.buffer),
+            TextStates::BoldTwo => format!("**{}", self.buffer),
+            TextStates::BoldThree => format!("**{}*", self.buffer),
         }
     }
     fn add_char(&mut self, c: char) -> String {
@@ -117,7 +117,7 @@ impl Buffer {
                 _ => {
                     //println!("Line 321: BoldOne to Plaintext:{c}");
                     //escaping from underscore, return the current buffer to be displayed
-                    return_string = format!("_{}{c}", self.buffer);
+                    return_string = format!("*{}{c}", self.buffer);
                     self.buffer = String::new();
                     TextStates::Plaintext
                 }
@@ -125,7 +125,7 @@ impl Buffer {
             TextStates::BoldTwo => match next_char {
                 CharTypes::Underscore => TextStates::BoldThree,
                 CharTypes::NewLine => {
-                    return_string = format!("__{}{c}", self.buffer);
+                    return_string = format!("**{}{c}", self.buffer);
                     self.buffer = String::new();
                     TextStates::Plaintext
                 }
@@ -143,12 +143,12 @@ impl Buffer {
                         TextStates::Plaintext
                     } //When this branch  is reached, it is time to generate the text, with the bold tag
                     CharTypes::NewLine => {
-                        return_string = format!("__{}_\n", self.buffer);
+                        return_string = format!("**{}*\n", self.buffer);
                         self.buffer = String::new();
                         TextStates::Plaintext
                     }
                     CharTypes::Space | CharTypes::Text => {
-                        return_string = format!("__{}_{c}", self.buffer);
+                        return_string = format!("**{}*{c}", self.buffer);
                         self.buffer = String::new();
                         TextStates::Plaintext
                     }
@@ -210,7 +210,7 @@ mod bold_tests {
     #[test]
     fn convert_bold() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some __text__");
+        let input_str = String::from("some **text**");
         let expected_result = String::from("some <b>text</b>");
         let actual_result = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
@@ -218,16 +218,16 @@ mod bold_tests {
     #[test]
     fn convert_bold_invalid_one() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some __ text_ _");
-        let expected_result = String::from("some __ text_ _");
+        let input_str = String::from("some ** text* *");
+        let expected_result = String::from("some ** text* *");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_bold_invalid_two() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some _ _ text__");
-        let expected_result = String::from("some _ _ text__");
+        let input_str = String::from("some * * text**");
+        let expected_result = String::from("some * * text**");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
