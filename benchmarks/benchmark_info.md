@@ -26,5 +26,5 @@ calculating by running the execute_benchmark.sh, which runs `cargo run` 100 time
 
 | Benchmark # | v1    | v2   |
 | ----------- | ----- | ---- |
-| 1           | 0.32s | 0.32 |
+| 1           | 0.10s | 0.10 |
 | 2           | -     | -    |
