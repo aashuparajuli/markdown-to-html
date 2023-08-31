@@ -198,7 +198,6 @@ mod bold_tests {
     use super::*;
     #[test]
     fn convert_bold() {
-        //string with space before pound sign should not be converted
         let input_str = String::from("some **text**");
         let expected_result = String::from("some <b>text</b>");
         let actual_result = process_bold(input_str);
