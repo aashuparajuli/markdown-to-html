@@ -11,11 +11,11 @@ impl TextState {
         }
     }
 }
-trait Buffer {
+trait Stack {
     fn second_last(&self) -> Option<&TextState>;
     fn append_char(&mut self, c: char);
 }
-impl Buffer for Vec<TextState> {
+impl Stack for Vec<TextState> {
     fn second_last(&self) -> Option<&TextState> {
         if self.len() < 2 {
             return None;
@@ -44,6 +44,7 @@ impl Buffer for Vec<TextState> {
 pub fn process_italics(str: String) -> String {
     let mut result: String = String::new();
     let mut stack: Vec<TextState> = Vec::new();
+    let mut currently_matching = false;
     for c in str.chars() {
         /*
         cases:
@@ -53,6 +54,7 @@ pub fn process_italics(str: String) -> String {
         - switching out of italics
         */
         //switching in or out of italics
+
         if c == '*' {
             //switching out of italics
             if let Some(&TextState::Italics) = stack.second_last() {

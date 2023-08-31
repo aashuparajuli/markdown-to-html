@@ -151,7 +151,7 @@ pub fn process_bold(str: String) -> String {
     let mut _stack: Vec<&str> = Vec::new();
     //let mut buffer: String = String::new();
     let mut buffer = Buffer::new();
-    let mut substring: String = String::new();
+    let mut substring: String;
     let mut _current_state = TextStates::new();
     for c in str.chars() {
         /*
