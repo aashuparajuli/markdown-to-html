@@ -6,6 +6,7 @@
 - parse italics using asterisk from File
 - parse bold using underscore from File
 - a bash script to run the file 100 times and average results
+ - Note: bash script only runs on MacOS. On MacOS: install grep using `brew install grep`
 
 # Future features
 
