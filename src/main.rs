@@ -49,17 +49,8 @@ fn main() {
     let output_file_name = "./benchmarks/benchmark1/output.html";
     // let input_file_name = "./input/input.md";
     // let output_file_name = "./output/output.html";
-    let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
+    let input_lines: Vec<String> = file_io::get_file_lines(input_file_name); //get the lines from the file
     let output_lines = parse_line_formatting::parse_all_lines(input_lines); //process the lines
 
-    // for line in output_lines.clone() {
-    //     println!("{}", line); //display the lines
-    // }
     file_io::write_line_to_file_true(&output_lines, output_file_name);
-
-    // let _italics_result: String =
-    //     parse_text_formatting::process_italics(String::from("new *struing*"));
-    // let _header_result: String =
-    //     parse_line_formatting::process_headers(String::from("# new string"));
-    // File hosts.txt must exist in the current path
 }
