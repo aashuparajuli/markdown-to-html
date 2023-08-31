@@ -92,67 +92,61 @@ impl Buffer {
             TextStates::BoldThree => format!("**{}*", self.buffer),
         }
     }
+    // fn escape(&self, c: char) -> String {
+    //     match self.state {
+    //         TextStates::BoldOne => format!("*{}{c}", self.buffer),
+    //         TextStates::BoldTwo => format!("**{}{c}", self.buffer),
+    //         TextStates::BoldThree => format!("**{}*{c}", self.buffer),
+    //         TextStates::Plaintext => self.buffer.clone(),
+    //     }
+    // }
     fn add_char(&mut self, c: char) -> String {
         let next_char: CharTypes = CharTypes::new(c);
         let mut return_string: String = String::new();
-        self.state = match self.state {
-            TextStates::Plaintext => match next_char {
-                CharTypes::Underscore => {
-                    //flush the current buffer
-                    return_string = String::clone(&self.buffer);
-                    //println!("Line 311: Plaintext to BoldOne:{}|", self.buffer);
-                    self.buffer = String::new();
-                    TextStates::BoldOne
-                }
-                _ => {
-                    self.buffer.push(c);
-                    TextStates::Plaintext
-                }
-            },
-            TextStates::BoldOne => match next_char {
-                CharTypes::Underscore => {
-                    //println!("Line 318: BoldOne to BoldTwo:{c}");
-                    TextStates::BoldTwo
-                }
-                _ => {
-                    //println!("Line 321: BoldOne to Plaintext:{c}");
-                    //escaping from underscore, return the current buffer to be displayed
-                    return_string = format!("*{}{c}", self.buffer);
-                    self.buffer = String::new();
-                    TextStates::Plaintext
-                }
-            },
-            TextStates::BoldTwo => match next_char {
-                CharTypes::Underscore => TextStates::BoldThree,
-                CharTypes::NewLine => {
-                    return_string = format!("**{}{c}", self.buffer);
-                    self.buffer = String::new();
-                    TextStates::Plaintext
-                }
-                CharTypes::Space | CharTypes::Text => {
-                    self.buffer.push(c);
-                    TextStates::BoldTwo
-                }
-            },
-            TextStates::BoldThree => {
-                match next_char {
-                    CharTypes::Underscore => {
-                        //println!("Created a bold fragment");
-                        return_string = format!("<b>{}</b>", self.buffer);
-                        self.buffer = String::new();
-                        TextStates::Plaintext
-                    } //When this branch  is reached, it is time to generate the text, with the bold tag
-                    CharTypes::NewLine => {
-                        return_string = format!("**{}*\n", self.buffer);
-                        self.buffer = String::new();
-                        TextStates::Plaintext
-                    }
-                    CharTypes::Space | CharTypes::Text => {
-                        return_string = format!("**{}*{c}", self.buffer);
-                        self.buffer = String::new();
-                        TextStates::Plaintext
-                    }
-                }
+        self.state = match (self.state, next_char) {
+            (TextStates::Plaintext, CharTypes::Underscore) => {
+                //flush the current buffer
+                return_string = String::clone(&self.buffer);
+                self.buffer = String::new();
+                TextStates::BoldOne
+            }
+            (TextStates::Plaintext, _) => {
+                self.buffer.push(c);
+                TextStates::Plaintext
+            }
+            (TextStates::BoldOne, CharTypes::Underscore) => TextStates::BoldTwo,
+            (TextStates::BoldOne, _) => {
+                //escaping from underscore, return the current buffer to be displayed
+                return_string = format!("*{}{c}", self.buffer);
+                self.buffer = String::new();
+                TextStates::Plaintext
+            }
+            (TextStates::BoldTwo, CharTypes::Underscore) => TextStates::BoldThree,
+            (TextStates::BoldTwo, CharTypes::NewLine) => {
+                return_string = format!("**{}{c}", self.buffer);
+                self.buffer = String::new();
+                TextStates::Plaintext
+            }
+            (TextStates::BoldTwo, _) => {
+                //handles Space and Text cases
+                self.buffer.push(c);
+                TextStates::BoldTwo
+            }
+            (TextStates::BoldThree, CharTypes::Underscore) => {
+                //When this branch  is reached, it is time to generate the text, with the bold tag,
+                return_string = format!("<b>{}</b>", self.buffer);
+                self.buffer = String::new();
+                TextStates::Plaintext
+            }
+            (TextStates::BoldThree, CharTypes::NewLine) => {
+                return_string = format!("**{}*\n", self.buffer);
+                self.buffer = String::new();
+                TextStates::Plaintext
+            }
+            (TextStates::BoldThree, _) => {
+                return_string = format!("**{}*{c}", self.buffer);
+                self.buffer = String::new();
+                TextStates::Plaintext
             }
         };
         return_string
@@ -163,6 +157,7 @@ pub fn process_bold(str: String) -> String {
     let mut _stack: Vec<&str> = Vec::new();
     //let mut buffer: String = String::new();
     let mut buffer = Buffer::new();
+    let mut substring: String = String::new();
     let mut _current_state = TextStates::new();
     for c in str.chars() {
         /*
@@ -174,8 +169,8 @@ pub fn process_bold(str: String) -> String {
         */
         //two consecutive '*' should convert to plaintext
         //println!("currState:{:?}, nextChar:{c}|", buffer.state);
-        let res = buffer.add_char(c);
-        result.push_str(&res);
+        substring = buffer.add_char(c);
+        result.push_str(&substring);
         //current_state.transition(CharTypes::new(c));
         //println!("{:?}\n", buffer.state);
     }
@@ -228,6 +223,14 @@ mod bold_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some * * text**");
         let expected_result = String::from("some * * text**");
+        let actual_result: String = process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_bold_invalid_three() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some **text");
+        let expected_result = String::from("some **text");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
