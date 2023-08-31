@@ -12,7 +12,17 @@
 
 v1: Using a Finite State machine to move between states to parse bold. Using a stack to parse italics. Headers and lists were parsed by checking start the first n characters in the line
 
-Time data
+- using parse_text_formatting::process_bold
+- using parse_text_formatting::process_italics
+
+v2: Using a stack to parse italics
+
+- using parse_text_formatting::process_bold
+- using parse_text_formatting::process_italics
+
+# Time data
+
+calculating by running the execute_benchmark.sh, which runs `cargo run` 100 times and calculates the mean execution time
 
 | Benchmark # | v1    | v2  |
 | ----------- | ----- | --- |

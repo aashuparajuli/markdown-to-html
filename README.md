@@ -5,11 +5,13 @@
 - parse ordered lists from File
 - parse italics using asterisk from File
 - parse bold using underscore from File
+- a bash script to run the file 100 times and average results
 
 # Future features
 
 ## Short-term
 
+- for bash script
 - links
 - italics using underscore
 - pass in filepaths using command-line arguments
