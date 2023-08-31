@@ -122,7 +122,8 @@ impl Buffer {
             }
             (TextStates::BoldTwo, CharTypes::Underscore) => TextStates::BoldThree,
             (TextStates::BoldTwo, CharTypes::NewLine) => {
-                return_string = format!("**{c}");
+                return_string = format!("**{}{c}", self.buffer);
+                self.buffer.clear();
                 TextStates::Plaintext
             }
             (TextStates::BoldTwo, _) => {
@@ -133,11 +134,6 @@ impl Buffer {
             (TextStates::BoldThree, CharTypes::Underscore) => {
                 //When this branch  is reached, it is time to generate the text, with the bold tag,
                 return_string = format!("<b>{}</b>", self.buffer);
-                self.buffer.clear();
-                TextStates::Plaintext
-            }
-            (TextStates::BoldThree, CharTypes::NewLine) => {
-                return_string = format!("**{}*\n", self.buffer);
                 self.buffer.clear();
                 TextStates::Plaintext
             }
@@ -229,6 +225,22 @@ mod bold_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some **text");
         let expected_result = String::from("some **text");
+        let actual_result: String = process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_bold_invalid_four() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some **text\n");
+        let expected_result = String::from("some **text\n");
+        let actual_result: String = process_bold(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_bold_invalid_five() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some **text*\n");
+        let expected_result = String::from("some **text*\n");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
