@@ -28,13 +28,14 @@ impl Buffer for Vec<TextState> {
 
     fn append_char(&mut self, c: char) {
         //create a plaintext struct at the top of the stack if needed
-        if let Some(&TextState::Plaintext(_)) = self.last() {
+        if let Some(TextState::Plaintext(ref x)) = self.last() {
+            //maybe I only need to call this once, not every time I want to push a char
             let len = self.len();
-            let mut current_string: String = self.last().unwrap().get_text();
+            let mut current_string: String = x.clone();
             current_string.push(c);
             (*self)[len - 1] = TextState::Plaintext(current_string);
         } else {
-            let current_string: String = String::from(c);
+            let current_string: String = String::from(c); //consider using String::with_capacity here
             (*self).push(TextState::Plaintext(current_string));
         }
     }
@@ -55,7 +56,7 @@ pub fn process_italics(str: String) -> String {
         if c == '*' {
             //switching out of italics
             if let Some(&TextState::Italics) = stack.second_last() {
-                let string_to_format = stack.pop().unwrap().get_text();
+                let string_to_format: String = stack.pop().unwrap().get_text();
                 stack.pop().unwrap(); //pop the TextState::Italics off of the stack
                                       //append the new string
                 let formatted_string = format!("<i>{}</i>", string_to_format);
