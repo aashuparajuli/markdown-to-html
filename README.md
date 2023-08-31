@@ -6,7 +6,7 @@
 - parse italics using asterisk from File
 - parse bold using underscore from File
 - a bash script to run the file 100 times and average results
- - Note: bash script only runs on MacOS. On MacOS: install grep using `brew install grep`
+- Note: bash script only runs on MacOS. On MacOS: install grep using `brew install grep`
 
 # Future features
 
@@ -32,6 +32,7 @@
 - begin a <p> tag directly after a header, end it at the next header. This could be used for css tagging or JavaScript
 - add comments that when parsed, convert into html 'id' or 'class' attributes
 - escape characters to treat next formatting token as plain text
+- `command time -l cargo run ` may be useful to gather more detailed information
 
 ## Implementation future work to add
 

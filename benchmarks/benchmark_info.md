@@ -22,9 +22,9 @@ v2: Using a stack to parse italics
 
 # Time data
 
-calculating by running the execute_benchmark.sh, which runs `cargo run` 100 times and calculates the mean execution time
+calculating by running the execute_benchmark.sh, which runs `cargo run` 100 times and calculates the mean execution ti
 
-| Benchmark # | v1    | v2  |
-| ----------- | ----- | --- |
-| 1           | 0.15s | -   |
-| 2           | -     | -   |
+| Benchmark # | v1    | v2   |
+| ----------- | ----- | ---- |
+| 1           | 0.32s | 0.32 |
+| 2           | -     | -    |
