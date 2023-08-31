@@ -107,7 +107,7 @@ impl Buffer {
             (TextStates::Plaintext, CharTypes::Underscore) => {
                 //flush the current buffer
                 return_string = String::clone(&self.buffer);
-                self.buffer = String::new();
+                self.buffer.clear();
                 TextStates::BoldOne
             }
             (TextStates::Plaintext, _) => {
@@ -117,14 +117,12 @@ impl Buffer {
             (TextStates::BoldOne, CharTypes::Underscore) => TextStates::BoldTwo,
             (TextStates::BoldOne, _) => {
                 //escaping from underscore, return the current buffer to be displayed
-                return_string = format!("*{}{c}", self.buffer);
-                self.buffer = String::new();
+                return_string = format!("*{c}");
                 TextStates::Plaintext
             }
             (TextStates::BoldTwo, CharTypes::Underscore) => TextStates::BoldThree,
             (TextStates::BoldTwo, CharTypes::NewLine) => {
-                return_string = format!("**{}{c}", self.buffer);
-                self.buffer = String::new();
+                return_string = format!("**{c}");
                 TextStates::Plaintext
             }
             (TextStates::BoldTwo, _) => {
@@ -135,17 +133,17 @@ impl Buffer {
             (TextStates::BoldThree, CharTypes::Underscore) => {
                 //When this branch  is reached, it is time to generate the text, with the bold tag,
                 return_string = format!("<b>{}</b>", self.buffer);
-                self.buffer = String::new();
+                self.buffer.clear();
                 TextStates::Plaintext
             }
             (TextStates::BoldThree, CharTypes::NewLine) => {
                 return_string = format!("**{}*\n", self.buffer);
-                self.buffer = String::new();
+                self.buffer.clear();
                 TextStates::Plaintext
             }
             (TextStates::BoldThree, _) => {
                 return_string = format!("**{}*{c}", self.buffer);
-                self.buffer = String::new();
+                self.buffer.clear();
                 TextStates::Plaintext
             }
         };
