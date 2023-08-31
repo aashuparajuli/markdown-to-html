@@ -92,18 +92,24 @@ impl Buffer {
             TextStates::BoldThree => format!("**{}*", self.buffer),
         }
     }
-    // fn escape(&self, c: char) -> String {
-    //     match self.state {
-    //         TextStates::BoldOne => format!("*{}{c}", self.buffer),
-    //         TextStates::BoldTwo => format!("**{}{c}", self.buffer),
-    //         TextStates::BoldThree => format!("**{}*{c}", self.buffer),
-    //         TextStates::Plaintext => self.buffer.clone(),
-    //     }
-    // }
+    fn escape(&mut self, c: char) -> String {
+        let escape_string = match self.state {
+            TextStates::BoldOne => format!("*{c}"),
+            TextStates::BoldTwo => format!("**{}{c}", self.buffer),
+            TextStates::BoldThree => format!("**{}*{c}", self.buffer),
+            TextStates::Plaintext => self.buffer.clone(),
+        };
+        self.buffer.clear();
+        escape_string
+    }
     fn add_char(&mut self, c: char) -> String {
         let next_char: CharTypes = CharTypes::new(c);
         let mut return_string: String = String::new();
         self.state = match (self.state, next_char) {
+            (_, CharTypes::NewLine) => {
+                return_string = self.escape(c);
+                TextStates::Plaintext
+            }
             (TextStates::Plaintext, CharTypes::Underscore) => {
                 //flush the current buffer
                 return_string = String::clone(&self.buffer);
@@ -117,15 +123,10 @@ impl Buffer {
             (TextStates::BoldOne, CharTypes::Underscore) => TextStates::BoldTwo,
             (TextStates::BoldOne, _) => {
                 //escaping from underscore, return the current buffer to be displayed
-                return_string = format!("*{c}");
+                return_string = self.escape(c);
                 TextStates::Plaintext
             }
             (TextStates::BoldTwo, CharTypes::Underscore) => TextStates::BoldThree,
-            (TextStates::BoldTwo, CharTypes::NewLine) => {
-                return_string = format!("**{}{c}", self.buffer);
-                self.buffer.clear();
-                TextStates::Plaintext
-            }
             (TextStates::BoldTwo, _) => {
                 //handles Space and Text cases
                 self.buffer.push(c);
@@ -138,8 +139,7 @@ impl Buffer {
                 TextStates::Plaintext
             }
             (TextStates::BoldThree, _) => {
-                return_string = format!("**{}*{c}", self.buffer);
-                self.buffer.clear();
+                return_string = self.escape(c);
                 TextStates::Plaintext
             }
         };
