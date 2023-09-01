@@ -36,6 +36,10 @@ Section-specific time data: as of v3
 
 \* = shown by system as 0
 
+v3: Changed process_italics to use 
+- using parse_text_formatting::process_bold
+- using parse_text_formatting::process_italics
+
 # Time data
 
 calculating by running the execute_benchmark.sh, which runs `cargo run` 200 times and calculates the mean execution time
