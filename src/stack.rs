@@ -44,7 +44,6 @@ impl Stack for Vec<TextState> {
 pub fn process_italics(str: String) -> String {
     let mut result: String = String::new();
     let mut stack: Vec<TextState> = Vec::new();
-    let mut currently_matching = false;
     for c in str.chars() {
         /*
         cases:
