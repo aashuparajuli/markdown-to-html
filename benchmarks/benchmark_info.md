@@ -18,13 +18,31 @@ v1: Using a Finite State machine to move between states to parse bold. Using a s
 v2: Using a stack to parse italics
 
 - using parse_text_formatting::process_bold
-- using parse_text_formatting::process_italics
+- using stack::process_italics
+
+v3: Changed stack::process_italics to store string indices instead of building strings by appending char. implemented on optimize/process-italics
+
+- using parse_text_formatting::process_bold
+- using stack::process_italics
+
+Section-specific time data: as of v3
+
+| Section                                | v3      | -   | -   |
+| -------------------------------------- | ------- | --- | --- |
+| file_io::get_file_lines                | .09     | -   | -   |
+| file_io::write_line_to_file_true       | .001    | -   | -   |
+| parse_line_formatting::parse_all_lines | <.001\* | -   | -   |
+| Total                                  | .091    | -   | -   |
+
+\* = shown by system as 0
 
 # Time data
 
-calculating by running the execute_benchmark.sh, which runs `cargo run` 100 times and calculates the mean execution time
+calculating by running the execute_benchmark.sh, which runs `cargo run` 200 times and calculates the mean execution time
 
-| Benchmark # | v1     | v2     |
-| ----------- | ------ | ------ |
-| 1           | 0.104s | 0.094s |
-| 2           | -      | -      |
+Times calculated in release mode
+
+| Benchmark # | v1     | v2     | v3    |
+| ----------- | ------ | ------ | ----- |
+| 1           | 0.104s | 0.094s | v.094 |
+| 2           | -      | -      | v2    |
