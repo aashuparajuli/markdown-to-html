@@ -27,16 +27,17 @@ v3: Changed stack::process_italics to store string indices instead of building s
 
 Section-specific time data: as of v3
 
-| Section                                | v3      | -   | -   |
-| -------------------------------------- | ------- | --- | --- |
-| file_io::get_file_lines                | .09     | -   | -   |
-| file_io::write_line_to_file_true       | .001    | -   | -   |
-| parse_line_formatting::parse_all_lines | <.001\* | -   | -   |
-| Total                                  | .091    | -   | -   |
+| Section                                | v3   | -   | -   |
+| -------------------------------------- | ---- | --- | --- |
+| file_io::get_file_lines                | -    | -   | -   |
+| file_io::write_line_to_file_true       | -    | -   | -   |
+| parse_line_formatting::parse_all_lines | -    | -   | -   |
+| Total                                  | .091 | -   | -   |
 
 \* = shown by system as 0
 
-v3: Changed process_italics to use 
+v3: Changed process_italics to use
+
 - using parse_text_formatting::process_bold
 - using parse_text_formatting::process_italics
 
