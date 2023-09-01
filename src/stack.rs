@@ -12,7 +12,7 @@ impl TextState {
     // }
 }
 trait Stack {
-    fn second_last(&self) -> Option,&TextState>;
+    fn second_last(&self) -> Option<&TextState>;
     // fn append_char(&mut self, c: char);
 }
 impl Stack for Vec<TextState> {
@@ -149,12 +149,14 @@ mod italics_tests {
     fn convert_italics() {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text*");
-        let expected_result = String::from("some 
+        let expected_result = String::from(
+            "some 
           
           
           
           
-          i>text</i>");
+          i>text</i>",
+        );
         let actual_result = process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
