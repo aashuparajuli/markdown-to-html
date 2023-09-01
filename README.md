@@ -13,6 +13,7 @@
 ## Short-term
 
 - pass in filepaths using command-line arguments
+- pass in a folder, process every md folder in the file
 - links
 - italics using underscore
 - strikethrough
