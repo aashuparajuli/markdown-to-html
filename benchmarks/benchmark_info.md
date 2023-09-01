@@ -20,6 +20,10 @@ v2: Using a stack to parse italics
 - using parse_text_formatting::process_bold
 - using parse_text_formatting::process_italics
 
+v3: Changed process_italics to use 
+- using parse_text_formatting::process_bold
+- using parse_text_formatting::process_italics
+
 # Time data
 
 calculating by running the execute_benchmark.sh, which runs `cargo run` 100 times and calculates the mean execution ti
