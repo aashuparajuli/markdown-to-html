@@ -1,3 +1,4 @@
+//#![allow(dead_code)]
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
