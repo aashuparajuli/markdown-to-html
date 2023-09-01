@@ -1,8 +1,9 @@
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code, unused_imports, unused_variables)]
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
 pub mod file_io {
+    use std::fs::read_to_string;
     /**
      * Functions to read/write lines from a file
      */
@@ -19,16 +20,11 @@ pub mod file_io {
         Ok(io::BufReader::new(file).lines())
     }
     pub fn get_file_lines(filename: &str) -> Vec<String> {
-        //let filename = "./hosts.txt";
-        let mut file_lines: Vec<String> = Vec::new();
-        if let Ok(lines) = read_lines(filename) {
-            // Consumes the iterator, returns an (Optional) String
-            for line in lines {
-                let ip = line.unwrap();
-                file_lines.push(ip);
-            }
-        }
-        file_lines
+        read_to_string(filename)
+            .unwrap() // panic on possible file-reading errors
+            .lines() // split the string into an iterator of string slices
+            .map(String::from) // make each slice into a string
+            .collect() // gather them together into a vector
     }
 
     pub fn write_line_to_file_true(str: &Vec<String>, filename: &str) {
@@ -50,8 +46,8 @@ fn main() {
     let output_file_name = "./benchmarks/benchmark1/output.html";
     // let input_file_name = "./input/input.md";
     // let output_file_name = "./output/output.html";
-    let input_lines: Vec<String> = file_io::get_file_lines(input_file_name); //get the lines from the file
-    let output_lines = parse_line_formatting::parse_all_lines(input_lines); //process the lines
+    let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
+    let output_lines: Vec<String> = parse_line_formatting::parse_all_lines(input_lines); //process the lines
 
     file_io::write_line_to_file_true(&output_lines, output_file_name);
 }
