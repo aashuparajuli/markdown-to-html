@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
