@@ -149,14 +149,7 @@ mod italics_tests {
     fn convert_italics() {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text*");
-        let expected_result = String::from(
-            "some 
-          
-          
-          
-          
-          i>text</i>",
-        );
+        let expected_result = String::from("some <i>text</i>");
         let actual_result = process_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
