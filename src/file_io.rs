@@ -1,4 +1,3 @@
-
 use std::fs::read_to_string;
 /**
  * Functions to read/write lines from a file
@@ -21,6 +20,25 @@ pub fn get_file_lines(filename: &str) -> Vec<String> {
         .lines() // split the string into an iterator of string slices
         .map(String::from) // make each slice into a string
         .collect() // gather them together into a vector
+}
+pub struct FileAccess {
+    file: File,
+}
+pub fn open_file(filename: &str) -> FileAccess {
+    let file = File::create(filename).expect("Unable to create file");
+    FileAccess { file }
+}
+pub fn write_directly_to_file(str: &str, file_struct: &mut FileAccess) {
+    //("writing to file: {}", str);
+    file_struct
+        .file
+        .write_all(str.as_bytes())
+        .expect("Unable to write data");
+}
+pub fn write_one_line_to_file(s: &str, filename: &str) {
+    //let data = "Some data!";
+    let mut f = File::create(filename).expect("Unable to create file");
+    f.write_all(s.as_bytes()).expect("Unable to write data");
 }
 
 pub fn write_line_to_file_true(str: &Vec<String>, filename: &str) {
