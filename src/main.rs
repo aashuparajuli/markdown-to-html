@@ -1,8 +1,9 @@
-#![allow(dead_code, unused_imports, unused_variables)]
+#![allow(dead_code, unused_imports)]
 mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
+use std::env;
 use std::time::{Duration, Instant};
 
 fn main() {
@@ -10,7 +11,7 @@ fn main() {
     let output_file_name = "./benchmarks/benchmark1/output.html";
     let start_reading_file = Instant::now();
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
-    let reading_file_duration = start_reading_file.elapsed();
+    let reading_file_duration: Duration = start_reading_file.elapsed();
 
     let start_parsing_text = Instant::now();
     let output_lines: Vec<String> = parse_line_formatting::parse_all_lines(input_lines); //process the lines

@@ -34,8 +34,12 @@ pub fn parse_all_lines(lines: Vec<String>) -> Vec<String> {
 
         //parse and format the italics
         let parsed_line = parse_text_formatting::process_bold(parsed_line);
+        //uncomment this line use the italics parser in v1
         //let parsed_line = parse_text_formatting::process_italics(parsed_line);
+
+        //uncomment this line to use the italics parser in v3
         let parsed_line: String = stack::process_italics(parsed_line);
+
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
         let parsed_line: String = match new_line_state {

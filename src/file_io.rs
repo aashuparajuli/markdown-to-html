@@ -1,4 +1,3 @@
-
 use std::fs::read_to_string;
 /**
  * Functions to read/write lines from a file
