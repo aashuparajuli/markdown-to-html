@@ -56,6 +56,9 @@ pub fn process_italics(str: String) -> String {
     let mut parsing_italics: bool = false;
     let mut start_idx: usize = 0;
     let mut _current_state: TextState = TextState::Plaintext;
+    if str.is_empty() {
+        return str;
+    }
     for (curr_idx, c) in str.chars().enumerate() {
         //initially:currently_matching = false;
         /*cases for string matching:
