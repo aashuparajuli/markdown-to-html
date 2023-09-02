@@ -87,7 +87,7 @@ pub fn process_italics(str: String) -> String {
         // };
         if parsing_italics && (c == ' ' || c == '*') && start_idx == curr_idx {
             //if no letters have been added yet, then break out of italics
-            println!("escaping from italics");
+            //println!("escaping from italics");
             // if let Some(x) = stack.last_mut() {
             //     x.format = TextState::Plaintext;
             //     x.end_idx = end_idx;
@@ -98,20 +98,20 @@ pub fn process_italics(str: String) -> String {
         if parsing_italics && c == '*' {
             //construct a FormattedText[Italics] struct, append it to the stack
             let italics_text = FormattedText::new(TextState::Italics, start_idx, curr_idx);
-            println!(
-                "created new italics line 95:{start_idx}:{curr_idx}.:{}|\n",
-                &str[start_idx..curr_idx]
-            );
+            // println!(
+            //     "created new italics line 95:{start_idx}:{curr_idx}.:{}|\n",
+            //     &str[start_idx..curr_idx]
+            // );
             stack.push(italics_text);
             start_idx = curr_idx;
             parsing_italics = false;
         } else if !parsing_italics && c == '*' {
             //construct a FormattedText[Plaintext] struct, append it to the stack
             let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
-            println!(
-                "created new plaintext line 95:{start_idx}:{curr_idx}.:{}|\n",
-                &str[start_idx..curr_idx]
-            );
+            // println!(
+            //     "created new plaintext line 95:{start_idx}:{curr_idx}.:{}|\n",
+            //     &str[start_idx..curr_idx]
+            // );
             stack.push(italics_text);
             //increment start and end pointers
             start_idx = curr_idx + 1;
@@ -121,12 +121,12 @@ pub fn process_italics(str: String) -> String {
     }
     //append any strings that have not been completed yet
     if parsing_italics {
-        println!("found unmatched asterisk");
+        //println!("found unmatched asterisk");
         let plain_text = FormattedText::new(TextState::Plaintext, start_idx - 1, str.len());
         stack.push(plain_text);
     } else if start_idx != str.len() - 1 {
         //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
-        println!("found unterminated plain text");
+        //println!("found unterminated plain text");
         let plain_text = FormattedText::new(TextState::Plaintext, start_idx, str.len());
         stack.push(plain_text);
     }
@@ -134,7 +134,7 @@ pub fn process_italics(str: String) -> String {
     //stack.push(FormattedText::new(TextState::Plaintext, start_idx, end_idx));
 
     //concatenate the stack to generate the final result string
-    println!("stack_size:{}", stack.len());
+    //println!("stack_size:{}", stack.len());
     stack
         .iter()
         .for_each(|state: &FormattedText| result.push_str(&state.get_text(&str)));

@@ -15,7 +15,7 @@ v1: Using a Finite State machine to move between states to parse bold. Using a s
 - using parse_text_formatting::process_bold
 - using parse_text_formatting::process_italics
 
-v1: Using a stack to parse italics
+v2: Using a stack to parse italics
 
 - using parse_text_formatting::process_bold
 - using stack::process_italics
@@ -30,13 +30,15 @@ Section-specific time data: as of v3
 # Time data
 
 calculating by running the execute_benchmark.sh, which runs `cargo run` 200 times and calculates the mean execution time
-Info
-all times are in milliseconds
-Times calculated using `cargo build --release` mode
 
-| Section                      | v2    | v3  |
-| ---------------------------- | ----- | --- |
-| reading lines from the file  | 0.369 | -   |
-| converting markdown to html  | 5.519 | -   |
-| writing the html to the file | 1.905 | -   |
-| Total                        | 7.798 | -   |
+### Info
+
+- all times are in milliseconds
+- Times calculated using `cargo build --release`
+
+| Section                      | v2    | v3    |
+| ---------------------------- | ----- | ----- |
+| reading lines from the file  | 0.369 | .368  |
+| converting markdown to html  | 5.519 | 5.384 |
+| writing the html to the file | 1.905 | 2.11  |
+| Total                        | 7.798 | 7.890 |
