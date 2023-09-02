@@ -3,7 +3,6 @@ mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
-use std::env;
 use std::time::{Duration, Instant};
 
 fn main() {

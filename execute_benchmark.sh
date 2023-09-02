@@ -2,6 +2,7 @@
 
 #the problem: when a time is displayed with no decimal places: eg: 360ms, the grep does not match, causing an error
 cargo build --release
+cargo run --release
 total_runtime=0
 total_read_file_runtime=0
 total_process_text_runtime=0
@@ -10,7 +11,7 @@ sample_size=200
 for i in $(seq 1 $sample_size);
 do
     #run the program, collect the output
-    output=$(cargo run 2>/dev/null)
+    output=$(cargo run --release 2>/dev/null)
     #get the runtime of eachc section
     
     read_file_runtime=$(echo "$output" | ggrep -Po "(?<=read:)\d+[\.]?[\d]*")
