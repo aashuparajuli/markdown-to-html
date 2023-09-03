@@ -301,13 +301,36 @@ mod header_test {
     }
 }
 #[cfg(test)]
-mod plaintext {
+mod plaintext_test {
     use super::parse_all_lines;
     #[test]
     fn test_plaintext() {
         let mut actual_html_lines: Vec<String> = Vec::new();
         let markdown_lines: Vec<String> = vec![String::from("Plain text")];
         let expecte_html_lines: Vec<String> = vec![String::from("Plain text\n")];
+        parse_all_lines(markdown_lines, &mut actual_html_lines);
+        //assert_eq!(actual_result.len(), expected_result.len());
+        assert_eq!(actual_html_lines[0], expecte_html_lines[0]);
+    }
+}
+
+#[cfg(test)]
+mod blockquote_test {
+    use super::parse_all_lines;
+    #[test]
+    fn test_blockquote() {
+        let mut actual_html_lines: Vec<String> = Vec::new();
+        let markdown_lines: Vec<String> = vec![String::from("> Quoted text")];
+        let expecte_html_lines: Vec<String> =
+            vec![String::from("<blockquote>Quoted text</blockquote>\n")];
+        parse_all_lines(markdown_lines, &mut actual_html_lines);
+        //assert_eq!(actual_result.len(), expected_result.len());
+        assert_eq!(actual_html_lines[0], expecte_html_lines[0]);
+    }
+    fn test_blockquote_invalid() {
+        let mut actual_html_lines: Vec<String> = Vec::new();
+        let markdown_lines: Vec<String> = vec![String::from(">Not quoted text")];
+        let expecte_html_lines: Vec<String> = vec![String::from(">Not quoted text\n")];
         parse_all_lines(markdown_lines, &mut actual_html_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_html_lines[0], expecte_html_lines[0]);
