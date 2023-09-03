@@ -1,8 +1,12 @@
 <ul><li>One line</li>
-</ul>Two <i>line</i>
+</ul>  Two _line_
+
 <h1>Red line</h1>
+
 Blue __line
-<ol><li> <b>One</b></li>
-<li> <i>Two</i></li>
-<li> Four</li>
+
+<ol><li><b>One</b></li>
+<li>Two</li>
+<li>Four</li>
 </ol>
+<blockquote>A quote that is </blockquote>
