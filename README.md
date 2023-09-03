@@ -1,3 +1,18 @@
+To use the program:
+
+> `cargo run -- input_file output_file`
+
+ex:
+
+> `cargo run -- input/input.txt output/output.txt 1> /dev/null`
+
+to check that the program generates the correct file compared to some reference file
+
+> `chmod +x ./check.sh` //optional
+> `./check.sh input/input.txt output/output.txt output/correct.txt`
+
+to run benchmarks to see the performance of the file
+
 # Current Features
 
 - parse header tags from File
