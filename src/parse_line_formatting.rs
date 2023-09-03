@@ -1,4 +1,5 @@
 use crate::file_io;
+use crate::file_io::FileWriter;
 use crate::parse_text_formatting;
 use crate::stack;
 use std::time::{Duration, Instant};
@@ -14,8 +15,10 @@ enum LineType {
     Header1,
     Header2,
     Header3,
+    Blockquote,
     Other,
 }
+
 /**
  * Input: a Vec<String> - one String for each line in the input file
  * For each String, check if there are any headers at the start of the file
@@ -24,7 +27,8 @@ enum LineType {
  * Returns a Vec<String> where each String has been converted to HTML code
  * Writes the resulting html to a file
  */
-pub fn parse_all_lines(lines: Vec<String>, file_access: &mut file_io::FileAccess) -> Vec<String> {
+
+pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> Vec<String> {
     let mut proxy_file: Vec<String> = Vec::new();
     let mut current_line_state: LineType = LineType::Other;
 
@@ -62,10 +66,13 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut file_io::FileAccess
             LineType::Other => {
                 format!("{}{}\n", prefix, parsed_line)
             }
+            LineType::Blockquote => {
+                format!("{}<blockquote>{}</blockquote>\n", prefix, parsed_line)
+            }
         };
         //file_io::write_line_to_file(&parsed_line, &mut proxy_file);
 
-        file_access.write_to_file(&parsed_line);
+        file_access.write_line_to_file(&parsed_line);
         //file_io::write_one_line_to_file(&parsed_line, "output/output.html");
         current_line_state = new_line_state;
     }
@@ -73,10 +80,10 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut file_io::FileAccess
     if current_line_state == LineType::OrderedList {
         let parsed_line = String::from("</ol>");
         //file_io::write_line_to_file(&parsed_line, &mut proxy_file);
-        file_access.write_to_file(&parsed_line);
+        file_access.write_line_to_file(&parsed_line);
     } else if current_line_state == LineType::UnorderedList {
         let parsed_line: String = String::from("</ul>");
-        file_access.write_to_file(&parsed_line);
+        file_access.write_line_to_file(&parsed_line);
         //file_io::write_directly_to_file(&parsed_line, file_access);file_io::write_line_to_file(&parsed_line, &mut proxy_file);
     }
     proxy_file
@@ -88,6 +95,9 @@ fn determine_line_type(line: String) -> (String, LineType) {
     } else if &line[0..2] == "# " {
         let remaining_str = &line[2..];
         (remaining_str.to_string(), LineType::Header1)
+    } else if &line[0..2] == "> " {
+        let remaining_str = &line[2..];
+        (remaining_str.to_string(), LineType::Blockquote)
     } else if &line[0..2] == "- " {
         let remaining_str = &line[2..];
         (remaining_str.to_string(), LineType::UnorderedList)
@@ -132,43 +142,44 @@ mod unordered_list_test {
     use super::*;
     #[test]
     fn test_one_line_list() {
-        //string with space before pound sign should not be converted
-        let file_lines: Vec<String> = vec![
+        let mut actual_html_lines: Vec<String> = Vec::new();
+        let markdown_lines: Vec<String> = vec![
             String::from("no list"),
             String::from("- list here"),
-            String::from("-end list"),
+            String::from("-end list"), //this should not be converted into a list
         ];
-        let expected_result: Vec<String> = vec![
+        let expecte_html_lines: Vec<String> = vec![
             String::from("no list\n"),
             String::from("<ul><li>list here</li>\n"),
             String::from("</ul>-end list\n"),
         ];
-        let actual_result = parse_all_lines(file_lines);
+        parse_all_lines(markdown_lines, &mut actual_html_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
-        assert_eq!(actual_result[0], expected_result[0]);
-        assert_eq!(actual_result[1], expected_result[1]);
-        assert_eq!(actual_result[2], expected_result[2]);
+        assert_eq!(actual_html_lines[0], expecte_html_lines[0]);
+        assert_eq!(actual_html_lines[1], expecte_html_lines[1]);
+        assert_eq!(actual_html_lines[2], expecte_html_lines[2]);
     }
     #[test]
     fn test_two_line_list() {
         //string with space before pound sign should not be converted
-        let file_lines: Vec<String> = vec![
+        let mut actual_html_lines: Vec<String> = Vec::new();
+        let markdown_lines: Vec<String> = vec![
             String::from("no list"),
-            String::from("- list here"),
-            String::from("- another here"),
+            String::from("- first item"),
+            String::from("- second item"),
             String::from("end list"),
         ];
-        let expected_result: Vec<String> = vec![
+        let expected_html_lines: Vec<String> = vec![
             String::from("no list\n"),
-            String::from("<ul><li>list here</li>\n"),
-            String::from("<li>another here</li>\n"),
+            String::from("<ul><li>first item</li>\n"),
+            String::from("<li>second item</li>\n"),
             String::from("</ul>end list\n"),
         ];
-        let actual_result = parse_all_lines(file_lines);
+        parse_all_lines(markdown_lines, &mut actual_html_lines);
         //assert_eq!(actual_result.len(), expected_result.len());
-        assert_eq!(actual_result[0], expected_result[0]);
-        assert_eq!(actual_result[1], expected_result[1]);
-        assert_eq!(actual_result[2], expected_result[2]);
-        assert_eq!(actual_result[3], expected_result[3]);
+        assert_eq!(actual_html_lines[0], expected_html_lines[0]);
+        assert_eq!(actual_html_lines[1], expected_html_lines[1]);
+        assert_eq!(actual_html_lines[2], expected_html_lines[2]);
+        assert_eq!(actual_html_lines[3], expected_html_lines[3]);
     }
 }
