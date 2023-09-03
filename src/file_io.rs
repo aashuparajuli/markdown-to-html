@@ -24,17 +24,19 @@ pub fn get_file_lines(filename: &str) -> Vec<String> {
 pub struct FileAccess {
     file: File,
 }
-pub fn open_file(filename: &str) -> FileAccess {
-    let file = File::create(filename).expect("Unable to create file");
-    FileAccess { file }
+impl FileAccess {
+    pub fn open_file(filename: &str) -> FileAccess {
+        let file = File::create(filename).expect("Unable to create file");
+        FileAccess { file }
+    }
+    pub fn write_to_file(&mut self, str: &str) {
+        //("writing to file: {}", str);
+        self.file
+            .write_all(str.as_bytes())
+            .expect("Unable to write data");
+    }
 }
-pub fn write_directly_to_file(str: &str, file_struct: &mut FileAccess) {
-    //("writing to file: {}", str);
-    file_struct
-        .file
-        .write_all(str.as_bytes())
-        .expect("Unable to write data");
-}
+
 pub fn write_one_line_to_file(s: &str, filename: &str) {
     //let data = "Some data!";
     let mut f = File::create(filename).expect("Unable to create file");

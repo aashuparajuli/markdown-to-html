@@ -3,8 +3,8 @@ mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
+use file_io::FileAccess;
 use std::time::{Duration, Instant};
-
 fn main() {
     let input_file_name = "./benchmarks/benchmark1/input.md";
     let output_file_name = "./benchmarks/benchmark1/output.html";
@@ -17,7 +17,7 @@ fn main() {
     let reading_file_duration = start_reading_file.elapsed();
 
     let start_parsing_text = Instant::now();
-    let mut file_access: file_io::FileAccess = file_io::open_file(output_file_name);
+    let mut file_access: file_io::FileAccess = FileAccess::open_file(output_file_name);
     let output_lines: Vec<String> =
         parse_line_formatting::parse_all_lines(input_lines, &mut file_access); //process the lines
     let parsing_text_duration = start_parsing_text.elapsed();

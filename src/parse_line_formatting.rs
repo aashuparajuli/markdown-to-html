@@ -61,7 +61,7 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut file_io::FileAccess
         };
         //file_io::write_line_to_file(&parsed_line, &mut proxy_file);
 
-        file_io::write_directly_to_file(&parsed_line, file_access);
+        file_access.write_to_file(&parsed_line);
         //file_io::write_one_line_to_file(&parsed_line, "output/output.html");
         current_line_state = new_line_state;
     }
@@ -69,10 +69,10 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut file_io::FileAccess
     if current_line_state == LineType::OrderedList {
         let parsed_line = String::from("</ol>");
         //file_io::write_line_to_file(&parsed_line, &mut proxy_file);
-        file_io::write_directly_to_file(&parsed_line, file_access);
+        file_access.write_to_file(&parsed_line);
     } else if current_line_state == LineType::UnorderedList {
         let parsed_line: String = String::from("</ul>");
-        file_io::write_directly_to_file(&parsed_line, file_access);
+        file_access.write_to_file(&parsed_line);
         //file_io::write_directly_to_file(&parsed_line, file_access);file_io::write_line_to_file(&parsed_line, &mut proxy_file);
     }
     proxy_file
