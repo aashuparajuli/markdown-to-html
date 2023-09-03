@@ -29,7 +29,7 @@ Section-specific time data: as of v3
 
 v4:
 Before: parse_line_formatting_parse_lines processed every line and stored them in a Vec<String>. Then the entire Vec<String> was written to a file
-Change: parse_line_formatting_parse_lines will processs one line, write it to a file, then process the next line
+Change: parse_line_formatting_parse_lines will processs one line, write it to a file, then process the next line. file_io::FileAccess is a struct that stores the file to access so that the file is only opened once
 
 # Time data
 
@@ -40,11 +40,11 @@ calculating by running the execute_benchmark.sh, which runs `cargo run` 200 time
 - all times are in milliseconds
 - Times calculated using `./execute_benchmark.sh`. which uses `cargo run --release`
 
-| Section                      | v1  | v3  | v4    |
-| ---------------------------- | --- | --- | ----- |
-| reading lines from the file  | -   | -   | .154  |
-| converting markdown to html  | -   | -   | 3.308 |
-| writing the html to the file | -   | -   | -     |
-| Total                        | -   | -   | 3.462 |
+| Section                      | v1  | v3  | v4     |
+| ---------------------------- | --- | --- | ------ |
+| reading lines from the file  | -   | -   | 0.126  |
+| converting markdown to html  | -   | -   | 2.776  |
+| writing the html to the file | -   | -   | -      |
+| Total                        | -   | -   | 2.9021 |
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step
