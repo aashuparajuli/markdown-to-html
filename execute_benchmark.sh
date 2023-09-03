@@ -2,7 +2,8 @@
 
 #the problem: when a time is displayed with no decimal places: eg: 360ms, the grep does not match, causing an error
 cargo build --release
-cargo run --release
+cargo run --release &>/dev/null
+
 total_runtime=0
 total_read_file_runtime=0
 total_process_text_runtime=0
@@ -31,6 +32,7 @@ do
     #delete the file that was generated
     rm benchmarks/benchmark1/output.html
 done
+
 average_read_file_runtime=$(echo "scale=6;$total_read_file_runtime / $sample_size" / 1000 | bc)
 average_process_text_runtime=$(echo "scale=4;$total_process_text_runtime / $sample_size" | bc)
 average_write_file_runtime=$(echo "scale=4;$total_write_file_runtime / $sample_size" | bc)

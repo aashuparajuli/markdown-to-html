@@ -12,6 +12,27 @@ pub fn get_file_lines(filename: &str) -> Vec<String> {
         .map(String::from) // make each slice into a string
         .collect() // gather them together into a vector
 }
+pub struct FileAccess {
+    file: File,
+}
+impl FileAccess {
+    pub fn open_file(filename: &str) -> FileAccess {
+        let file = File::create(filename).expect("Unable to create file");
+        FileAccess { file }
+    }
+    pub fn write_to_file(&mut self, str: &str) {
+        //("writing to file: {}", str);
+        self.file
+            .write_all(str.as_bytes())
+            .expect("Unable to write data");
+    }
+}
+
+pub fn write_one_line_to_file(s: &str, filename: &str) {
+    //let data = "Some data!";
+    let mut f = File::create(filename).expect("Unable to create file");
+    f.write_all(s.as_bytes()).expect("Unable to write data");
+}
 
 pub fn write_line_to_file_true(str: &Vec<String>, filename: &str) {
     //let data = "Some data!";
