@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #the problem: when a time is displayed with no decimal places: eg: 360ms, the grep does not match, causing an error
-cargo build
+cargo build --release
 cargo run --release &>/dev/null
+
 total_runtime=0
 total_read_file_runtime=0
 total_process_text_runtime=0

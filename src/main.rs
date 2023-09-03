@@ -1,4 +1,5 @@
 #![allow(dead_code, unused_imports, unused_variables, unused_mut)]
+
 mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
@@ -14,7 +15,7 @@ fn main() {
 
     let start_reading_file = Instant::now();
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
-    let reading_file_duration = start_reading_file.elapsed();
+    let reading_file_duration: Duration = start_reading_file.elapsed();
 
     let start_parsing_text = Instant::now();
     let mut file_access: file_io::FileAccess = FileAccess::open_file(output_file_name);

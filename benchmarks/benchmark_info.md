@@ -33,18 +33,18 @@ Change: parse_line_formatting_parse_lines will processs one line, write it to a 
 
 # Time data
 
-calculating by running the execute_benchmark.sh, which runs `cargo run` 200 times and calculates the mean execution time
+calculating by running the execute_benchmark.sh, which runs `cargo run --release` 200 times and calculates the mean execution time
 
 ### Info
 
 - all times are in milliseconds
 - Times calculated using `./execute_benchmark.sh`. which uses `cargo run --release`
 
-| Section                      | v1  | v3  | v4     |
-| ---------------------------- | --- | --- | ------ |
-| reading lines from the file  | -   | -   | 0.126  |
-| converting markdown to html  | -   | -   | 2.776  |
-| writing the html to the file | -   | -   | -      |
-| Total                        | -   | -   | 2.9021 |
-
+| Section                      | v1    | v3    | v4     |
+| ---------------------------- | ----- | ----- |------ |
+| reading lines from the file  | 0.153 | 1.151 |0.126  |
+| converting markdown to html  | 1.446 | 1.335 |2.776  |
+| writing the html to the file | 2.150 | 2.134 | -      |
+| Total                        | 3.749 | 3.621 |2.9021 |
+                             
 Note: For v4, converting markdown to html and writing html to file are done in a single step
