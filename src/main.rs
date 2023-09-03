@@ -4,14 +4,23 @@ mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
+use clap::Parser;
 use file_io::FileAccess;
+use std::path::PathBuf;
 use std::time::{Duration, Instant};
+#[derive(Parser)]
+struct Cli {
+    input_file_path: PathBuf,
+    output_file_path: PathBuf,
+}
 fn main() {
+    let args = Cli::parse();
     // let input_file_name = "./benchmarks/benchmark1/input.md";
     // let output_file_name = "./benchmarks/benchmark1/output.html";
 
-    let input_file_name = "./input/input.txt";
-    let output_file_name = "./output/output.html";
+    // let input_file_name = "./input/input.txt";
+    let input_file_name = args.input_file_path;
+    let output_file_name = args.output_file_path;
 
     let start_reading_file = Instant::now();
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
