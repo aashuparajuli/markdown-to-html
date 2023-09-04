@@ -51,20 +51,18 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 
 - the below times are averaged over 500 iterations, instead of 200
 
-| Section                      | v4 w/ no additions | + inline code blocks | + strikethrough |
-| ---------------------------- | ------------------ | -------------------- | --------------- |
-| reading lines from the file  | .124               | 0.139                | .133            |
-| converting markdown to html  | 2.666              | 2.941                | 3.378           |
-| writing the html to the file | -                  | -                    | -               |
-| Total                        | 2.790              | 3.080                | 3.511           |
+| Section                              | v4 w/ no additions | + inline code blocks | + strikethrough |
+| ------------------------------------ | ------------------ | -------------------- | --------------- |
+| reading lines from the file          | .124               | 0.139                | .133            |
+| converting to html + writing to file | 2.666              | 2.941                | 3.378           |
+| Total                                | 2.790              | 3.080                | 3.511           |
 
 part 2
 
-| Section                      | + italics using underscore | -   | -   |
-| ---------------------------- | -------------------------- | --- | --- |
-| reading lines from the file  | 0.129                      |     |     |
-| converting markdown to html  | 3.756                      |     |     |
-| writing the html to the file | -                          |     |     |
-| Total                        | 3.885                      |     |     |
+| Section                              | + italics using underscore | + bold using underscore |
+| ------------------------------------ | -------------------------- | ----------------------- |
+| reading lines from the file          | 0.129                      | .134                    |
+| converting to html + writing to file | 3.756                      | 4.426                   |
+| Total                                | 3.885                      | 4.564                   |
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step

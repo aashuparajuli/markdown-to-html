@@ -1,5 +1,5 @@
 <ul><li>One line</li>
-</ul>  Two _line_
+</ul>  Two <i>line</i>
 
 <h1>Red line</h1>
 
@@ -14,3 +14,8 @@ Blue __line
 <code>let x = 1;</code>
 
 <del>deleted text</del>
+
+<b>bold underscores</b>
+<b>bold asterisks</b>
+<i>italic underscores</i>
+<i>italic asterisks</i>

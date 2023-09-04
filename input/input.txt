@@ -14,3 +14,8 @@ Blue __line
 `let x = 1;`
 
 ~~deleted text~~
+
+__bold underscores__
+**bold asterisks**
+_italic underscores_
+*italic asterisks*

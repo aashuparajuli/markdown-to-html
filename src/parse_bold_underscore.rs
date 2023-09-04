@@ -13,14 +13,14 @@ impl TextStates {
 enum CharTypes {
     NewLine,
     Space,
-    Asterisk,
+    Underscore,
     Text,
 }
 impl CharTypes {
     fn new(c: char) -> Self {
         match c {
             ' ' => CharTypes::Space,
-            '*' => CharTypes::Asterisk,
+            '_' => CharTypes::Underscore,
             '\n' => CharTypes::NewLine,
             _ => CharTypes::Text,
         }
@@ -40,16 +40,16 @@ impl Buffer {
     fn get_string(&self) -> String {
         match self.state {
             TextStates::Plaintext => self.buffer.clone(),
-            TextStates::BoldOne => format!("*{}", self.buffer),
-            TextStates::BoldTwo => format!("**{}", self.buffer),
-            TextStates::BoldThree => format!("**{}*", self.buffer),
+            TextStates::BoldOne => format!("_{}", self.buffer),
+            TextStates::BoldTwo => format!("__{}", self.buffer),
+            TextStates::BoldThree => format!("__{}_", self.buffer),
         }
     }
     fn escape(&mut self, c: char) -> String {
         let escape_string = match self.state {
-            TextStates::BoldOne => format!("*{c}"),
-            TextStates::BoldTwo => format!("**{}{c}", self.buffer),
-            TextStates::BoldThree => format!("**{}*{c}", self.buffer),
+            TextStates::BoldOne => format!("_{c}"),
+            TextStates::BoldTwo => format!("__{}{c}", self.buffer),
+            TextStates::BoldThree => format!("__{}_{c}", self.buffer),
             TextStates::Plaintext => self.buffer.clone(),
         };
         self.buffer.clear();
@@ -63,7 +63,7 @@ impl Buffer {
                 return_string = self.escape(c);
                 TextStates::Plaintext
             }
-            (TextStates::Plaintext, CharTypes::Asterisk) => {
+            (TextStates::Plaintext, CharTypes::Underscore) => {
                 //flush the current buffer
                 return_string = String::clone(&self.buffer);
                 self.buffer.clear();
@@ -73,19 +73,19 @@ impl Buffer {
                 self.buffer.push(c);
                 TextStates::Plaintext
             }
-            (TextStates::BoldOne, CharTypes::Asterisk) => TextStates::BoldTwo,
+            (TextStates::BoldOne, CharTypes::Underscore) => TextStates::BoldTwo,
             (TextStates::BoldOne, _) => {
                 //escaping from underscore, return the current buffer to be displayed
                 return_string = self.escape(c);
                 TextStates::Plaintext
             }
-            (TextStates::BoldTwo, CharTypes::Asterisk) => TextStates::BoldThree,
+            (TextStates::BoldTwo, CharTypes::Underscore) => TextStates::BoldThree,
             (TextStates::BoldTwo, _) => {
                 //handles Space and Text cases
                 self.buffer.push(c);
                 TextStates::BoldTwo
             }
-            (TextStates::BoldThree, CharTypes::Asterisk) => {
+            (TextStates::BoldThree, CharTypes::Underscore) => {
                 //When this branch  is reached, it is time to generate the text, with the bold tag,
                 return_string = format!("<b>{}</b>", self.buffer);
                 self.buffer.clear();
@@ -131,7 +131,7 @@ mod bold_tests {
     use super::*;
     #[test]
     fn convert_bold() {
-        let input_str = String::from("some **text**");
+        let input_str = String::from("some __text__");
         let expected_result = String::from("some <b>text</b>");
         let actual_result = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
@@ -139,40 +139,40 @@ mod bold_tests {
     #[test]
     fn convert_bold_invalid_one() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some ** text* *");
-        let expected_result = String::from("some ** text* *");
+        let input_str = String::from("some __ text_ _");
+        let expected_result = String::from("some __ text_ _");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_bold_invalid_two() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some * * text**");
-        let expected_result = String::from("some * * text**");
+        let input_str = String::from("some _ _ text__");
+        let expected_result = String::from("some _ _ text__");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_bold_invalid_three() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some **text");
-        let expected_result = String::from("some **text");
+        let input_str = String::from("some __text");
+        let expected_result = String::from("some __text");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_bold_invalid_four() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some **text\n");
-        let expected_result = String::from("some **text\n");
+        let input_str = String::from("some __text\n");
+        let expected_result = String::from("some __text\n");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_bold_invalid_five() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some **text*\n");
-        let expected_result = String::from("some **text*\n");
+        let input_str = String::from("some __text_\n");
+        let expected_result = String::from("some __text_\n");
         let actual_result: String = process_bold(input_str);
         assert_eq!(actual_result, expected_result);
     }

@@ -4,6 +4,7 @@ mod bold;
 mod code_block;
 mod file_io;
 mod italics;
+mod parse_bold_underscore;
 mod parse_italics_underscore;
 mod parse_markdown;
 mod strikethrough;
