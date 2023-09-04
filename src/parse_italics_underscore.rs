@@ -41,7 +41,7 @@ impl FormattedText {
         }
     }
 }
-pub fn process_italics_asterisk(str: String) -> String {
+pub fn process_italics_underscore(str: String) -> String {
     let mut result: String = String::new();
     let mut stack: Vec<FormattedText> = Vec::new();
     let mut parsing_italics: bool = false;
@@ -53,13 +53,13 @@ pub fn process_italics_asterisk(str: String) -> String {
     for (curr_idx, c) in str.chars().enumerate() {
         //initially:currently_matching = false;
         /*cases for string matching:
-           !currently_matching && c != '*' => endIdx +=1
-           !currently_matching && c == '*' => {
+           !currently_matching && c != '_' => endIdx +=1
+           !currently_matching && c == '_' => {
                 push the substring to result: result.push_str(&str[startIdx..endIdx])
                 currently_matching = true
                 startIdx =
             }
-            if currently_matching && c == '*' => {
+            if currently_matching && c == '_' => {
 
             }
         */
@@ -72,23 +72,23 @@ pub fn process_italics_asterisk(str: String) -> String {
         */
         //switching in or out of italics
         // match (parsing_plaintext, c) {
-        //     (false, '*') => {}
-        //     (true, '*')  => {}
-        //     (false, '*') => {}
+        //     (false, '_') => {}
+        //     (true, '_')  => {}
+        //     (false, '_') => {}
         // };
-        if parsing_italics && (c == ' ' || c == '*') && start_idx == curr_idx {
+        if parsing_italics && (c == ' ' || c == '_') && start_idx == curr_idx {
             //move start_idx backwards so that the previously captured '*' is captured in plaintext
             start_idx -= 1;
             //switch to parsing italics
             parsing_italics = false;
         }
-        if parsing_italics && c == '*' {
+        if parsing_italics && c == '_' {
             //construct a FormattedText struct storing TextState::Italics, append it to the stack
             let italics_text = FormattedText::new(TextState::Italics, start_idx, curr_idx);
             stack.push(italics_text);
             start_idx = curr_idx;
             parsing_italics = false;
-        } else if !parsing_italics && c == '*' {
+        } else if !parsing_italics && c == '_' {
             //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
             let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
             stack.push(italics_text);
@@ -121,9 +121,9 @@ mod italics_tests {
     #[test]
     fn convert_italics() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some *text*");
+        let input_str = String::from("some _text_");
         let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_italics_asterisk(input_str);
+        let actual_result = process_italics_underscore(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -131,31 +131,31 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
-        let actual_result = process_italics_asterisk(input_str);
+        let actual_result = process_italics_underscore(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_2() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some *text *");
+        let input_str = String::from("some _text _");
         let expected_result = String::from("some <i>text </i>");
-        let actual_result = process_italics_asterisk(input_str);
+        let actual_result = process_italics_underscore(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_invalid() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some * text *");
-        let expected_result = String::from("some * text *");
-        let actual_result: String = process_italics_asterisk(input_str);
+        let input_str = String::from("some _ text _");
+        let expected_result = String::from("some _ text _");
+        let actual_result: String = process_italics_underscore(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_invalid_2() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some **text");
-        let expected_result = String::from("some **text");
-        let actual_result: String = process_italics_asterisk(input_str);
+        let input_str = String::from("some __text");
+        let expected_result = String::from("some __text");
+        let actual_result: String = process_italics_underscore(input_str);
         assert_eq!(actual_result, expected_result);
     }
 }

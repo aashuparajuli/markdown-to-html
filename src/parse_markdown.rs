@@ -2,6 +2,7 @@ use crate::bold;
 use crate::code_block;
 use crate::file_io::FileWriter;
 use crate::italics;
+use crate::parse_italics_underscore;
 use crate::strikethrough;
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
@@ -38,16 +39,20 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
 
         //parse and format the italics
         let parsed_line = bold::process_bold(parsed_line);
+        //parse strikethrough
+        let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
+
         //uncomment this line use the italics parser in v1
         //let parsed_line = parse_text_formatting::process_italics(parsed_line);
 
         //uncomment this line to use the italics parser in v3
-        let parsed_line: String = italics::process_italics(parsed_line);
+        let parsed_line: String = italics::process_italics_asterisk(parsed_line);
+
+        //parse italics using asterisk
+        let parsed_line: String = parse_italics_underscore::process_italics_underscore(parsed_line);
 
         //parse and format inline code blocks
         let parsed_line: String = code_block::process_inline_code(parsed_line);
-        //parse strikethrough
-        let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);

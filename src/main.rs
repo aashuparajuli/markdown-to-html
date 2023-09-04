@@ -4,9 +4,9 @@ mod bold;
 mod code_block;
 mod file_io;
 mod italics;
+mod parse_italics_underscore;
 mod parse_markdown;
 mod strikethrough;
-
 use file_io::FileAccess;
 use std::time::{Duration, Instant};
 fn main() {

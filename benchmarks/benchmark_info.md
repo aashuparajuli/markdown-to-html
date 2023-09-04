@@ -58,4 +58,13 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 | writing the html to the file | -                  | -                    | -               |
 | Total                        | 2.790              | 3.080                | 3.511           |
 
+part 2
+
+| Section                      | + italics using underscore | -   | -   |
+| ---------------------------- | -------------------------- | --- | --- |
+| reading lines from the file  | .124                       |     |     |
+| converting markdown to html  | 2.666                      |     |     |
+| writing the html to the file | -                          |     |     |
+| Total                        | 2.790                      |     |     |
+
 Note: For v4, converting markdown to html and writing html to file are done in a single step
