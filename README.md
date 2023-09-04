@@ -9,7 +9,7 @@ ex:
 to check that the program generates the correct file compared to some reference file
 
 > `chmod +x ./validate.sh` //optional
-> `./validate.sh input/input.txt output/output.txt output/expected.txt`
+> `./validate.sh test`
 
 to run benchmarks to see the performance of the file
 
