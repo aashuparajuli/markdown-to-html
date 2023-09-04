@@ -2,6 +2,7 @@ use crate::bold;
 use crate::code_block;
 use crate::file_io::FileWriter;
 use crate::italics;
+use crate::strikethrough;
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -45,6 +46,8 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
 
         //parse and format inline code blocks
         let parsed_line: String = code_block::process_inline_code(parsed_line);
+        //parse strikethrough
+        let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);

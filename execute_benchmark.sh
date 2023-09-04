@@ -30,7 +30,7 @@ do
     total_runtime=$(echo "$total_runtime + $runtime" | bc)
     #'
     #delete the file that was generated
-    rm benchmarks/benchmark1/output.html
+    rm benchmarks/benchmark1/output.txt
 done
 
 average_read_file_runtime=$(echo "scale=6;$total_read_file_runtime / $sample_size" / 1000 | bc)

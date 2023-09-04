@@ -12,3 +12,5 @@ Blue __line
 > A quote that is 
 
 `let x = 1;`
+
+~~deleted text~~

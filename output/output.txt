@@ -12,3 +12,5 @@ Blue __line
 <blockquote>A quote that is </blockquote>
 
 <code>let x = 1;</code>
+
+<del>deleted text</del>

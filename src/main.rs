@@ -3,14 +3,15 @@
 mod bold;
 mod code_block;
 mod file_io;
-mod parse_markdown;
 mod italics;
+mod parse_markdown;
+mod strikethrough;
 
 use file_io::FileAccess;
 use std::time::{Duration, Instant};
 fn main() {
     let input_file_name = "./benchmarks/benchmark1/input.md";
-    let output_file_name = "./benchmarks/benchmark1/output.html";
+    let output_file_name = "./benchmarks/benchmark1/output.txt";
 
     // let input_file_name = "./input/input.txt";
     // let output_file_name = "./output/output.txt";
