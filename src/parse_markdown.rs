@@ -1,7 +1,7 @@
+use crate::bold;
 use crate::code_block;
 use crate::file_io::FileWriter;
-use crate::parse_text_formatting;
-use crate::stack;
+use crate::italics;
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -36,12 +36,12 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //format the other text in the string
 
         //parse and format the italics
-        let parsed_line = parse_text_formatting::process_bold(parsed_line);
+        let parsed_line = bold::process_bold(parsed_line);
         //uncomment this line use the italics parser in v1
         //let parsed_line = parse_text_formatting::process_italics(parsed_line);
 
         //uncomment this line to use the italics parser in v3
-        let parsed_line: String = stack::process_italics(parsed_line);
+        let parsed_line: String = italics::process_italics(parsed_line);
 
         //parse and format inline code blocks
         let parsed_line: String = code_block::process_inline_code(parsed_line);

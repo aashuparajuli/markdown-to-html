@@ -1,10 +1,10 @@
 #![allow(dead_code, unused_imports)]
 
+mod bold;
 mod code_block;
 mod file_io;
-mod parse_line_formatting;
-mod parse_text_formatting;
-mod stack;
+mod parse_markdown;
+mod italics;
 
 use file_io::FileAccess;
 use std::time::{Duration, Instant};
@@ -21,7 +21,7 @@ fn main() {
 
     let start_parsing_text = Instant::now();
     let mut file_access: file_io::FileAccess = FileAccess::open_file(output_file_name);
-    parse_line_formatting::parse_all_lines(input_lines, &mut file_access); //process the lines
+    parse_markdown::parse_all_lines(input_lines, &mut file_access); //process the lines
     let parsing_text_duration = start_parsing_text.elapsed();
 
     //let start_writing_file = Instant::now();
