@@ -62,9 +62,9 @@ part 2
 
 | Section                      | + italics using underscore | -   | -   |
 | ---------------------------- | -------------------------- | --- | --- |
-| reading lines from the file  | .124                       |     |     |
-| converting markdown to html  | 2.666                      |     |     |
+| reading lines from the file  | 0.129                      |     |     |
+| converting markdown to html  | 3.756                      |     |     |
 | writing the html to the file | -                          |     |     |
-| Total                        | 2.790                      |     |     |
+| Total                        | 3.885                      |     |     |
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step
