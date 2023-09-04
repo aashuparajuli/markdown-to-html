@@ -1,9 +1,9 @@
 input_folder="test"
-input_file="test/input.txt"
-output_file="test/output.txt"
-expected_output_file="test/expected.txt"
+input_file="${input_folder}/input.txt"
+output_file="${input_folder}/output.txt"
+expected_output_file="${input_folder}/expected.txt"
 
-cargo run -- $input_file $output_file 1> /dev/null
+cargo run -- $input_file $output_file 2> /dev/null
 diff_lines=$(diff $output_file $expected_output_file | wc -l)
 
 if [ ! $diff_lines -eq 0 ]
