@@ -4,8 +4,8 @@ use std::fs::read_to_string;
  */
 use std::fs::File;
 use std::io::Write;
-
-pub fn get_file_lines(filename: &str) -> Vec<String> {
+use std::path::PathBuf;
+pub fn get_file_lines(filename: PathBuf) -> Vec<String> {
     read_to_string(filename)
         .unwrap() // panic on possible file-reading errors
         .lines() // split the string into an iterator of string slices
@@ -38,7 +38,7 @@ pub struct FileAccess {
     file: File,
 }
 impl FileAccess {
-    pub fn open_file(filename: &str) -> FileAccess {
+    pub fn open_file(filename: PathBuf) -> FileAccess {
         let file = File::create(filename).expect("Unable to create file");
         FileAccess { file }
     }
