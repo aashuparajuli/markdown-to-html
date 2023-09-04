@@ -8,7 +8,7 @@ total_runtime=0
 total_read_file_runtime=0
 total_process_text_runtime=0
 total_write_file_runtime=0
-sample_size=200
+sample_size=500
 for i in $(seq 1 $sample_size);
 do
     #run the program, collect the output

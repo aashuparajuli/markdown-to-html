@@ -1,6 +1,6 @@
 #[derive(Clone, Debug)]
 enum TextState {
-    Italics,
+    CodeSnippet,
     Plaintext,
 }
 trait Stack {
@@ -12,7 +12,7 @@ impl Stack for Vec<TextState> {
             return None;
         }
         match self[self.len() - 2] {
-            TextState::Italics => Some(&TextState::Italics), //return italics
+            TextState::CodeSnippet => Some(&TextState::CodeSnippet), //return italics
             TextState::Plaintext => None,
         }
     }
@@ -34,14 +34,17 @@ impl FormattedText {
     fn get_text<'a>(&'a self, full_string: &'a str) -> String {
         //add the extra text formatted using format!
         match self.format {
-            TextState::Italics => {
-                format!("<i>{}</i>", &full_string[self.start_idx..self.end_idx])
+            TextState::CodeSnippet => {
+                format!(
+                    "<code>{}</code>",
+                    &full_string[self.start_idx..self.end_idx]
+                )
             }
             TextState::Plaintext => full_string[self.start_idx..self.end_idx].to_string(),
         }
     }
 }
-pub fn process_italics(str: String) -> String {
+pub fn process_inline_code(str: String) -> String {
     let mut result: String = String::new();
     let mut stack: Vec<FormattedText> = Vec::new();
     let mut parsing_italics: bool = false;
@@ -70,25 +73,25 @@ pub fn process_italics(str: String) -> String {
         - in italics, adding a char
         - switching out of italics
         */
-        //switching in or out of italics
+        //switching in or out of code snippets
         // match (parsing_plaintext, c) {
         //     (false, '*') => {}
         //     (true, '*')  => {}
         //     (false, '*') => {}
         // };
-        if parsing_italics && (c == ' ' || c == '*') && start_idx == curr_idx {
+        if parsing_italics && (c == ' ' || c == '`') && start_idx == curr_idx {
             //move start_idx backwards so that the previously captured '*' is captured in plaintext
             start_idx -= 1;
             //switch to parsing italics
             parsing_italics = false;
         }
-        if parsing_italics && c == '*' {
-            //construct a FormattedText struct storing TextState::Italics, append it to the stack
-            let italics_text = FormattedText::new(TextState::Italics, start_idx, curr_idx);
+        if parsing_italics && c == '`' {
+            //construct a FormattedText struct storing TextState::CodeSnippet, append it to the stack
+            let italics_text = FormattedText::new(TextState::CodeSnippet, start_idx, curr_idx);
             stack.push(italics_text);
             start_idx = curr_idx;
             parsing_italics = false;
-        } else if !parsing_italics && c == '*' {
+        } else if !parsing_italics && c == '`' {
             //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
             let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
             stack.push(italics_text);
@@ -116,14 +119,14 @@ pub fn process_italics(str: String) -> String {
 }
 
 #[cfg(test)]
-mod italics_tests {
+mod code_snippet_tests {
     use super::*;
     #[test]
     fn convert_italics() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some *text*");
-        let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_italics(input_str);
+        let input_str = String::from("some `text`");
+        let expected_result = String::from("some <code>text</code>");
+        let actual_result = process_inline_code(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -131,31 +134,31 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
-        let actual_result = process_italics(input_str);
+        let actual_result = process_inline_code(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_2() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some *text *");
-        let expected_result = String::from("some <i>text </i>");
-        let actual_result = process_italics(input_str);
+        let input_str = String::from("some `text `");
+        let expected_result = String::from("some <code>text </code>");
+        let actual_result = process_inline_code(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_invalid() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some * text *");
-        let expected_result = String::from("some * text *");
-        let actual_result: String = process_italics(input_str);
+        let input_str = String::from("some ` text `");
+        let expected_result = String::from("some ` text `");
+        let actual_result: String = process_inline_code(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
     fn convert_italics_invalid_2() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("some **text");
-        let expected_result = String::from("some **text");
-        let actual_result: String = process_italics(input_str);
+        let input_str = String::from("some ``text");
+        let expected_result = String::from("some ``text");
+        let actual_result: String = process_inline_code(input_str);
         assert_eq!(actual_result, expected_result);
     }
 }
@@ -166,7 +169,7 @@ mod buffer_tests {
     #[test]
     fn second_last() {
         //valid use of second_last
-        let first_state = TextState::Italics;
+        let first_state = TextState::CodeSnippet;
         let second_state = TextState::Plaintext;
         let buffer: Vec<TextState> = vec![first_state, second_state];
         assert!(buffer.second_last().is_some());
@@ -174,7 +177,7 @@ mod buffer_tests {
     #[test]
     fn second_last_invalid() {
         let first_state = TextState::Plaintext;
-        let second_state = TextState::Italics;
+        let second_state = TextState::CodeSnippet;
         let buffer: Vec<TextState> = vec![first_state, second_state];
         assert!(buffer.second_last().is_none());
     }

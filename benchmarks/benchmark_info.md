@@ -41,10 +41,21 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 - Times calculated using `./execute_benchmark.sh`. which uses `cargo run --release`
 
 | Section                      | v1    | v3    | v4     |
-| ---------------------------- | ----- | ----- |------ |
-| reading lines from the file  | 0.153 | 1.151 |0.126  |
-| converting markdown to html  | 1.446 | 1.335 |2.776  |
+| ---------------------------- | ----- | ----- | ------ |
+| reading lines from the file  | 0.153 | 1.151 | 0.126  |
+| converting markdown to html  | 1.446 | 1.335 | 2.776  |
 | writing the html to the file | 2.150 | 2.134 | -      |
-| Total                        | 3.749 | 3.621 |2.9021 |
-                             
+| Total                        | 3.749 | 3.621 | 2.9021 |
+
+## Adding features
+
+- the below times are averaged over 500 iterations, instead of 200
+
+| Section                      | v4    | v4 + inline code snippets |     |
+| ---------------------------- | ----- | ------------------------- | --- |
+| reading lines from the file  | .124  | 0.139                     | -   |
+| converting markdown to html  | 2.666 | 2.941                     | -   |
+| writing the html to the file | -     | 0                         | -   |
+| Total                        | 2.790 | 3.080                     | -   |
+
 Note: For v4, converting markdown to html and writing html to file are done in a single step

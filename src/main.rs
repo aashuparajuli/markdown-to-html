@@ -1,17 +1,19 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
+mod code_block;
 mod file_io;
 mod parse_line_formatting;
 mod parse_text_formatting;
 mod stack;
+
 use file_io::FileAccess;
 use std::time::{Duration, Instant};
 fn main() {
-    // let input_file_name = "./benchmarks/benchmark1/input.md";
-    // let output_file_name = "./benchmarks/benchmark1/output.html";
+    let input_file_name = "./benchmarks/benchmark1/input.md";
+    let output_file_name = "./benchmarks/benchmark1/output.html";
 
-    let input_file_name = "./input/input.txt";
-    let output_file_name = "./output/output.html";
+    // let input_file_name = "./input/input.txt";
+    // let output_file_name = "./output/output.txt";
 
     let start_reading_file = Instant::now();
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file

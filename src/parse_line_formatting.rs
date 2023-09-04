@@ -1,3 +1,4 @@
+use crate::code_block;
 use crate::file_io::FileWriter;
 use crate::parse_text_formatting;
 use crate::stack;
@@ -41,6 +42,9 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
 
         //uncomment this line to use the italics parser in v3
         let parsed_line: String = stack::process_italics(parsed_line);
+
+        //parse and format inline code blocks
+        let parsed_line: String = code_block::process_inline_code(parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
