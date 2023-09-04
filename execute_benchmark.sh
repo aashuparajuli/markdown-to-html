@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#the problem: when a time is displayed with no decimal places: eg: 360ms, the grep does not match, causing an error
-cargo build --release
-cargo run --release &>/dev/null
+input_file="benchmarks/benchmark1/input.txt"
+output_file="benchmarks/benchmark1/output.txt"
+
+cargo run --release -- $input_file $output_file &>/dev/null
 
 total_runtime=0
 total_read_file_runtime=0
@@ -12,7 +13,7 @@ sample_size=200
 for i in $(seq 1 $sample_size);
 do
     #run the program, collect the output
-    output=$(cargo run --release 2>/dev/null)
+    output=$(cargo run --release -- $input_file $output_file 2>/dev/null)
     #get the runtime of eachc section
     
     read_file_runtime=$(echo "$output" | ggrep -Po "(?<=read:)\d+[\.]?[\d]*")
@@ -30,7 +31,7 @@ do
     total_runtime=$(echo "$total_runtime + $runtime" | bc)
     #'
     #delete the file that was generated
-    rm benchmarks/benchmark1/output.html
+    rm $output_file
 done
 
 average_read_file_runtime=$(echo "scale=6;$total_read_file_runtime / $sample_size" / 1000 | bc)

@@ -9,9 +9,13 @@ ex:
 to check that the program generates the correct file compared to some reference file
 
 > `chmod +x ./check.sh` //optional
-> `./check.sh input/input.txt output/output.txt output/correct.txt`
+> `./check.sh input/input.txt output/output.txt output/expected.txt`
 
 to run benchmarks to see the performance of the file
+
+
+> `chmod +x ./execute_benchmark.sh` //optional
+> `./execute_benchmark.sh`
 
 # Current Features
 
