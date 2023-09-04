@@ -26,6 +26,11 @@ to run benchmarks to see the performance of the file
 - parse bold using asterisks from File
 - a bash script to run the file 100 times and average results
 - Note: bash script only runs on MacOS. On MacOS: install grep using `brew install grep`
+- italics using underscore
+- strikethrough
+- inline code blocks
+- bold using underscore
+- italics using underscores
 
 # Future features
 
@@ -34,9 +39,6 @@ to run benchmarks to see the performance of the file
 - pass in filepaths using command-line arguments
 - pass in a folder, process every md folder in the file
 - links
-- italics using underscore
-- strikethrough
-- inline code blocks
 - for bash script: automatically delete created files before and after testing
 
 ## Long-term
@@ -46,8 +48,6 @@ to run benchmarks to see the performance of the file
 - use 2 line breaks to separate elements
 - nested bullet points
 - multiline code blocks
-- bold using underscore
-- italics using underscores
 - nested italics and bold
 - begin a <p> tag directly after a header, end it at the next header. This could be used for css tagging or JavaScript
 - add comments that when parsed, convert into html 'id' or 'class' attributes
@@ -65,6 +65,3 @@ to run benchmarks to see the performance of the file
 - create test functions that compare the generated file to the correct file
 - separate the testing modules to inside their respective modules
 - create more benchmark files
-
-- in process_bold: replace `self.buffer = String::new()` with `self.buffer.clear()`
-- check that double underscore are not being coverted into \*\* when parsing md - want to make sure they stay as underscore

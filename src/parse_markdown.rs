@@ -1,8 +1,10 @@
-use crate::file_io;
+use crate::bold;
+use crate::code_block;
 use crate::file_io::FileWriter;
-use crate::parse_text_formatting;
-use crate::stack;
-use std::time::{Duration, Instant};
+use crate::italics;
+use crate::parse_bold_underscore;
+use crate::parse_italics_underscore;
+use crate::strikethrough;
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -28,8 +30,7 @@ enum LineType {
  * Writes the resulting html to a file
  */
 
-pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> Vec<String> {
-    let mut proxy_file: Vec<String> = Vec::new();
+pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
     let mut current_line_state: LineType = LineType::Other;
 
     //process the current line, determine its state
@@ -37,13 +38,20 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> 
         let (parsed_line, new_line_state) = determine_line_type(line);
         //format the other text in the string
 
-        //parse and format the italics
-        let parsed_line = parse_text_formatting::process_bold(parsed_line);
-        //uncomment this line use the italics parser in v1
-        //let parsed_line = parse_text_formatting::process_italics(parsed_line);
+        //parse and format the bold
+        let parsed_line = bold::process_bold(parsed_line); //parse bold with italics
+        let parsed_line: String = parse_bold_underscore::process_bold(parsed_line); //parse bold with underscores
 
-        //uncomment this line to use the italics parser in v3
-        let parsed_line: String = stack::process_italics(parsed_line);
+        //parse strikethrough
+        let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
+
+        //parse italics under asterisk
+        let parsed_line: String = italics::process_italics_asterisk(parsed_line);
+        //parse italics using underscores
+        let parsed_line: String = parse_italics_underscore::process_italics_underscore(parsed_line);
+
+        //parse and format inline code blocks
+        let parsed_line: String = code_block::process_inline_code(parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
@@ -86,7 +94,6 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> 
         file_access.write_line_to_file(&parsed_line);
         //file_io::write_directly_to_file(&parsed_line, file_access);file_io::write_line_to_file(&parsed_line, &mut proxy_file);
     }
-    proxy_file
 }
 
 fn determine_line_type(line: String) -> (String, LineType) {

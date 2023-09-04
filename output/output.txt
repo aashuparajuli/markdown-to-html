@@ -1,0 +1,21 @@
+<ul><li>One line</li>
+</ul>  Two <i>line</i>
+
+<h1>Red line</h1>
+
+Blue __line
+
+<ol><li><b>One</b></li>
+<li>Two</li>
+<li>Four</li>
+</ol>
+<blockquote>A quote that is </blockquote>
+
+<code>let x = 1;</code>
+
+<del>deleted text</del>
+
+<b>bold underscores</b>
+<b>bold asterisks</b>
+<i>italic underscores</i>
+<i>italic asterisks</i>
