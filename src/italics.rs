@@ -79,7 +79,7 @@ pub fn process_italics_asterisk(str: String) -> String {
         if parsing_italics && (c == ' ' || c == '*') && start_idx == curr_idx {
             //move start_idx backwards so that the previously captured '*' is captured in plaintext
             start_idx -= 1;
-            //switch to parsing italics
+            //switch to parsing plaintext
             parsing_italics = false;
         }
         if parsing_italics && c == '*' {
@@ -100,12 +100,10 @@ pub fn process_italics_asterisk(str: String) -> String {
     }
     //append any strings that have not been completed yet
     if parsing_italics {
-        //println!("found unmatched asterisk");
         let plain_text = FormattedText::new(TextState::Plaintext, start_idx - 1, str.len());
         stack.push(plain_text);
     } else if start_idx != str.len() - 1 {
         //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
-        //println!("found unterminated plain text");
         let plain_text = FormattedText::new(TextState::Plaintext, start_idx, str.len());
         stack.push(plain_text);
     }
