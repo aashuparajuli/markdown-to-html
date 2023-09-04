@@ -3,9 +3,6 @@
 mod bold;
 mod code_block;
 mod file_io;
-mod parse_line_formatting;
-mod parse_text_formatting;
-mod stack;
 use clap::Parser;
 mod italics;
 mod parse_bold_underscore;
@@ -28,7 +25,7 @@ fn main() {
     // let input_file_name = "./input/input.txt";
     let input_file_name = args.input_file_path;
     let output_file_name = args.output_file_path;
-  
+
     let start_reading_file = Instant::now();
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
     let reading_file_duration: Duration = start_reading_file.elapsed();
