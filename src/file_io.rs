@@ -43,22 +43,3 @@ impl FileAccess {
         FileAccess { file }
     }
 }
-
-pub fn write_one_line_to_file(s: &str, filename: &str) {
-    //let data = "Some data!";
-    let mut f = File::create(filename).expect("Unable to create file");
-    f.write_all(s.as_bytes()).expect("Unable to write data");
-}
-
-pub fn write_line_to_file_true(str: &Vec<String>, filename: &str) {
-    //let data = "Some data!";
-    let mut f = File::create(filename).expect("Unable to create file");
-    for s in str {
-        f.write_all(s.as_bytes()).expect("Unable to write data");
-    }
-}
-pub fn write_line_to_file(str: &str, file: &mut Vec<String>) {
-    //write a line to a file
-    //TODO: should write to file
-    file.push(str.to_string());
-}

@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports, unused_variables, unused_mut)]
+#![allow(dead_code)]
 
 mod file_io;
 mod parse_line_formatting;
@@ -19,8 +19,7 @@ fn main() {
 
     let start_parsing_text = Instant::now();
     let mut file_access: file_io::FileAccess = FileAccess::open_file(output_file_name);
-    let output_lines: Vec<String> =
-        parse_line_formatting::parse_all_lines(input_lines, &mut file_access); //process the lines
+    parse_line_formatting::parse_all_lines(input_lines, &mut file_access); //process the lines
     let parsing_text_duration = start_parsing_text.elapsed();
 
     //let start_writing_file = Instant::now();

@@ -1,8 +1,6 @@
-use crate::file_io;
 use crate::file_io::FileWriter;
 use crate::parse_text_formatting;
 use crate::stack;
-use std::time::{Duration, Instant};
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -28,8 +26,7 @@ enum LineType {
  * Writes the resulting html to a file
  */
 
-pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> Vec<String> {
-    let mut proxy_file: Vec<String> = Vec::new();
+pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
     let mut current_line_state: LineType = LineType::Other;
 
     //process the current line, determine its state
@@ -86,7 +83,6 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) -> 
         file_access.write_line_to_file(&parsed_line);
         //file_io::write_directly_to_file(&parsed_line, file_access);file_io::write_line_to_file(&parsed_line, &mut proxy_file);
     }
-    proxy_file
 }
 
 fn determine_line_type(line: String) -> (String, LineType) {
