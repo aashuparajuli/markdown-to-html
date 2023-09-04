@@ -20,7 +20,7 @@ v2: Changes: Using a stack to parse italics
 - using parse_text_formatting::process_bold
 - using stack::process_italics
 
-v3: Changes: stack::process_italics stores string indices instead of building strings by appending `char` repeatedly. implemented on optimize/process-italics
+v3: Changes: Use an enum to mark formatted and plaintext on the stack. Store string indices instead of building strings by appending `char` repeatedly. implemented on optimize/process-italics.
 
 - using parse_text_formatting::process_bold
 - using stack::process_italics
@@ -51,11 +51,11 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 
 - the below times are averaged over 500 iterations, instead of 200
 
-| Section                      | v4    | v4 + inline code snippets |     |
-| ---------------------------- | ----- | ------------------------- | --- |
-| reading lines from the file  | .124  | 0.139                     | -   |
-| converting markdown to html  | 2.666 | 2.941                     | -   |
-| writing the html to the file | -     | 0                         | -   |
-| Total                        | 2.790 | 3.080                     | -   |
+| Section                      | v4    | v4 + inline code blocks |     |
+| ---------------------------- | ----- | ----------------------- | --- |
+| reading lines from the file  | .124  | 0.139                   | -   |
+| converting markdown to html  | 2.666 | 2.941                   | -   |
+| writing the html to the file | -     | 0                       | -   |
+| Total                        | 2.790 | 3.080                   | -   |
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step
