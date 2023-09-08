@@ -1,0 +1,21 @@
+- One line
+  Two _line_
+
+# Red line
+
+Blue __line
+
+1. **One**
+1. Two
+1. Four
+
+> A quote that is 
+
+`let x = 1;`
+
+~~deleted text~~
+
+__bold underscores__
+**bold asterisks**
+_italic underscores_
+*italic asterisks*
