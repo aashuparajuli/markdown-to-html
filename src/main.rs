@@ -5,10 +5,12 @@ mod code_block;
 mod file_io;
 use clap::Parser;
 mod italics;
+mod italics_lexer;
 mod parse_bold_underscore;
 mod parse_italics_underscore;
 mod parse_markdown;
 mod strikethrough;
+
 use file_io::FileAccess;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
