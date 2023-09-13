@@ -137,6 +137,24 @@ mod tokenizer {
                 TokenType::Plaintext { start: _, end: _ }
             ));
         }
+        #[test]
+        fn unusual() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("  s – s");
+            let actual_result = italics_tokenizer(input_str);
+            assert_eq!(5, actual_result.len());
+            assert!(matches!(
+                actual_result[0],
+                TokenType::Plaintext { start: _, end: _ }
+            ));
+            assert!(matches!(actual_result[1], TokenType::Space));
+            assert!(matches!(actual_result[2], TokenType::Italics));
+            assert!(matches!(actual_result[3], TokenType::Italics));
+            assert!(matches!(
+                actual_result[4],
+                TokenType::Plaintext { start: _, end: _ }
+            ));
+        }
     }
 }
 mod parser {
@@ -246,6 +264,7 @@ mod parser {
                 }
                 (TokenType::Plaintext { start, end }, Some(_)) => {
                     //append this string to the previous string
+                    //println!("{},{}", *start, *end);
                     add_char(&mut stack, &full_string[*start..*end])
                 }
             };
@@ -257,6 +276,7 @@ mod parser {
     }
 }
 pub fn parse_italics(input_str: String) -> String {
+    //println!("{input_str}");
     let tokens = tokenizer::italics_tokenizer(input_str.clone());
     parser::parse_tokens(&tokens, &input_str)
 }
@@ -307,8 +327,8 @@ mod italics_tests {
     #[test]
     fn unusual() {
         //string with space before pound sign should not be converted
-        let input_str = String::from("s - s");
-        let expected_result = String::from("s - s");
+        let input_str = String::from("  s - s");
+        let expected_result = String::from("  s - s");
         let actual_result: String = parse_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }

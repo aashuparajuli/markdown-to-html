@@ -2,6 +2,7 @@ use crate::bold;
 use crate::code_block;
 use crate::file_io::FileWriter;
 use crate::italics;
+use crate::italics_lexer;
 use crate::parse_bold_underscore;
 use crate::parse_italics_underscore;
 use crate::strikethrough;
@@ -45,8 +46,10 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //parse strikethrough
         let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
 
-        //parse italics under asterisk
-        let parsed_line: String = italics::process_italics_asterisk(parsed_line);
+        //parse italics using asterisk
+        //let parsed_line: String = italics::process_italics_asterisk(parsed_line);
+        //parse italics using asterisk with parser and lexer
+        let parsed_line: String = italics_lexer::parse_italics(parsed_line);
         //parse italics using underscores
         let parsed_line: String = parse_italics_underscore::process_italics_underscore(parsed_line);
 

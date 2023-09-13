@@ -21,15 +21,11 @@ do
     write_file_runtime=$(echo "$output" |ggrep -Po "(?<=write:)\d+[\.]?[\d]*")
     runtime=$(echo "$output" | ggrep -Po "(?<=total:)\d+[\.]?[\d]*")
     
-    #echo "$total_read_file_runtime:$read_file_runtime"
     total_read_file_runtime=$(echo "$total_read_file_runtime + $read_file_runtime" | bc)
-    #echo "processed"
-    #:'
     total_process_text_runtime=$(echo "$total_process_text_runtime + $process_text_runtime" | bc)
     
     total_write_file_runtime=$(echo "$total_write_file_runtime + $write_file_runtime" | bc)
     total_runtime=$(echo "$total_runtime + $runtime" | bc)
-    #'
     #delete the file that was generated
     rm $output_file
 done

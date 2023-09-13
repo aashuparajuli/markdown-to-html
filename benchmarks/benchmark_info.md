@@ -70,3 +70,13 @@ Note: For v4, converting markdown to html and writing html to file are done in a
 | reading lines from the file          | 0.129                      | .134                            |
 | converting to html + writing to file | 3.756                      | 4.426                           |
 | Total                                | 3.885                      | 4.564                           |
+
+# Switching to parser + lexer
+
+v7: Using a parser to break up the text into tokens, then using a lexer to generate formatted html. Only used to format italics using asterisk
+
+| Functionality of parser + lexer      | italics w/ asterisk | -   |
+| ------------------------------------ | ------------------- | --- |
+| reading lines from the file          | 0.478               | -   |
+| converting to html + writing to file | 9.715               | -   |
+| Total                                | 10.293              | -   |
