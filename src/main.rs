@@ -22,10 +22,6 @@ struct Cli {
 fn main() {
     let start_reading_file = Instant::now();
     let args = Cli::parse();
-    // let input_file_name = "./benchmarks/benchmark1/input.md";
-    // let output_file_name = "./benchmarks/benchmark1/output.html";
-
-    // let input_file_name = "./input/input.txt";
     let input_file_name = args.input_file_path;
     let output_file_name = args.output_file_path;
 
