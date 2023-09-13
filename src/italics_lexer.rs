@@ -188,13 +188,13 @@ mod parser {
 
     enum Substring {
         //Each substring is either a tag(only italics for now) or plaintext
-        Italic,
+        Tag(HtmlTag),
         Plaintext(String),
     }
     impl Substring {
         fn get_text(&self) -> String {
             match self {
-                Substring::Italic => String::from("*"),
+                Substring::Tag(HtmlTag::ItalicsAsterisk) => String::from("*"),
                 Substring::Plaintext(x) => x.to_owned(),
             }
         }
@@ -228,10 +228,13 @@ mod parser {
                 (TokenType::Tag(HtmlTag::ItalicsAsterisk), None) => {
                     //the italics is the first things on the stack
                     //push italics
-                    stack.push(Substring::Italic);
+                    stack.push(Substring::Tag(HtmlTag::ItalicsAsterisk));
                 }
                 (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(x)))
-                    if matches!(stack.second_last(), Some(Substring::Italic)) =>
+                    if matches!(
+                        stack.second_last(),
+                        Some(Substring::Tag(HtmlTag::ItalicsAsterisk))
+                    ) =>
                 {
                     //if curr is italics, top is plaintext && second is italics, format text, push it
                     let formatted_text = format!("<i>{}</i>", x);
@@ -240,7 +243,10 @@ mod parser {
                                  //push text with italics tags
                     stack.push(Substring::Plaintext(formatted_text))
                 }
-                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Italic)) => {
+                (
+                    TokenType::Tag(HtmlTag::ItalicsAsterisk),
+                    Some(Substring::Tag(HtmlTag::ItalicsAsterisk)),
+                ) => {
                     //if two consecutive italics, convert both into plaintext: **
                     stack.pop();
                     //stack.push(Substring::Plaintext(String::from("**")));
@@ -249,13 +255,13 @@ mod parser {
                 }
                 (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(_))) => {
                     //if curr is italics, top is plaintext, then push italics}
-                    stack.push(Substring::Italic);
+                    stack.push(Substring::Tag(HtmlTag::ItalicsAsterisk));
                 }
                 (TokenType::Space, None) => {
                     //if stack is empty, push space as plaintext
                     stack.push(Substring::Plaintext(String::from(" ")))
                 }
-                (TokenType::Space, Some(Substring::Italic)) => {
+                (TokenType::Space, Some(Substring::Tag(HtmlTag::ItalicsAsterisk))) => {
                     //if curr is space and top is italics, escape the italics
                     stack.pop();
                     add_char(&mut stack, "* ");
