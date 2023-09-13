@@ -18,9 +18,9 @@ mod tokenizer {
                             start: start_idx,
                             end: curr_idx,
                         });
-                        println!("created 2 token in *:{curr_idx},{c}");
+                        // println!("created 2 token in *:{curr_idx},{c}");
                     } else {
-                        println!("created 1 tokens in *:{curr_idx},{c}");
+                        // println!("created 1 tokens in *:{curr_idx},{c}");
                     }
                     //push the italics token
                     tokens.push(TokenType::Italics);
@@ -34,9 +34,9 @@ mod tokenizer {
                             start: start_idx,
                             end: curr_idx,
                         });
-                        println!("created 2 token in *:{curr_idx},{c}");
+                        // println!("created 2 token in *:{curr_idx},{c}");
                     } else {
-                        println!("created 1 tokens in space:{curr_idx},{c}");
+                        // println!("created 1 tokens in space:{curr_idx},{c}");
                     }
                     //push the space token
                     tokens.push(TokenType::Space);
@@ -256,7 +256,7 @@ mod parser {
         result
     }
 }
-fn parse_italics(input_str: String) -> String {
+pub fn parse_italics(input_str: String) -> String {
     let tokens = tokenizer::italics_tokenizer(input_str.clone());
     parser::parse_tokens(&tokens, &input_str)
 }
@@ -301,6 +301,14 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some **text");
         let expected_result = String::from("some **text");
+        let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn unusual() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("s - s");
+        let expected_result = String::from("s - s");
         let actual_result: String = parse_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
