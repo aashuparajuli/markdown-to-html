@@ -47,8 +47,8 @@ Intro
   -Object values are the content of the body(a file)
   -Max object size is 5TB
   -if uploading more than 5 GB, must use "multi-part upload"
-  -Metadata (list of text key / value pairs – system or user metadata)
-  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Metadata (list of text key / value pairs - system or user metadata)
+  -Tags (Unicode key / value pair - up to 10) - useful for security / lifecycle
   -Version ID (if versioning is enabled)
 
 # S3 - Security
@@ -185,11 +185,11 @@ All Storage classes:
 - Used for: archiving/backup
 - Pricing: price for storage + object retrieval
 - Amazon S3 Glacier Instant Retrieval
-  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+  -Millisecond retrieval, great for data accessed once a quarter * Minimum storage duration of 90 days
 - Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
-- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) - free
 - Minimum storage duration of 90 days
-- Amazon S3 Glacier Deep Archive – for long term storage:
+- Amazon S3 Glacier Deep Archive - for long term storage:
 - Standard (12 hours), Bulk (48 hours)
 - Minimum storage duration of 180 days
 
@@ -300,8 +300,8 @@ Intro
   -Object values are the content of the body(a file)
   -Max object size is 5TB
   -if uploading more than 5 GB, must use "multi-part upload"
-  -Metadata (list of text key / value pairs – system or user metadata)
-  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Metadata (list of text key / value pairs - system or user metadata)
+  -Tags (Unicode key / value pair - up to 10) - useful for security / lifecycle
   -Version ID (if versioning is enabled)
 
 # S3 - Security
@@ -439,11 +439,11 @@ All Storage classes:
 - Used for: archiving/backup
 - Pricing: price for storage + object retrieval
 - Amazon S3 Glacier Instant Retrieval
-- Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+- Millisecond retrieval, great for data accessed once a quarter * Minimum storage duration of 90 days
 - Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
-- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+- Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) - free
 - Minimum storage duration of 90 days
-- Amazon S3 Glacier Deep Archive – for long term storage:
+- Amazon S3 Glacier Deep Archive - for long term storage:
 - Standard (12 hours), Bulk (48 hours)
 - Minimum storage duration of 180 days
 
@@ -554,8 +554,8 @@ Intro
   -Object values are the content of the body(a file)
   -Max object size is 5TB
   -if uploading more than 5 GB, must use "multi-part upload"
-  -Metadata (list of text key / value pairs – system or user metadata)
-  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Metadata (list of text key / value pairs - system or user metadata)
+  -Tags (Unicode key / value pair - up to 10) - useful for security / lifecycle
   -Version ID (if versioning is enabled)
 
 # S3 - Security
@@ -693,11 +693,11 @@ All Storage classes:
 - Used for: archiving/backup
 - Pricing: price for storage + object retrieval
 - Amazon S3 Glacier Instant Retrieval
-  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+  -Millisecond retrieval, great for data accessed once a quarter * Minimum storage duration of 90 days
 - Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
-  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) - free
   -Minimum storage duration of 90 days
-- Amazon S3 Glacier Deep Archive – for long term storage:
+- Amazon S3 Glacier Deep Archive - for long term storage:
   -Standard (12 hours), Bulk (48 hours)
   -Minimum storage duration of 180 days
 
@@ -808,8 +808,8 @@ Intro
   -Object values are the content of the body(a file)
   -Max object size is 5TB
   -if uploading more than 5 GB, must use "multi-part upload"
-  -Metadata (list of text key / value pairs – system or user metadata)
-  -Tags (Unicode key / value pair – up to 10) – useful for security / lifecycle
+  -Metadata (list of text key / value pairs - system or user metadata)
+  -Tags (Unicode key / value pair - up to 10) - useful for security / lifecycle
   -Version ID (if versioning is enabled)
 
 # S3 - Security
@@ -947,11 +947,11 @@ All Storage classes:
 - Used for: archiving/backup
 - Pricing: price for storage + object retrieval
 - Amazon S3 Glacier Instant Retrieval
-  -Millisecond retrieval, great for data accessed once a quarter • Minimum storage duration of 90 days
+  -Millisecond retrieval, great for data accessed once a quarter * Minimum storage duration of 90 days
 - Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier):
-  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+  -Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) - free
   -Minimum storage duration of 90 days
-- Amazon S3 Glacier Deep Archive – for long term storage:
+- Amazon S3 Glacier Deep Archive - for long term storage:
   -Standard (12 hours), Bulk (48 hours)
   -Minimum storage duration of 180 days
 
