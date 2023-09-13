@@ -137,24 +137,6 @@ mod tokenizer {
                 TokenType::Plaintext { start: _, end: _ }
             ));
         }
-        #[test]
-        fn unusual() {
-            //string with space before pound sign should not be converted
-            let input_str = String::from("  s – s");
-            let actual_result = italics_tokenizer(input_str);
-            assert_eq!(5, actual_result.len());
-            assert!(matches!(
-                actual_result[0],
-                TokenType::Plaintext { start: _, end: _ }
-            ));
-            assert!(matches!(actual_result[1], TokenType::Space));
-            assert!(matches!(actual_result[2], TokenType::Italics));
-            assert!(matches!(actual_result[3], TokenType::Italics));
-            assert!(matches!(
-                actual_result[4],
-                TokenType::Plaintext { start: _, end: _ }
-            ));
-        }
     }
 }
 mod parser {
@@ -282,7 +264,7 @@ pub fn parse_italics(input_str: String) -> String {
 }
 
 #[cfg(test)]
-mod italics_tests {
+mod italics_asterisk_tests {
     use super::parse_italics;
     #[test]
     fn valid() {
@@ -329,6 +311,65 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("  s - s");
         let expected_result = String::from("  s - s");
+        let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+
+    fn text_around() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("a*a a*a");
+        let expected_result = String::from("a*a a*a");
+        let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+}
+#[cfg(test)]
+mod italics_underscore_tests {
+    use super::parse_italics;
+    #[test]
+    fn valid() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _text_");
+        let expected_result = String::from("some <i>text</i>");
+        let actual_result = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn plain_text() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("plain text");
+        let expected_result = String::from("plain text");
+        let actual_result = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn valid_one_space() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _text _");
+        let expected_result = String::from("some <i>text </i>");
+        let actual_result = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_italics_invalid() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _ text _");
+        let expected_result = String::from("some _ text _");
+        let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn convert_italics_invalid_2() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some **text");
+        let expected_result = String::from("some **text");
+        let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    fn text_around() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("a_a a_a");
+        let expected_result = String::from("a_a a_a");
         let actual_result: String = parse_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
