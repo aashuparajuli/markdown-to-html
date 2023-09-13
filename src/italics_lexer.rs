@@ -1,7 +1,11 @@
 mod tokenizer {
     #[derive(Clone, Debug)]
+    pub enum HtmlTag {
+        ItalicsAsterisk,
+    }
+    #[derive(Clone, Debug)]
     pub enum TokenType {
-        Italics,
+        Tag(HtmlTag),
         Space,
         Plaintext { start: usize, end: usize },
     }
@@ -23,10 +27,11 @@ mod tokenizer {
                         // println!("created 1 tokens in *:{curr_idx},{c}");
                     }
                     //push the italics token
-                    tokens.push(TokenType::Italics);
+                    tokens.push(TokenType::Tag(HtmlTag::ItalicsAsterisk));
 
                     start_idx = curr_idx + 1;
                 }
+
                 ' ' => {
                     //push the currently parsed plaintext, if there is any
                     if curr_idx != start_idx {
@@ -60,6 +65,7 @@ mod tokenizer {
     #[cfg(test)]
     mod test_tokenizer {
         use super::italics_tokenizer;
+        use super::HtmlTag;
         use super::TokenType;
         #[test]
         fn valid_tokens() {
@@ -69,9 +75,9 @@ mod tokenizer {
             assert_eq!(5, actual_result.len());
             matches!(actual_result[0], TokenType::Plaintext { start: 0, end: 4 });
             matches!(actual_result[1], TokenType::Space);
-            matches!(actual_result[2], TokenType::Italics);
+            matches!(actual_result[2], TokenType::Tag(HtmlTag::ItalicsAsterisk));
             matches!(actual_result[3], TokenType::Plaintext { start: 5, end: 9 });
-            matches!(actual_result[4], TokenType::Italics);
+            matches!(actual_result[4], TokenType::Tag(HtmlTag::ItalicsAsterisk));
         }
         #[test]
         fn plain_text() {
@@ -91,13 +97,19 @@ mod tokenizer {
                 TokenType::Plaintext { start: _, end: _ }
             ));
             assert!(matches!(actual_result[1], TokenType::Space));
-            assert!(matches!(actual_result[2], TokenType::Italics));
+            assert!(matches!(
+                actual_result[2],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
             assert!(matches!(
                 actual_result[3],
                 TokenType::Plaintext { start: _, end: _ }
             ));
             assert!(matches!(actual_result[4], TokenType::Space));
-            assert!(matches!(actual_result[5], TokenType::Italics));
+            assert!(matches!(
+                actual_result[5],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
         }
         #[test]
         fn invalid_two_spaces() {
@@ -110,14 +122,20 @@ mod tokenizer {
                 TokenType::Plaintext { start: _, end: _ }
             ));
             assert!(matches!(actual_result[1], TokenType::Space));
-            assert!(matches!(actual_result[2], TokenType::Italics));
+            assert!(matches!(
+                actual_result[2],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
             assert!(matches!(actual_result[3], TokenType::Space));
             assert!(matches!(
                 actual_result[4],
                 TokenType::Plaintext { start: _, end: _ }
             ));
             assert!(matches!(actual_result[5], TokenType::Space));
-            assert!(matches!(actual_result[6], TokenType::Italics));
+            assert!(matches!(
+                actual_result[6],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
         }
         #[test]
         fn invalid_two_asterisk() {
@@ -130,8 +148,14 @@ mod tokenizer {
                 TokenType::Plaintext { start: _, end: _ }
             ));
             assert!(matches!(actual_result[1], TokenType::Space));
-            assert!(matches!(actual_result[2], TokenType::Italics));
-            assert!(matches!(actual_result[3], TokenType::Italics));
+            assert!(matches!(
+                actual_result[2],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
+            assert!(matches!(
+                actual_result[3],
+                TokenType::Tag(HtmlTag::ItalicsAsterisk)
+            ));
             assert!(matches!(
                 actual_result[4],
                 TokenType::Plaintext { start: _, end: _ }
@@ -140,6 +164,7 @@ mod tokenizer {
     }
 }
 mod parser {
+    use super::tokenizer::HtmlTag;
     use std::fmt::format;
 
     use super::tokenizer::TokenType;
@@ -200,12 +225,12 @@ mod parser {
             //the only time formatting tags can be appending to strings is when a TokenType::Italics is added (or other tags in the future)
             //in all other cases, changes will happen, but no text will be re-formatted
             match (token, stack.last()) {
-                (TokenType::Italics, None) => {
+                (TokenType::Tag(HtmlTag::ItalicsAsterisk), None) => {
                     //the italics is the first things on the stack
                     //push italics
                     stack.push(Substring::Italic);
                 }
-                (TokenType::Italics, Some(Substring::Plaintext(x)))
+                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(x)))
                     if matches!(stack.second_last(), Some(Substring::Italic)) =>
                 {
                     //if curr is italics, top is plaintext && second is italics, format text, push it
@@ -215,15 +240,14 @@ mod parser {
                                  //push text with italics tags
                     stack.push(Substring::Plaintext(formatted_text))
                 }
-                (TokenType::Italics, Some(Substring::Italic)) => {
+                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Italic)) => {
                     //if two consecutive italics, convert both into plaintext: **
                     stack.pop();
                     //stack.push(Substring::Plaintext(String::from("**")));
                     add_char(&mut stack, "**");
                     //todo!("either append to current plaintext or create new plaintext at the top")
                 }
-
-                (TokenType::Italics, Some(Substring::Plaintext(_))) => {
+                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(_))) => {
                     //if curr is italics, top is plaintext, then push italics}
                     stack.push(Substring::Italic);
                 }
@@ -240,13 +264,8 @@ mod parser {
                     // if Some(Plaintext), append space
                     add_char(&mut stack, " ");
                 }
-                (TokenType::Plaintext { start, end }, None) => {
+                (TokenType::Plaintext { start, end }, _) => {
                     //add this substring to the stack
-                    add_char(&mut stack, &full_string[*start..*end])
-                }
-                (TokenType::Plaintext { start, end }, Some(_)) => {
-                    //append this string to the previous string
-                    //println!("{},{}", *start, *end);
                     add_char(&mut stack, &full_string[*start..*end])
                 }
             };
@@ -371,6 +390,35 @@ mod italics_underscore_tests {
         let input_str = String::from("a_a a_a");
         let expected_result = String::from("a_a a_a");
         let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+}
+
+#[cfg(test)]
+mod mixed_underscore_asterisk_tests {
+    use super::parse_italics;
+    #[test]
+    fn mixed() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _text*");
+        let expected_result = String::from("some _text*");
+        let actual_result = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn inner_asterisk() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some _*text _");
+        let expected_result = String::from("some <i>*text </i>");
+        let actual_result = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn inner_underscore() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some *_text *");
+        let expected_result = String::from("some <i>_text </i>");
+        let actual_result = parse_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
 }
