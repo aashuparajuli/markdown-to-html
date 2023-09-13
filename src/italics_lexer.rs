@@ -1,13 +1,40 @@
-mod tokenizer {
+mod structs {
     #[derive(Clone, Debug)]
     pub enum HtmlTag {
         ItalicsAsterisk,
+        ItalicsUnderscore,
     }
+
+    impl HtmlTag {
+        pub fn get_text(&self) -> &str {
+            match self {
+                HtmlTag::ItalicsAsterisk => "*",
+                HtmlTag::ItalicsUnderscore => "_",
+            }
+        }
+        pub fn format(&self, s: &str) -> String {
+            match self {
+                HtmlTag::ItalicsAsterisk | HtmlTag::ItalicsUnderscore => format!("<i>{}</i>", s),
+            }
+        }
+    }
+}
+mod tokenizer {
+    use super::structs;
     #[derive(Clone, Debug)]
     pub enum TokenType {
-        Tag(HtmlTag),
+        Tag(structs::HtmlTag),
         Space,
         Plaintext { start: usize, end: usize },
+    }
+    impl TokenType {
+        fn get_plain_text(&self) -> &str {
+            match self {
+                TokenType::Tag(x) => x.get_text(),
+                TokenType::Space => todo!(),
+                TokenType::Plaintext { start, end } => todo!(),
+            }
+        }
     }
     pub fn italics_tokenizer(str: String) -> Vec<TokenType> {
         let mut tokens: Vec<TokenType> = Vec::new();
@@ -27,7 +54,23 @@ mod tokenizer {
                         // println!("created 1 tokens in *:{curr_idx},{c}");
                     }
                     //push the italics token
-                    tokens.push(TokenType::Tag(HtmlTag::ItalicsAsterisk));
+                    tokens.push(TokenType::Tag(structs::HtmlTag::ItalicsAsterisk));
+
+                    start_idx = curr_idx + 1;
+                }
+                '_' => {
+                    //push the currently parsed tokens
+                    if curr_idx != start_idx {
+                        tokens.push(TokenType::Plaintext {
+                            start: start_idx,
+                            end: curr_idx,
+                        });
+                        // println!("created 2 token in *:{curr_idx},{c}");
+                    } else {
+                        // println!("created 1 tokens in *:{curr_idx},{c}");
+                    }
+                    //push the italics token
+                    tokens.push(TokenType::Tag(structs::HtmlTag::ItalicsUnderscore));
 
                     start_idx = curr_idx + 1;
                 }
@@ -65,7 +108,7 @@ mod tokenizer {
     #[cfg(test)]
     mod test_tokenizer {
         use super::italics_tokenizer;
-        use super::HtmlTag;
+        use super::structs::HtmlTag;
         use super::TokenType;
         #[test]
         fn valid_tokens() {
@@ -164,12 +207,13 @@ mod tokenizer {
     }
 }
 mod parser {
-    use super::tokenizer::HtmlTag;
+    use super::structs::HtmlTag;
     use std::fmt::format;
 
     use super::tokenizer::TokenType;
     trait Stack {
         fn second_last(&self) -> Option<&Substring>;
+        fn add_char(&mut self, substr: &str);
     }
     impl Stack for Vec<Substring> {
         fn second_last(&self) -> Option<&Substring> {
@@ -179,7 +223,14 @@ mod parser {
                 Some(&self[self.len() - 2])
             }
         }
+        fn add_char(&mut self, substr: &str) {
+            match self.last_mut() {
+                Some(Substring::Plaintext(x)) => x.push_str(substr),
+                _ => self.push(Substring::Plaintext(substr.to_string())),
+            }
+        }
     }
+
     /*There are 2 types of formatted strings:
        tokens, that are simply the start and end indices from a string
        or raw-unformatted opening tags
@@ -195,20 +246,16 @@ mod parser {
         fn get_text(&self) -> String {
             match self {
                 Substring::Tag(HtmlTag::ItalicsAsterisk) => String::from("*"),
+                Substring::Tag(HtmlTag::ItalicsUnderscore) => String::from("_"),
                 Substring::Plaintext(x) => x.to_owned(),
             }
         }
     }
-    fn add_char(stack: &mut Vec<Substring>, substr: &str) {
-        match stack.last_mut() {
-            Some(Substring::Plaintext(x)) => x.push_str(substr),
-            _ => stack.push(Substring::Plaintext(substr.to_string())),
-        }
-    }
+
     pub fn parse_tokens(tokens: &Vec<TokenType>, full_string: &str) -> String {
         let mut result: String = String::new();
         let mut stack: Vec<Substring> = Vec::new();
-
+        let mut previousToken: Option<TokenType> = None;
         for token in tokens {
             //use the current character and the top of the stack to make a decision
             /*
@@ -224,57 +271,65 @@ mod parser {
             */
             //the only time formatting tags can be appending to strings is when a TokenType::Italics is added (or other tags in the future)
             //in all other cases, changes will happen, but no text will be re-formatted
+            use HtmlTag::ItalicsAsterisk as Asterisk;
+            use HtmlTag::ItalicsUnderscore as Underscore;
             match (token, stack.last()) {
-                (TokenType::Tag(HtmlTag::ItalicsAsterisk), None) => {
+                (TokenType::Tag(x), None) => {
                     //the italics is the first things on the stack
                     //push italics
-                    stack.push(Substring::Tag(HtmlTag::ItalicsAsterisk));
-                }
-                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(x)))
-                    if matches!(
-                        stack.second_last(),
-                        Some(Substring::Tag(HtmlTag::ItalicsAsterisk))
-                    ) =>
-                {
-                    //if curr is italics, top is plaintext && second is italics, format text, push it
-                    let formatted_text = format!("<i>{}</i>", x);
-                    stack.pop(); //pop plaintext
-                    stack.pop(); //pop opening italics
-                                 //push text with italics tags
-                    stack.push(Substring::Plaintext(formatted_text))
-                }
-                (
-                    TokenType::Tag(HtmlTag::ItalicsAsterisk),
-                    Some(Substring::Tag(HtmlTag::ItalicsAsterisk)),
-                ) => {
-                    //if two consecutive italics, convert both into plaintext: **
-                    stack.pop();
-                    //stack.push(Substring::Plaintext(String::from("**")));
-                    add_char(&mut stack, "**");
-                    //todo!("either append to current plaintext or create new plaintext at the top")
-                }
-                (TokenType::Tag(HtmlTag::ItalicsAsterisk), Some(Substring::Plaintext(_))) => {
-                    //if curr is italics, top is plaintext, then push italics}
-                    stack.push(Substring::Tag(HtmlTag::ItalicsAsterisk));
+                    stack.push(Substring::Tag(x.clone()));
                 }
                 (TokenType::Space, None) => {
                     //if stack is empty, push space as plaintext
                     stack.push(Substring::Plaintext(String::from(" ")))
                 }
-                (TokenType::Space, Some(Substring::Tag(HtmlTag::ItalicsAsterisk))) => {
-                    //if curr is space and top is italics, escape the italics
+                (TokenType::Tag(x), Some(Substring::Plaintext(s)))
+                    if matches!(stack.second_last(), Some(Substring::Tag(x))) =>
+                {
+                    //if curr is italics, top is plaintext && second is italics, format text, push it
+                    let formatted_text = x.format(s);
+                    stack.pop(); //pop plaintext
+                    stack.pop(); //pop opening italics
+                                 //push text with italics tags
+                    stack.push(Substring::Plaintext(formatted_text))
+                }
+                (TokenType::Tag(x), Some(Substring::Tag(y))) if matches!(x, y) => {
+                    //if two consecutive identical tags, convert both into plaintext: **
                     stack.pop();
-                    add_char(&mut stack, "* ");
+                    //stack.push(Substring::Plaintext(String::from("**")));
+                    stack.add_char(x.get_text());
+                    stack.add_char(x.get_text());
+                    //todo!("either append to current plaintext or create new plaintext at the top")
+                }
+                (TokenType::Tag(_), Some(Substring::Tag(y))) => {
+                    //if two consecutive different tags: push the second one
+                    stack.push(Substring::Tag(y.clone()));
+                }
+                (TokenType::Tag(x), Some(Substring::Plaintext(_))) => {
+                    //if curr is tag, top is plaintext, then push tag}
+                    stack.push(Substring::Tag(x.clone()));
+                }
+                (TokenType::Space, Some(Substring::Tag(x))) => {
+                    //if curr is space and top is italics, escape the italics
+                    // stack.pop();
+                    // //stack.push(Substring::Plaintext(String::from("**")));
+                    // stack.add_char(x.get_text());
+                    // stack.add_char(x.get_text());
+
+                    // stack.pop();
+                    // stack.add_char(x.clone().get_text());
+                    // stack.add_char(" ");
                 }
                 (TokenType::Space, Some(Substring::Plaintext(_))) => {
                     // if Some(Plaintext), append space
-                    add_char(&mut stack, " ");
+                    stack.add_char(" ");
                 }
                 (TokenType::Plaintext { start, end }, _) => {
                     //add this substring to the stack
-                    add_char(&mut stack, &full_string[*start..*end])
+                    stack.add_char(&full_string[*start..*end])
                 }
             };
+            previousToken = Some(token.clone());
         }
         stack
             .iter()
@@ -321,6 +376,14 @@ mod italics_asterisk_tests {
         let input_str = String::from("some * text *");
         let expected_result = String::from("some * text *");
         let actual_result: String = parse_italics(input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn valid_no_space() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some*text*a");
+        let expected_result = String::from("some<i>text</i>");
+        let actual_result = parse_italics(input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
