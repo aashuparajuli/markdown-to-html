@@ -141,6 +141,7 @@ pub const ITALICS_ASTERISK_TAG: HtmlTag = HtmlTag {
     closing_tag: "</i>",
     matching_char: '*',
 };
+#[cfg(test)]
 mod italics_underscore_test {
     use super::single_char_parser::process_single_char_formats;
     use super::single_char_parser::HtmlTag;
