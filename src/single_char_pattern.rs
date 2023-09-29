@@ -5,7 +5,6 @@ enum ItalicsUnderscoreState {
 }
 trait FormattingToken {
     fn get_text(&self, s: &str) -> String;
-    fn is_formatting_token(c: char) -> bool;
 }
 impl FormattingToken for ItalicsUnderscoreState {
     fn get_text(&self, s: &str) -> String {
@@ -14,14 +13,13 @@ impl FormattingToken for ItalicsUnderscoreState {
             ItalicsUnderscoreState::Plaintext => s.to_string(),
         }
     }
-    fn is_formatting_token(c: char) -> bool {
-        match c {
-            '_' => true,
-            _ => false,
-        }
+}
+fn is_formatting_token(c: char) -> bool {
+    match c {
+        '_' => true,
+        _ => false,
     }
 }
-
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
 
