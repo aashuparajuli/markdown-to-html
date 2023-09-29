@@ -14,9 +14,19 @@ impl FormattingToken for TextState {
         }
     }
 }
+fn is_formatting_token(c: char) -> bool {
+    match c {
+        '_' => true,
+        _ => false,
+    }
+}
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
+
+//or user passes in a character, then a TextState is built off that
+//or user passes in a function to check if a character is a token, then that is used to build a function
 mod single_char_parser {
+    use super::is_formatting_token;
     use super::FormattingToken;
     use super::TextState;
     trait Stack {
@@ -89,20 +99,20 @@ mod single_char_parser {
             //     (true, '_')  => {}
             //     (false, '_') => {}
             // };
-            if parsing_italics && (c == ' ' || c == '_') && start_idx == curr_idx {
+            if parsing_italics && (c == ' ' || is_formatting_token(c)) && start_idx == curr_idx {
                 //move start_idx backwards so that the previously captured '*' is captured in plaintext
                 start_idx -= 1;
                 //switch to parsing italics
                 parsing_italics = false;
             }
-            if parsing_italics && c == '_' {
+            if parsing_italics && is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Italics, append it to the stack
                 let italics_text =
                     FormattedText::new(TextState::Italics, &str[start_idx..curr_idx]);
                 stack.push(italics_text);
                 start_idx = curr_idx;
                 parsing_italics = false;
-            } else if !parsing_italics && c == '_' {
+            } else if !parsing_italics && is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
                 //let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
                 let italics_text: FormattedText =
