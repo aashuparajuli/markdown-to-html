@@ -53,6 +53,21 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step
 
+# Part 2
+
+v7: original at start of ref-str
+v8: Using a single function: single_char_pattern::single_char_parser::process_single_char_formats to perform parsing. Use &str (string slices) to store substrings
+Create wrappers around process_single_char_formts in parsers::italics and parsers::inline_code to process italics(asterisks and underscore) and inline code blocks
+
+- implemented for: italics using underscore
+
+| Section                      | v7    | v8     |        | -     | v6    |
+| ---------------------------- | ----- | ------ | ------ | ----- | ----- |
+| reading lines from the file  | .587  | .356   | -      | -     | -  |
+| converting markdown to html  | 8.417 | 5.159 | -  | - | - |
+| writing the html to the file | -     | -      | -      | -     |
+| Total                        | 9.045 | 5.516 | - |- | - |
+
 ## Adding features
 
 - the progression from v4 to v5
