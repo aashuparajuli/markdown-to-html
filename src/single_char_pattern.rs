@@ -1,25 +1,27 @@
 #[derive(Clone, Debug)]
-enum TextState {
+enum ItalicsUnderscoreState {
     Italics,
     Plaintext,
 }
 trait FormattingToken {
     fn get_text(&self, s: &str) -> String;
+    fn is_formatting_token(c: char) -> bool;
 }
-impl FormattingToken for TextState {
+impl FormattingToken for ItalicsUnderscoreState {
     fn get_text(&self, s: &str) -> String {
         match self {
-            TextState::Italics => format!("<i>{}</i>", s),
-            TextState::Plaintext => s.to_string(),
+            ItalicsUnderscoreState::Italics => format!("<i>{}</i>", s),
+            ItalicsUnderscoreState::Plaintext => s.to_string(),
+        }
+    }
+    fn is_formatting_token(c: char) -> bool {
+        match c {
+            '_' => true,
+            _ => false,
         }
     }
 }
-fn is_formatting_token(c: char) -> bool {
-    match c {
-        '_' => true,
-        _ => false,
-    }
-}
+
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
 
@@ -28,28 +30,28 @@ fn is_formatting_token(c: char) -> bool {
 mod single_char_parser {
     use super::is_formatting_token;
     use super::FormattingToken;
-    use super::TextState;
+    use super::ItalicsUnderscoreState;
     trait Stack {
-        fn second_last(&self) -> Option<&TextState>;
+        fn second_last(&self) -> Option<&ItalicsUnderscoreState>;
     }
-    impl Stack for Vec<TextState> {
-        fn second_last(&self) -> Option<&TextState> {
+    impl Stack for Vec<ItalicsUnderscoreState> {
+        fn second_last(&self) -> Option<&ItalicsUnderscoreState> {
             if self.len() < 2 {
                 return None;
             }
             match self[self.len() - 2] {
-                TextState::Italics => Some(&TextState::Italics), //return italics
-                TextState::Plaintext => None,
+                ItalicsUnderscoreState::Italics => Some(&ItalicsUnderscoreState::Italics), //return italics
+                ItalicsUnderscoreState::Plaintext => None,
             }
         }
     }
 
     struct FormattedText<'a> {
-        format: TextState,
+        format: ItalicsUnderscoreState,
         substring: &'a str,
     }
     impl FormattedText<'_> {
-        fn new(format: TextState, substring: &str) -> FormattedText {
+        fn new(format: ItalicsUnderscoreState, substring: &str) -> FormattedText {
             FormattedText { format, substring }
         }
         fn get_text<'a>(&'a self) -> String {
@@ -66,9 +68,9 @@ mod single_char_parser {
     pub fn process_italics_underscore(str: &str) -> String {
         let mut result: String = String::new();
         let mut stack: Vec<FormattedText> = Vec::new();
-        let mut parsing_italics: bool = false;
+        let mut parsing_formatted_text: bool = false;
         let mut start_idx: usize = 0;
-        let mut _current_state: TextState = TextState::Plaintext;
+        let mut _current_state: ItalicsUnderscoreState = ItalicsUnderscoreState::Plaintext;
         if str.is_empty() {
             return String::new();
         }
@@ -99,41 +101,48 @@ mod single_char_parser {
             //     (true, '_')  => {}
             //     (false, '_') => {}
             // };
-            if parsing_italics && (c == ' ' || is_formatting_token(c)) && start_idx == curr_idx {
+            if parsing_formatted_text
+                && (c == ' ' || is_formatting_token(c))
+                && start_idx == curr_idx
+            {
                 //move start_idx backwards so that the previously captured '*' is captured in plaintext
                 start_idx -= 1;
                 //switch to parsing italics
-                parsing_italics = false;
+                parsing_formatted_text = false;
             }
-            if parsing_italics && is_formatting_token(c) {
+            if parsing_formatted_text && is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Italics, append it to the stack
                 let italics_text =
-                    FormattedText::new(TextState::Italics, &str[start_idx..curr_idx]);
+                    FormattedText::new(ItalicsUnderscoreState::Italics, &str[start_idx..curr_idx]);
                 stack.push(italics_text);
                 start_idx = curr_idx;
-                parsing_italics = false;
-            } else if !parsing_italics && is_formatting_token(c) {
+                parsing_formatted_text = false;
+            } else if !parsing_formatted_text && is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
                 //let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
-                let italics_text: FormattedText =
-                    FormattedText::new(TextState::Plaintext, &str[start_idx..curr_idx]);
+                let italics_text: FormattedText = FormattedText::new(
+                    ItalicsUnderscoreState::Plaintext,
+                    &str[start_idx..curr_idx],
+                );
 
                 stack.push(italics_text);
                 //increment start pointer
                 start_idx = curr_idx + 1;
                 //switch into parsing italics mode
-                parsing_italics = true;
+                parsing_formatted_text = true;
             }
         }
         //append any strings that have not been completed yet
-        if parsing_italics {
+        if parsing_formatted_text {
             //println!("found unmatched asterisk");
-            let plain_text = FormattedText::new(TextState::Plaintext, &str[start_idx - 1..]);
+            let plain_text =
+                FormattedText::new(ItalicsUnderscoreState::Plaintext, &str[start_idx - 1..]);
             stack.push(plain_text);
         } else if start_idx != str.len() - 1 {
             //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
             //println!("found unterminated plain text");
-            let plain_text = FormattedText::new(TextState::Plaintext, &str[start_idx..]);
+            let plain_text =
+                FormattedText::new(ItalicsUnderscoreState::Plaintext, &str[start_idx..]);
             stack.push(plain_text);
         }
         stack
@@ -193,16 +202,16 @@ mod single_char_parser {
         #[test]
         fn second_last() {
             //valid use of second_last
-            let first_state = TextState::Italics;
-            let second_state = TextState::Plaintext;
-            let buffer: Vec<TextState> = vec![first_state, second_state];
+            let first_state = ItalicsUnderscoreState::Italics;
+            let second_state = ItalicsUnderscoreState::Plaintext;
+            let buffer: Vec<ItalicsUnderscoreState> = vec![first_state, second_state];
             assert!(buffer.second_last().is_some());
         }
         #[test]
         fn second_last_invalid() {
-            let first_state = TextState::Plaintext;
-            let second_state = TextState::Italics;
-            let buffer: Vec<TextState> = vec![first_state, second_state];
+            let first_state = ItalicsUnderscoreState::Plaintext;
+            let second_state = ItalicsUnderscoreState::Italics;
+            let buffer: Vec<ItalicsUnderscoreState> = vec![first_state, second_state];
             assert!(buffer.second_last().is_none());
         }
     }
