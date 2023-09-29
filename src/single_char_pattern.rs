@@ -4,10 +4,21 @@
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
 mod single_char_parser {
+    use crate::italics;
+
     pub struct FormatText<'a> {
         formatted: bool,
         substring: &'a str,
     }
+    pub struct HtmlTag<'a> {
+        opening: &'a str,
+        closing: &'a str,
+    }
+    // impl HtmlTag<'_>{
+    //     fn get_text(s: &str) -> String {
+    //         format!("{self.opening}{}</self.closing>", f.substring),
+    //     }
+    // }
     impl FormatText<'_> {
         fn new(formatted: bool, substring: &str) -> FormatText {
             FormatText {
@@ -16,9 +27,9 @@ mod single_char_parser {
             }
         }
     }
-    fn get_text(f: &FormatText) -> String {
+    fn get_text(f: &FormatText, tag: &HtmlTag) -> String {
         match f.formatted {
-            true => format!("<i>{}</i>", f.substring),
+            true => format!("{}{}{}", tag.opening, f.substring, tag.closing),
             false => f.substring.to_string(),
         }
     }
@@ -31,6 +42,10 @@ mod single_char_parser {
         if str.is_empty() {
             return String::new();
         }
+        let italics_tag = HtmlTag {
+            opening: "<i>",
+            closing: "</i>",
+        };
 
         for (curr_idx, c) in str.char_indices() {
             //initially:currently_matching = false;
@@ -96,7 +111,7 @@ mod single_char_parser {
         }
         stack
             .iter()
-            .for_each(|subsection| result.push_str(&get_text(subsection)));
+            .for_each(|subsection| result.push_str(&get_text(subsection, &italics_tag)));
         result
     }
 
@@ -108,6 +123,10 @@ mod single_char_parser {
                 _ => false,
             }
         }
+        const italics_tag: HtmlTag = HtmlTag{
+            opening:"<i>",
+            closing:"</i>",
+        };
         use super::*;
         #[test]
         fn convert_italics() {
@@ -152,6 +171,7 @@ mod single_char_parser {
             assert_eq!(actual_result, expected_result);
         }
     }
+    #[cfg(test)]
     mod italics_asterisk_test {
         fn is_asterisk_token(c: char) -> bool {
             match c {
@@ -160,6 +180,11 @@ mod single_char_parser {
             }
         }
         use super::*;
+        use super::HtmlTag;
+        const italics_tag: HtmlTag = HtmlTag{
+            opening:"<i>",
+            closing:"</i>",
+        };
         #[test]
         fn convert_italics() {
             //string with space before pound sign should not be converted
@@ -201,4 +226,5 @@ mod single_char_parser {
             assert_eq!(actual_result, expected_result);
         }
     }
+    
 }
