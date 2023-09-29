@@ -1,11 +1,13 @@
+trait FormattingToken {
+    fn get_text(&self, s: &str) -> String;
+    fn is_formatting_token(c: char) -> bool;
+}
 #[derive(Clone, Debug)]
 enum ItalicsUnderscoreState {
     Italics,
     Plaintext,
 }
-trait FormattingToken {
-    fn get_text(&self, s: &str) -> String;
-}
+
 impl FormattingToken for ItalicsUnderscoreState {
     fn get_text(&self, s: &str) -> String {
         match self {
@@ -13,20 +15,18 @@ impl FormattingToken for ItalicsUnderscoreState {
             ItalicsUnderscoreState::Plaintext => s.to_string(),
         }
     }
-}
-fn is_formatting_token(c: char) -> bool {
-    match c {
-        '_' => true,
-        _ => false,
+    fn is_formatting_token(c: char) -> bool {
+        match c {
+            '_' => true,
+            _ => false,
+        }
     }
-}
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
 
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
 mod single_char_parser {
-    use super::is_formatting_token;
     use super::FormattingToken;
     use super::ItalicsUnderscoreState;
     trait Stack {
@@ -45,6 +45,7 @@ mod single_char_parser {
     }
 
     struct FormattedText<'a> {
+        //make it generic over any type that implements
         format: ItalicsUnderscoreState,
         substring: &'a str,
     }
@@ -53,17 +54,11 @@ mod single_char_parser {
             FormattedText { format, substring }
         }
         fn get_text<'a>(&'a self) -> String {
-            //add the extra text formatted using format!
             self.format.get_text(self.substring)
-            // match self.format {
-            //     TextState::Italics => {
-            //         format!("<i>{}</i>", self.substring)
-            //     }
-            //     TextState::Plaintext => self.substring.to_string(),
-            // }
         }
     }
-    pub fn process_italics_underscore(str: &str) -> String {
+    pub fn process_single_char_formats(str: &str) -> String {
+        //make it generic over any type that implements
         let mut result: String = String::new();
         let mut stack: Vec<FormattedText> = Vec::new();
         let mut parsing_formatted_text: bool = false;
@@ -100,7 +95,7 @@ mod single_char_parser {
             //     (false, '_') => {}
             // };
             if parsing_formatted_text
-                && (c == ' ' || is_formatting_token(c))
+                && (c == ' ' || ItalicsUnderscoreState::is_formatting_token(c))
                 && start_idx == curr_idx
             {
                 //move start_idx backwards so that the previously captured '*' is captured in plaintext
@@ -108,14 +103,14 @@ mod single_char_parser {
                 //switch to parsing italics
                 parsing_formatted_text = false;
             }
-            if parsing_formatted_text && is_formatting_token(c) {
+            if parsing_formatted_text && ItalicsUnderscoreState::is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Italics, append it to the stack
                 let italics_text =
                     FormattedText::new(ItalicsUnderscoreState::Italics, &str[start_idx..curr_idx]);
                 stack.push(italics_text);
                 start_idx = curr_idx;
                 parsing_formatted_text = false;
-            } else if !parsing_formatted_text && is_formatting_token(c) {
+            } else if !parsing_formatted_text && ItalicsUnderscoreState::is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
                 //let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
                 let italics_text: FormattedText = FormattedText::new(
@@ -157,7 +152,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some _text_");
             let expected_result = String::from("some <i>text</i>");
-            let actual_result = process_italics_underscore(&input_str);
+            let actual_result = process_single_char_formats(&input_str);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -165,7 +160,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("plain text");
             let expected_result = String::from("plain text");
-            let actual_result = process_italics_underscore(&input_str);
+            let actual_result = process_single_char_formats(&input_str);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -173,7 +168,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some _text _");
             let expected_result = String::from("some <i>text </i>");
-            let actual_result = process_italics_underscore(&input_str);
+            let actual_result = process_single_char_formats(&input_str);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -181,7 +176,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some _ text _");
             let expected_result = String::from("some _ text _");
-            let actual_result: String = process_italics_underscore(&input_str);
+            let actual_result: String = process_single_char_formats(&input_str);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -189,7 +184,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some __text");
             let expected_result = String::from("some __text");
-            let actual_result: String = process_italics_underscore(&input_str);
+            let actual_result: String = process_single_char_formats(&input_str);
             assert_eq!(actual_result, expected_result);
         }
     }
