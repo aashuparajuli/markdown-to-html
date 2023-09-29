@@ -244,14 +244,14 @@ mod code_snippet_tests {
     use super::single_char_parser::*;
     fn is_asterisk_token(c: char) -> bool {
         match c {
-            '*' => true,
+            '`' => true,
             _ => false,
         }
     }
 
     const ITALICS_TAG: HtmlTag = HtmlTag {
-        opening: "<i>",
-        closing: "</i>",
+        opening: "<code>",
+        closing: "</code>",
     };
     #[test]
     fn convert_italics() {
