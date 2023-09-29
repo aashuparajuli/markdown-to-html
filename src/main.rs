@@ -5,6 +5,7 @@ mod code_block;
 mod file_io;
 use clap::Parser;
 mod italics;
+mod parsers;
 mod parse_bold_underscore;
 mod parse_italics_underscore;
 mod parse_markdown;

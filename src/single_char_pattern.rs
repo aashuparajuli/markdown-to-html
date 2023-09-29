@@ -3,7 +3,7 @@
 
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
-mod single_char_parser {
+pub mod single_char_parser {
     use crate::italics;
 
     pub struct FormatText<'a> {
@@ -19,7 +19,7 @@ mod single_char_parser {
         //     format!("{self.opening}{}</self.closing>", f.substring),
         // }
         pub fn new<'a>(opening: &'a str, closing: &'a str) -> HtmlTag<'a>{
-             HtmlTag { opening, closing }
+            HtmlTag { opening, closing }
         }
     }
     impl FormatText<'_> {
