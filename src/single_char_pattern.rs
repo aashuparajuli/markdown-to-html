@@ -4,11 +4,6 @@
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
 mod single_char_parser {
-    trait FormattedText<'a> {
-        fn get_text(&'a self) -> String;
-        fn is_formatting_token(&self, c: char) -> bool;
-    }
-
     pub struct FormatText<'a> {
         formatted: bool,
         substring: &'a str,
@@ -73,17 +68,16 @@ mod single_char_parser {
                 parsing_formatted_text = false;
             }
             if parsing_formatted_text && is_formatting_token(c) {
-                //construct a FormattedText struct storing TextState::Italics, append it to the stack
+                //construct a FormatText struct storing TextState::Italics, append it to the stack
                 let italics_text = FormatText::new(true, &str[start_idx..curr_idx]);
                 stack.push(italics_text);
                 start_idx = curr_idx;
                 parsing_formatted_text = false;
             } else if !parsing_formatted_text && is_formatting_token(c) {
                 //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
-                //let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
-                let italics_text: FormatText = FormatText::new(false, &str[start_idx..curr_idx]);
+                let plain_text: FormatText = FormatText::new(false, &str[start_idx..curr_idx]);
 
-                stack.push(italics_text);
+                stack.push(plain_text);
                 //increment start pointer
                 start_idx = curr_idx + 1;
                 //switch into parsing italics mode
@@ -97,7 +91,6 @@ mod single_char_parser {
             stack.push(plain_text);
         } else if start_idx != str.len() - 1 {
             //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
-            //println!("found unterminated plain text");
             let plain_text = FormatText::new(false, &str[start_idx..]);
             stack.push(plain_text);
         }
@@ -208,23 +201,4 @@ mod single_char_parser {
             assert_eq!(actual_result, expected_result);
         }
     }
-    // #[cfg(test)]
-    // mod buffer_tests {
-    //     use super::*;
-    //     #[test]
-    //     fn second_last() {
-    //         //valid use of second_last
-    //         let first_state = ItalicsUnderscoreState::Italics;
-    //         let second_state = ItalicsUnderscoreState::Plaintext;
-    //         let buffer: Vec<ItalicsUnderscoreState> = vec![first_state, second_state];
-    //         assert!(buffer.second_last().is_some());
-    //     }
-    //     #[test]
-    //     fn second_last_invalid() {
-    //         let first_state = ItalicsUnderscoreState::Plaintext;
-    //         let second_state = ItalicsUnderscoreState::Italics;
-    //         let buffer: Vec<ItalicsUnderscoreState> = vec![first_state, second_state];
-    //         assert!(buffer.second_last().is_none());
-    //     }
-    // }
 }
