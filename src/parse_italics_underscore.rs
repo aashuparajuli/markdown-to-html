@@ -3,6 +3,7 @@ enum TextState {
     Italics,
     Plaintext,
 }
+
 trait Stack {
     fn second_last(&self) -> Option<&TextState>;
 }
@@ -18,26 +19,21 @@ impl Stack for Vec<TextState> {
     }
 }
 
-struct FormattedText {
+struct FormattedText<'a> {
     format: TextState,
-    start_idx: usize,
-    end_idx: usize,
+    substring: &'a str,
 }
-impl FormattedText {
-    fn new(format: TextState, start_idx: usize, end_idx: usize) -> FormattedText {
-        FormattedText {
-            format,
-            start_idx,
-            end_idx,
-        }
+impl FormattedText<'_> {
+    fn new(format: TextState, substring: &str) -> FormattedText {
+        FormattedText { format, substring }
     }
-    fn get_text<'a>(&'a self, full_string: &'a str) -> String {
+    fn get_text<'a>(&'a self) -> String {
         //add the extra text formatted using format!
         match self.format {
             TextState::Italics => {
-                format!("<i>{}</i>", &full_string[self.start_idx..self.end_idx])
+                format!("<i>{}</i>", self.substring)
             }
-            TextState::Plaintext => full_string[self.start_idx..self.end_idx].to_string(),
+            TextState::Plaintext => self.substring.to_string(),
         }
     }
 }
@@ -85,13 +81,16 @@ pub fn process_italics_underscore(str: &str) -> String {
         }
         if parsing_italics && c == '_' {
             //construct a FormattedText struct storing TextState::Italics, append it to the stack
-            let italics_text = FormattedText::new(TextState::Italics, start_idx, curr_idx);
+            let italics_text = FormattedText::new(TextState::Italics, &str[start_idx..curr_idx]);
             stack.push(italics_text);
             start_idx = curr_idx;
             parsing_italics = false;
         } else if !parsing_italics && c == '_' {
             //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
-            let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
+            //let italics_text = FormattedText::new(TextState::Plaintext, start_idx, curr_idx);
+            let italics_text: FormattedText =
+                FormattedText::new(TextState::Plaintext, &str[start_idx..curr_idx]);
+
             stack.push(italics_text);
             //increment start pointer
             start_idx = curr_idx + 1;
@@ -102,17 +101,17 @@ pub fn process_italics_underscore(str: &str) -> String {
     //append any strings that have not been completed yet
     if parsing_italics {
         //println!("found unmatched asterisk");
-        let plain_text = FormattedText::new(TextState::Plaintext, start_idx - 1, str.len());
+        let plain_text = FormattedText::new(TextState::Plaintext, &str[start_idx - 1..]);
         stack.push(plain_text);
     } else if start_idx != str.len() - 1 {
         //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
         //println!("found unterminated plain text");
-        let plain_text = FormattedText::new(TextState::Plaintext, start_idx, str.len());
+        let plain_text = FormattedText::new(TextState::Plaintext, &str[start_idx..]);
         stack.push(plain_text);
     }
     stack
         .iter()
-        .for_each(|state: &FormattedText| result.push_str(&state.get_text(&str)));
+        .for_each(|state: &FormattedText| result.push_str(&state.get_text()));
     result
 }
 

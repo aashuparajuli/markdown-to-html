@@ -56,16 +56,16 @@ Note: For v4, converting markdown to html and writing html to file are done in a
 # Part 2
 
 v7: original at start of ref-str
-v8: passing in a &str instead of String
+v8: passing in a &str instead of String, storing &str in FormattedText instead of using start and end indices
 
-- implemented for: italics using underscore, italics using asterisk
+- implemented for: italics using underscore
 
 | Section                      | v7    | v8     |        | -     | v6    |
 | ---------------------------- | ----- | ------ | ------ | ----- | ----- |
-| reading lines from the file  | .587  | .515   | -      | -     | .284  |
-| converting markdown to html  | 8.417 | 11.494 | 2.776  | 4.426 | 4.060 |
+| reading lines from the file  | .587  | .573   | -      | -     | .284  |
+| converting markdown to html  | 8.417 | 8.241 | 2.776  | 4.426 | 4.060 |
 | writing the html to the file | -     | -      | -      | -     |
-| Total                        | 9.045 | 12.130 | 2.9021 | 4.564 | 4.345 |
+| Total                        | 9.045 | 8.854 | 2.9021 | 4.564 | 4.345 |
 
 ## Adding features
 
