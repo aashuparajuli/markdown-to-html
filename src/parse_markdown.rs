@@ -1,11 +1,8 @@
 use crate::bold;
-use crate::code_block;
 use crate::file_io::FileWriter;
-use crate::italics;
 use crate::parse_bold_underscore;
-use crate::parse_italics_underscore;
 use crate::strikethrough;
-use crate::parsers;
+use crate::parsers::{italics, inline_code};
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -47,11 +44,11 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
 
         //parse italics under asterisk
-        let parsed_line: String = parsers::italics::process_asterisk(&parsed_line);
+        let parsed_line: String = italics::process_asterisk(&parsed_line);
         //parse italics using underscores
-        let parsed_line: String = parsers::italics::process_underscore(&parsed_line);
+        let parsed_line: String = italics::process_underscore(&parsed_line);
         //parse and format inline code blocks
-        let parsed_line: String = parsers::inline_code::process_inline_code(&parsed_line);
+        let parsed_line: String = inline_code::process_inline_code(&parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
@@ -78,10 +75,7 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
                 format!("{}<blockquote>{}</blockquote>\n", prefix, parsed_line)
             }
         };
-        //file_io::write_line_to_file(&parsed_line, &mut proxy_file);
-
         file_access.write_line_to_file(&parsed_line);
-        //file_io::write_one_line_to_file(&parsed_line, "output/output.html");
         current_line_state = new_line_state;
     }
     //close any tags that are still open:

@@ -63,10 +63,10 @@ Create wrappers around process_single_char_formts in parsers::italics and parser
 
 | Section                      | v7    | v8     |        | -     | v6    |
 | ---------------------------- | ----- | ------ | ------ | ----- | ----- |
-| reading lines from the file  | .587  | .358   | -      | -     | .284  |
-| converting markdown to html  | 8.417 | 5.19 | 2.776  | 4.426 | 4.060 |
+| reading lines from the file  | .587  | .354   | -      | -     | .284  |
+| converting markdown to html  | 8.417 | 5.173 | 2.776  | 4.426 | 4.060 |
 | writing the html to the file | -     | -      | -      | -     |
-| Total                        | 9.045 | 5.5 | 2.9021 | 4.564 | 4.345 |
+| Total                        | 9.045 | 5.528 | 2.9021 | 4.564 | 4.345 |
 
 ## Adding features
 
