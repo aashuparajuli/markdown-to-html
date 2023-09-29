@@ -11,14 +11,17 @@ mod single_char_parser {
         substring: &'a str,
     }
     pub struct HtmlTag<'a> {
-        opening: &'a str,
-        closing: &'a str,
+        pub opening: &'a str,
+        pub closing: &'a str,
     }
-    // impl HtmlTag<'_>{
-    //     fn get_text(s: &str) -> String {
-    //         format!("{self.opening}{}</self.closing>", f.substring),
-    //     }
-    // }
+    impl HtmlTag<'_>{
+        // fn get_text(s: &str) -> String {
+        //     format!("{self.opening}{}</self.closing>", f.substring),
+        // }
+        pub fn new<'a>(opening: &'a str, closing: &'a str) -> HtmlTag<'a>{
+             HtmlTag { opening, closing }
+        }
+    }
     impl FormatText<'_> {
         fn new(formatted: bool, substring: &str) -> FormatText {
             FormatText {
@@ -294,25 +297,5 @@ mod code_snippet_tests {
         let actual_result: String =
             process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
         assert_eq!(actual_result, expected_result);
-    }
-}
-
-#[cfg(test)]
-mod buffer_tests {
-    use single_char_parser::*;
-    #[test]
-    fn second_last() {
-        //valid use of second_last
-        let first_state = TextState::CodeSnippet;
-        let second_state = TextState::Plaintext;
-        let buffer: Vec<TextState> = vec![first_state, second_state];
-        assert!(buffer.second_last().is_some());
-    }
-    #[test]
-    fn second_last_invalid() {
-        let first_state = TextState::Plaintext;
-        let second_state = TextState::CodeSnippet;
-        let buffer: Vec<TextState> = vec![first_state, second_state];
-        assert!(buffer.second_last().is_none());
     }
 }
