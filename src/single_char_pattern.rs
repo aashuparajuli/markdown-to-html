@@ -119,7 +119,7 @@ mod single_char_parser {
                 _ => false,
             }
         }
-        const italics_tag: HtmlTag = HtmlTag{
+        const ITALICS_TAG: HtmlTag = HtmlTag{
             opening:"<i>",
             closing:"</i>",
         };
@@ -129,7 +129,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some _text_");
             let expected_result = String::from("some <i>text</i>");
-            let actual_result = process_single_char_formats(&input_str, is_underscore_token, italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -137,7 +137,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("plain text");
             let expected_result = String::from("plain text");
-            let actual_result = process_single_char_formats(&input_str, is_underscore_token, italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -145,7 +145,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some _text _");
             let expected_result = String::from("some <i>text </i>");
-            let actual_result = process_single_char_formats(&input_str, is_underscore_token, italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -154,7 +154,7 @@ mod single_char_parser {
             let input_str = String::from("some _ text _");
             let expected_result = String::from("some _ text _");
             let actual_result: String =
-                process_single_char_formats(&input_str, is_underscore_token, italics_tag);
+                process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -163,7 +163,7 @@ mod single_char_parser {
             let input_str = String::from("some __text");
             let expected_result = String::from("some __text");
             let actual_result: String =
-                process_single_char_formats(&input_str, is_underscore_token, italics_tag);
+                process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
     }
@@ -177,7 +177,7 @@ mod single_char_parser {
         }
         use super::*;
         use super::HtmlTag;
-        const italics_tag: HtmlTag = HtmlTag{
+        const ITALICS_TAG: HtmlTag = HtmlTag{
             opening:"<i>",
             closing:"</i>",
         };
@@ -186,7 +186,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some *text*");
             let expected_result = String::from("some <i>text</i>");
-            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -194,7 +194,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("plain text");
             let expected_result = String::from("plain text");
-            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -202,7 +202,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some *text *");
             let expected_result = String::from("some <i>text </i>");
-            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,italics_tag);
+            let actual_result = process_single_char_formats(&input_str, is_asterisk_token,ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -210,7 +210,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some * text *");
             let expected_result = String::from("some * text *");
-            let actual_result: String = process_single_char_formats(&input_str, is_asterisk_token,italics_tag);
+            let actual_result: String = process_single_char_formats(&input_str, is_asterisk_token,ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
         #[test]
@@ -218,7 +218,7 @@ mod single_char_parser {
             //string with space before pound sign should not be converted
             let input_str = String::from("some **text");
             let expected_result = String::from("some **text");
-            let actual_result: String = process_single_char_formats(&input_str, is_asterisk_token,italics_tag);
+            let actual_result: String = process_single_char_formats(&input_str, is_asterisk_token,ITALICS_TAG);
             assert_eq!(actual_result, expected_result);
         }
     }
