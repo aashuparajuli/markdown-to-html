@@ -3,6 +3,7 @@
 mod bold;
 mod file_io;
 use clap::Parser;
+mod double_char_parser;
 mod parsers;
 mod parse_bold_underscore;
 mod parse_markdown;
