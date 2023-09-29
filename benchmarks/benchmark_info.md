@@ -56,16 +56,17 @@ Note: For v4, converting markdown to html and writing html to file are done in a
 # Part 2
 
 v7: original at start of ref-str
-v8: passing in a &str instead of String, storing &str in FormattedText instead of using start and end indices
+v8: Using a single function: single_char_pattern::single_char_parser::process_single_char_formats to perform parsing. Use &str (string slices) to store substrings
+Create wrappers around process_single_char_formts in parsers::italics and parsers::inline_code to process italics(asterisks and underscore) and inline code blocks
 
 - implemented for: italics using underscore
 
 | Section                      | v7    | v8     |        | -     | v6    |
 | ---------------------------- | ----- | ------ | ------ | ----- | ----- |
-| reading lines from the file  | .587  | .573   | -      | -     | .284  |
-| converting markdown to html  | 8.417 | 8.241 | 2.776  | 4.426 | 4.060 |
+| reading lines from the file  | .587  | .358   | -      | -     | .284  |
+| converting markdown to html  | 8.417 | 5.19 | 2.776  | 4.426 | 4.060 |
 | writing the html to the file | -     | -      | -      | -     |
-| Total                        | 9.045 | 8.854 | 2.9021 | 4.564 | 4.345 |
+| Total                        | 9.045 | 5.5 | 2.9021 | 4.564 | 4.345 |
 
 ## Adding features
 

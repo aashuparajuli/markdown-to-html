@@ -2,7 +2,7 @@
 use crate::single_char_pattern::single_char_parser::HtmlTag;
 use crate::single_char_pattern::single_char_parser::process_single_char_formats;
 
-mod inline_code {
+pub mod inline_code {
     use super::HtmlTag;
     use super::process_single_char_formats;
     fn is_code_token(c: char) -> bool {
@@ -19,7 +19,7 @@ mod inline_code {
         process_single_char_formats(str, is_code_token, CODE_TAG)
     }
 }
-mod italics {
+pub mod italics {
     use super::HtmlTag;
     use super::process_single_char_formats;
     fn is_asterisk_token(c: char) -> bool {
