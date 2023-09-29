@@ -242,14 +242,14 @@ mod italics_asterisk_test {
 mod code_snippet_tests {
     use super::single_char_parser::HtmlTag;
     use super::single_char_parser::*;
-    fn is_asterisk_token(c: char) -> bool {
+    fn is_code_token(c: char) -> bool {
         match c {
             '`' => true,
             _ => false,
         }
     }
 
-    const ITALICS_TAG: HtmlTag = HtmlTag {
+    const CODE_TAG: HtmlTag = HtmlTag {
         opening: "<code>",
         closing: "</code>",
     };
@@ -259,7 +259,7 @@ mod code_snippet_tests {
         let input_str = String::from("some `text`");
         let expected_result = String::from("some <code>text</code>");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -268,7 +268,7 @@ mod code_snippet_tests {
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -277,7 +277,7 @@ mod code_snippet_tests {
         let input_str = String::from("some `text `");
         let expected_result = String::from("some <code>text </code>");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -286,7 +286,7 @@ mod code_snippet_tests {
         let input_str = String::from("some ` text `");
         let expected_result = String::from("some ` text `");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -295,7 +295,7 @@ mod code_snippet_tests {
         let input_str = String::from("some ``text");
         let expected_result = String::from("some ``text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
