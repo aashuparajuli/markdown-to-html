@@ -21,6 +21,7 @@ impl FormattingToken for ItalicsUnderscoreState {
             _ => false,
         }
     }
+}
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
 
