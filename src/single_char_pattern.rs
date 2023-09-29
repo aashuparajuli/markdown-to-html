@@ -22,6 +22,26 @@ impl FormattingToken for ItalicsUnderscoreState {
         }
     }
 }
+
+enum ItalicsAsteriskState {
+    Italics,
+    Plaintext,
+}
+
+impl FormattingToken for ItalicsAsteriskState {
+    fn get_text(&self, s: &str) -> String {
+        match self {
+            ItalicsAsteriskState::Italics => format!("<i>{}</i>", s),
+            ItalicsAsteriskState::Plaintext => s.to_string(),
+        }
+    }
+    fn is_formatting_token(c: char) -> bool {
+        match c {
+            '*' => true,
+            _ => false,
+        }
+    }
+}
 //basic ideas: user passes in an enum that impl FormattingToken
 //then all other operations work the same
 
@@ -64,7 +84,6 @@ mod single_char_parser {
         let mut stack: Vec<FormattedText> = Vec::new();
         let mut parsing_formatted_text: bool = false;
         let mut start_idx: usize = 0;
-        let mut _current_state: ItalicsUnderscoreState = ItalicsUnderscoreState::Plaintext;
         if str.is_empty() {
             return String::new();
         }
@@ -146,7 +165,7 @@ mod single_char_parser {
     }
 
     #[cfg(test)]
-    mod italics_tests {
+    mod italics_underscore_test {
         use super::*;
         #[test]
         fn convert_italics() {
@@ -189,7 +208,49 @@ mod single_char_parser {
             assert_eq!(actual_result, expected_result);
         }
     }
-
+    mod italics_asterisk_test {
+        use super::*;
+        #[test]
+        fn convert_italics() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("some *text*");
+            let expected_result = String::from("some <i>text</i>");
+            let actual_result = process_single_char_formats(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+        #[test]
+        fn convert_no_italics() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("plain text");
+            let expected_result = String::from("plain text");
+            let actual_result = process_single_char_formats(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+        #[test]
+        fn convert_italics_2() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("some *text *");
+            let expected_result = String::from("some <i>text </i>");
+            let actual_result = process_single_char_formats(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+        #[test]
+        fn convert_italics_invalid() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("some * text *");
+            let expected_result = String::from("some * text *");
+            let actual_result: String = process_single_char_formats(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+        #[test]
+        fn convert_italics_invalid_2() {
+            //string with space before pound sign should not be converted
+            let input_str = String::from("some **text");
+            let expected_result = String::from("some **text");
+            let actual_result: String = process_single_char_formats(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+    }
     #[cfg(test)]
     mod buffer_tests {
         use super::*;
