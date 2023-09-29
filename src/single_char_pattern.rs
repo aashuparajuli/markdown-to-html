@@ -10,15 +10,20 @@ pub mod single_char_parser {
         substring: &'a str,
     }
     pub struct HtmlTag<'a> {
-        pub opening: &'a str,
-        pub closing: &'a str,
+        pub opening_tag: &'a str,
+        pub closing_tag: &'a str,
+        pub matching_char: char,
     }
-    impl HtmlTag<'_>{
+    impl HtmlTag<'_> {
         // fn get_text(s: &str) -> String {
         //     format!("{self.opening}{}</self.closing>", f.substring),
         // }
-        pub fn new<'a>(opening: &'a str, closing: &'a str) -> HtmlTag<'a>{
-            HtmlTag { opening, closing }
+        pub fn new<'a>(opening: &'a str, closing: &'a str, matching_char: char) -> HtmlTag<'a> {
+            HtmlTag {
+                opening_tag: opening,
+                closing_tag: closing,
+                matching_char
+            }
         }
     }
     impl FormatText<'_> {
@@ -31,7 +36,7 @@ pub mod single_char_parser {
     }
     fn get_text(f: &FormatText, tag: &HtmlTag) -> String {
         match f.formatted {
-            true => format!("{}{}{}", tag.opening, f.substring, tag.closing),
+            true => format!("{}{}{}", tag.opening_tag, f.substring, tag.closing_tag),
             false => f.substring.to_string(),
         }
     }
@@ -48,7 +53,7 @@ pub mod single_char_parser {
         if str.is_empty() {
             return String::new();
         }
-
+        
         for (curr_idx, c) in str.char_indices() {
             //initially:currently_matching = false;
             /*cases for string matching:
@@ -117,20 +122,32 @@ pub mod single_char_parser {
         result
     }
 }
-#[cfg(test)]
+use single_char_parser::HtmlTag;
+pub const ITALICS_UNDERSCORE_TAG: HtmlTag = HtmlTag {
+    opening_tag: "<i>",
+    closing_tag: "</i>",
+    matching_char: '_',
+};
+pub const CODE_TAG: HtmlTag = HtmlTag {
+    opening_tag: "<code>",
+    closing_tag: "</code>",
+    matching_char: '`',
+};
+pub const ITALICS_ASTERISK_TAG: HtmlTag = HtmlTag {
+    opening_tag: "<i>",
+    closing_tag: "</i>",
+    matching_char: '*',
+};
 mod italics_underscore_test {
     use super::single_char_parser::process_single_char_formats;
     use super::single_char_parser::HtmlTag;
+    use super::ITALICS_UNDERSCORE_TAG;
     fn is_underscore_token(c: char) -> bool {
         match c {
             '_' => true,
             _ => false,
         }
     }
-    const ITALICS_TAG: HtmlTag = HtmlTag {
-        opening: "<i>",
-        closing: "</i>",
-    };
 
     #[test]
     fn convert_italics() {
@@ -138,7 +155,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _text_");
         let expected_result = String::from("some <i>text</i>");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -147,7 +164,7 @@ mod italics_underscore_test {
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -156,7 +173,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _text _");
         let expected_result = String::from("some <i>text </i>");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -165,7 +182,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _ text _");
         let expected_result = String::from("some _ text _");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -174,11 +191,10 @@ mod italics_underscore_test {
         let input_str = String::from("some __text");
         let expected_result = String::from("some __text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
-
 #[cfg(test)]
 mod italics_asterisk_test {
     fn is_asterisk_token(c: char) -> bool {
@@ -189,16 +205,13 @@ mod italics_asterisk_test {
     }
     use super::single_char_parser::HtmlTag;
     use super::single_char_parser::*;
-    const ITALICS_TAG: HtmlTag = HtmlTag {
-        opening: "<i>",
-        closing: "</i>",
-    };
+    use super::ITALICS_ASTERISK_TAG;
     #[test]
     fn convert_italics() {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text*");
         let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -206,7 +219,7 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -214,7 +227,7 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text *");
         let expected_result = String::from("some <i>text </i>");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -223,7 +236,7 @@ mod italics_asterisk_test {
         let input_str = String::from("some * text *");
         let expected_result = String::from("some * text *");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -232,7 +245,7 @@ mod italics_asterisk_test {
         let input_str = String::from("some **text");
         let expected_result = String::from("some **text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_TAG);
+            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
@@ -247,11 +260,7 @@ mod code_snippet_tests {
             _ => false,
         }
     }
-
-    const CODE_TAG: HtmlTag = HtmlTag {
-        opening: "<code>",
-        closing: "</code>",
-    };
+    use super::CODE_TAG;
     #[test]
     fn convert_italics() {
         //string with space before pound sign should not be converted

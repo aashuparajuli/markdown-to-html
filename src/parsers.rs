@@ -1,27 +1,26 @@
-
-use crate::single_char_pattern::single_char_parser::HtmlTag;
 use crate::single_char_pattern::single_char_parser::process_single_char_formats;
+use crate::single_char_pattern::single_char_parser::HtmlTag;
+use crate::single_char_pattern::{ITALICS_ASTERISK_TAG, ITALICS_UNDERSCORE_TAG, CODE_TAG};
 
 pub mod inline_code {
-    use super::HtmlTag;
     use super::process_single_char_formats;
+    use super::CODE_TAG;
+    use super::HtmlTag;
     fn is_code_token(c: char) -> bool {
         match c {
             '`' => true,
             _ => false,
         }
     }
-    const CODE_TAG: HtmlTag = HtmlTag {
-        opening: "<code>",
-        closing: "</code>",
-    };
     pub fn process_inline_code(str: &str) -> String {
         process_single_char_formats(str, is_code_token, CODE_TAG)
     }
 }
 pub mod italics {
-    use super::HtmlTag;
     use super::process_single_char_formats;
+    use super::ITALICS_ASTERISK_TAG;
+    use super::ITALICS_UNDERSCORE_TAG;
+    use super::HtmlTag;
     fn is_asterisk_token(c: char) -> bool {
         match c {
             '*' => true,
@@ -34,22 +33,18 @@ pub mod italics {
             _ => false,
         }
     }
-    pub const ITALICS_TAG: HtmlTag = HtmlTag {
-        opening: "<i>",
-        closing: "</i>",
-    };
+    
     pub fn process_asterisk(str: &str) -> String {
-        process_single_char_formats(str, is_asterisk_token, ITALICS_TAG)
+        process_single_char_formats(str, is_asterisk_token, ITALICS_UNDERSCORE_TAG)
     }
     pub fn process_underscore(str: &str) -> String {
-        process_single_char_formats(str, is_underscore_token, ITALICS_TAG)
+        process_single_char_formats(str, is_underscore_token, ITALICS_UNDERSCORE_TAG)
     }
 }
 
 #[cfg(test)]
 mod italics_underscore_test {
     use super::italics::process_underscore;
-
     #[test]
     fn convert_italics() {
         //string with space before pound sign should not be converted
@@ -62,8 +57,8 @@ mod italics_underscore_test {
     fn convert_no_italics() {
         //string with space before pound sign should not be converted
         let input_str = "plain text";
-        let expected_result = "plain text";    
-            let actual_result: String = process_underscore(&input_str);
+        let expected_result = "plain text";
+        let actual_result: String = process_underscore(&input_str);
 
         assert_eq!(actual_result, expected_result);
     }
