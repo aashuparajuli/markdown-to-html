@@ -48,7 +48,8 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //parse italics under asterisk
         let parsed_line: String = italics::process_italics_asterisk(parsed_line);
         //parse italics using underscores
-        let parsed_line: String = parse_italics_underscore::process_italics_underscore(parsed_line);
+        let parsed_line: String =
+            parse_italics_underscore::process_italics_underscore(&parsed_line);
 
         //parse and format inline code blocks
         let parsed_line: String = code_block::process_inline_code(parsed_line);

@@ -53,6 +53,19 @@ calculating by running the execute_benchmark.sh, which runs `cargo run --release
 
 Note: For v4, converting markdown to html and writing html to file are done in a single step
 
+# Part 2
+v7: original at start of ref-str 
+v8: passing in a &str instead of String
+- implemented for: italics using underscore
+
+
+| Section                      | v7  | v8   | -      | -     | v6    |
+| ---------------------------- | --- | --- | ------ | ----- | ----- |
+| reading lines from the file  | .587   | .537   | -      | -     | .284  |
+| converting markdown to html  | 8.417   | 10.114   | 2.776  | 4.426 | 4.060 |
+| writing the html to the file | -   | -   | -      | -     |
+| Total                        | 9.045   | 10.715   | 2.9021 | 4.564 | 4.345 |
+
 ## Adding features
 
 - the progression from v4 to v5

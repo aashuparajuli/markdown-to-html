@@ -41,16 +41,17 @@ impl FormattedText {
         }
     }
 }
-pub fn process_italics_underscore(str: String) -> String {
+pub fn process_italics_underscore(str: &str) -> String {
     let mut result: String = String::new();
     let mut stack: Vec<FormattedText> = Vec::new();
     let mut parsing_italics: bool = false;
     let mut start_idx: usize = 0;
     let mut _current_state: TextState = TextState::Plaintext;
     if str.is_empty() {
-        return str;
+        return String::new();
     }
-    for (curr_idx, c) in str.chars().enumerate() {
+
+    for (curr_idx, c) in str.char_indices() {
         //initially:currently_matching = false;
         /*cases for string matching:
            !currently_matching && c != '_' => endIdx +=1
@@ -123,7 +124,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some _text_");
         let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_italics_underscore(input_str);
+        let actual_result = process_italics_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -131,7 +132,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
-        let actual_result = process_italics_underscore(input_str);
+        let actual_result = process_italics_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -139,7 +140,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some _text _");
         let expected_result = String::from("some <i>text </i>");
-        let actual_result = process_italics_underscore(input_str);
+        let actual_result = process_italics_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -147,7 +148,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some _ text _");
         let expected_result = String::from("some _ text _");
-        let actual_result: String = process_italics_underscore(input_str);
+        let actual_result: String = process_italics_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -155,7 +156,7 @@ mod italics_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some __text");
         let expected_result = String::from("some __text");
-        let actual_result: String = process_italics_underscore(input_str);
+        let actual_result: String = process_italics_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }
 }
