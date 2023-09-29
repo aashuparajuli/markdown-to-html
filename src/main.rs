@@ -8,6 +8,7 @@ mod italics;
 mod parse_bold_underscore;
 mod parse_italics_underscore;
 mod parse_markdown;
+mod single_char_pattern;
 mod strikethrough;
 use file_io::FileAccess;
 use std::path::PathBuf;
