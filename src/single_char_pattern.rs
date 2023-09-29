@@ -78,6 +78,7 @@ pub mod single_char_parser {
             //     (true, '_')  => {}
             //     (false, '_') => {}
             // };
+            //case: where we see an escape character
             if parsing_formatted_text
                 && (c == ' ' || html_tag.is_special_char(c))
                 && start_idx == curr_idx
@@ -87,26 +88,30 @@ pub mod single_char_parser {
                 //switch to parsing italics
                 parsing_formatted_text = false;
             }
-            if parsing_formatted_text && html_tag.is_special_char(c) {
-                //construct a FormatText struct storing TextState::Italics, append it to the stack
-                let italics_text = FormatText::new(true, &str[start_idx..curr_idx]);
-                stack.push(italics_text);
-                start_idx = curr_idx;
-                parsing_formatted_text = false;
-            } else if !parsing_formatted_text && html_tag.is_special_char(c) {
-                //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
-                let plain_text: FormatText = FormatText::new(false, &str[start_idx..curr_idx]);
-
-                stack.push(plain_text);
-                //increment start pointer
-                start_idx = curr_idx + 1;
-                //switch into parsing italics mode
-                parsing_formatted_text = true;
+            //other cases: we need to go from formatted text to plain text or vice versa
+            if html_tag.is_special_char(c) {
+                //a section of text has been finished
+                //either push plain FormatText or FormatText that represents a special character
+                if parsing_formatted_text {
+                    //construct a FormatText struct storing TextState::Italics, append it to the stack
+                    let italics_text = FormatText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
+                    stack.push(italics_text);
+                    start_idx = curr_idx;
+                    parsing_formatted_text = false;
+                } else {
+                    //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
+                    let plain_text: FormatText = FormatText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
+                    stack.push(plain_text);
+                    //increment start pointer
+                    start_idx = curr_idx + 1;
+                    //switch into parsing italics mode
+                    parsing_formatted_text = true;
+                }
             }
         }
         //append any strings that have not been completed yet
         if parsing_formatted_text {
-            //println!("found unmatched asterisk");
+            //if there was an asterisk that is unmatched, then push it
             let plain_text = FormatText::new(false, &str[start_idx - 1..]);
             stack.push(plain_text);
         } else if start_idx != str.len() - 1 {
