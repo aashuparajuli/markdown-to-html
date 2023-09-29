@@ -28,11 +28,17 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     for c in str.chars() {
         let curr_char = CharType::new(c);
         match (prevChar, curr_char) {
-            (None, CharType::Asterisk) => {todo!("append Asterisk token")},
-            (None, CharType::Plaintext) => todo!("append plaintext token"),
-            (None, CharType::Space) => todo!("Append space token"),
+            (None, CharType::Asterisk) => {
+                token_stream.push(Token::Asterisk);
+                todo!("append Asterisk token")},
+            (None, CharType::Plaintext) => {
+                token_stream.push(Token::Plaintext)};
+                //todo!("append plaintext token")},
+            (None, CharType::Space) => {
+                token_stream.push(Token::Space)};
+                //todo!("Append space token")},
             (Some(CharType::Space), CharType::Asterisk) => todo!("append asterisk token"),
-            (Some(CharType::Asterisk), CharType::Asterisk) => todo!("remove previous asterisk token, append DoubleAsterisk token"),
+            (Some(CharType::Asterisk), CharType::Asterisk) => todo!("remove previous asterisk token, append DoubleAsterisk token. set prevToken to plaintext"),
             (Some(CharType::Plaintext), CharType::Asterisk) => todo!("append append '*' as plaintext token"),
 
             (Some(CharType::Asterisk), CharType::Plaintext) => todo!("append plaintext token"),
