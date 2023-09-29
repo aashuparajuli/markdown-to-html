@@ -3,6 +3,17 @@ enum TextState {
     Italics,
     Plaintext,
 }
+trait FormattingToken {
+    fn get_text(&self, s: &str) -> String;
+}
+impl FormattingToken for TextState {
+    fn get_text(&self, s: &str) -> String {
+        match self {
+            TextState::Italics => format!("<i>{}</i>", s),
+            TextState::Plaintext => s.to_string(),
+        }
+    }
+}
 
 trait Stack {
     fn second_last(&self) -> Option<&TextState>;
@@ -29,12 +40,13 @@ impl FormattedText<'_> {
     }
     fn get_text<'a>(&'a self) -> String {
         //add the extra text formatted using format!
-        match self.format {
-            TextState::Italics => {
-                format!("<i>{}</i>", self.substring)
-            }
-            TextState::Plaintext => self.substring.to_string(),
-        }
+        self.format.get_text(self.substring)
+        // match self.format {
+        //     TextState::Italics => {
+        //         format!("<i>{}</i>", self.substring)
+        //     }
+        //     TextState::Plaintext => self.substring.to_string(),
+        // }
     }
 }
 pub fn process_italics_underscore(str: &str) -> String {
