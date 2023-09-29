@@ -13,7 +13,7 @@ pub mod inline_code {
         }
     }
     pub fn process_inline_code(str: &str) -> String {
-        process_single_char_formats(str, is_code_token, CODE_TAG)
+        process_single_char_formats(str, CODE_TAG)
     }
 }
 pub mod italics {
@@ -35,10 +35,10 @@ pub mod italics {
     }
     
     pub fn process_asterisk(str: &str) -> String {
-        process_single_char_formats(str, is_asterisk_token, ITALICS_ASTERISK_TAG)
+        process_single_char_formats(str, ITALICS_ASTERISK_TAG)
     }
     pub fn process_underscore(str: &str) -> String {
-        process_single_char_formats(str, is_underscore_token, ITALICS_UNDERSCORE_TAG)
+        process_single_char_formats(str, ITALICS_UNDERSCORE_TAG)
     }
 }
 

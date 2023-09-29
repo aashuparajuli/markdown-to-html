@@ -25,6 +25,9 @@ pub mod single_char_parser {
                 matching_char
             }
         }
+        fn is_special_char(&self, c: char) -> bool{
+            self.matching_char == c
+        }
     }
     impl FormatText<'_> {
         fn new(formatted: bool, substring: &str) -> FormatText {
@@ -42,7 +45,6 @@ pub mod single_char_parser {
     }
     pub fn process_single_char_formats(
         str: &str,
-        is_formatting_token: fn(char) -> bool,
         html_tag: HtmlTag,
     ) -> String {
         //make it generic over any type that implements
@@ -53,7 +55,6 @@ pub mod single_char_parser {
         if str.is_empty() {
             return String::new();
         }
-        
         for (curr_idx, c) in str.char_indices() {
             //initially:currently_matching = false;
             /*cases for string matching:
@@ -81,7 +82,7 @@ pub mod single_char_parser {
             //     (false, '_') => {}
             // };
             if parsing_formatted_text
-                && (c == ' ' || is_formatting_token(c))
+                && (c == ' ' || html_tag.is_special_char(c))
                 && start_idx == curr_idx
             {
                 //move start_idx backwards so that the previously captured '*' is captured in plaintext
@@ -89,13 +90,13 @@ pub mod single_char_parser {
                 //switch to parsing italics
                 parsing_formatted_text = false;
             }
-            if parsing_formatted_text && is_formatting_token(c) {
+            if parsing_formatted_text && html_tag.is_special_char(c) {
                 //construct a FormatText struct storing TextState::Italics, append it to the stack
                 let italics_text = FormatText::new(true, &str[start_idx..curr_idx]);
                 stack.push(italics_text);
                 start_idx = curr_idx;
                 parsing_formatted_text = false;
-            } else if !parsing_formatted_text && is_formatting_token(c) {
+            } else if !parsing_formatted_text && html_tag.is_special_char(c) {
                 //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
                 let plain_text: FormatText = FormatText::new(false, &str[start_idx..curr_idx]);
 
@@ -155,7 +156,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _text_");
         let expected_result = String::from("some <i>text</i>");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
+            process_single_char_formats(&input_str, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -164,7 +165,7 @@ mod italics_underscore_test {
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
+            process_single_char_formats(&input_str, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -173,7 +174,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _text _");
         let expected_result = String::from("some <i>text </i>");
         let actual_result =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
+            process_single_char_formats(&input_str, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -182,7 +183,7 @@ mod italics_underscore_test {
         let input_str = String::from("some _ text _");
         let expected_result = String::from("some _ text _");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
+            process_single_char_formats(&input_str, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -191,7 +192,7 @@ mod italics_underscore_test {
         let input_str = String::from("some __text");
         let expected_result = String::from("some __text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_underscore_token, ITALICS_UNDERSCORE_TAG);
+            process_single_char_formats(&input_str, ITALICS_UNDERSCORE_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
@@ -211,7 +212,7 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text*");
         let expected_result = String::from("some <i>text</i>");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
+        let actual_result = process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -219,7 +220,7 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
+        let actual_result = process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -227,7 +228,7 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("some *text *");
         let expected_result = String::from("some <i>text </i>");
-        let actual_result = process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
+        let actual_result = process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -236,7 +237,7 @@ mod italics_asterisk_test {
         let input_str = String::from("some * text *");
         let expected_result = String::from("some * text *");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
+            process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -245,7 +246,7 @@ mod italics_asterisk_test {
         let input_str = String::from("some **text");
         let expected_result = String::from("some **text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_asterisk_token, ITALICS_ASTERISK_TAG);
+            process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
@@ -267,7 +268,7 @@ mod code_snippet_tests {
         let input_str = String::from("some `text`");
         let expected_result = String::from("some <code>text</code>");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
+            process_single_char_formats(&input_str, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -276,7 +277,7 @@ mod code_snippet_tests {
         let input_str = String::from("plain text");
         let expected_result = String::from("plain text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
+            process_single_char_formats(&input_str, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -285,7 +286,7 @@ mod code_snippet_tests {
         let input_str = String::from("some `text `");
         let expected_result = String::from("some <code>text </code>");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
+            process_single_char_formats(&input_str, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -294,7 +295,7 @@ mod code_snippet_tests {
         let input_str = String::from("some ` text `");
         let expected_result = String::from("some ` text `");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
+            process_single_char_formats(&input_str, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
     #[test]
@@ -303,7 +304,7 @@ mod code_snippet_tests {
         let input_str = String::from("some ``text");
         let expected_result = String::from("some ``text");
         let actual_result: String =
-            process_single_char_formats(&input_str, is_code_token, CODE_TAG);
+            process_single_char_formats(&input_str, CODE_TAG);
         assert_eq!(actual_result, expected_result);
     }
 }
