@@ -6,8 +6,8 @@
 pub mod single_char_parser {
 
     pub struct FormatText<'a> {
-        formatted: bool,
-        substring: &'a str,
+        pub formatted: bool,
+        pub substring: &'a str,
     }
     pub struct HtmlTag<'a> {
         pub opening_tag: &'a str,
@@ -30,7 +30,7 @@ pub mod single_char_parser {
         }
     }
     impl FormatText<'_> {
-        fn new(formatted: bool, substring: &str) -> FormatText {
+        pub fn new(formatted: bool, substring: &str) -> FormatText {
             FormatText {
                 formatted,
                 substring,
@@ -44,7 +44,6 @@ pub mod single_char_parser {
         }
     }
     pub fn process_single_char_formats(str: &str, html_tag: HtmlTag) -> String {
-        //make it generic over any type that implements
         let mut result: String = String::new();
         let mut stack: Vec<FormatText> = Vec::new();
         let mut parsing_formatted_text: bool = false;
@@ -234,6 +233,14 @@ mod italics_asterisk_test {
         //string with space before pound sign should not be converted
         let input_str = String::from("some * text *");
         let expected_result = String::from("some * text *");
+        let actual_result: String = process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn invalid_single_star() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some * text");
+        let expected_result = String::from("some * text");
         let actual_result: String = process_single_char_formats(&input_str, ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result, expected_result);
     }

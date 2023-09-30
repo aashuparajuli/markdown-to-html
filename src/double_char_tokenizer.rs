@@ -1,5 +1,7 @@
+use crate::single_char_pattern::single_char_parser::FormatText;
+
 #[derive(Clone, Copy, Debug)]
-pub enum Token{
+pub enum Token {
     // Plaintext(usize, usize),
     Plaintext(usize, usize),
     Asterisk,
@@ -22,6 +24,9 @@ impl CharType {
     }
 }
 pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
+    if str.is_empty() {
+        return Vec::new();
+    }
     use Token;
     //make it generic over any type that implements
     let mut token_stream: Vec<Token> = Vec::new();
@@ -47,31 +52,29 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
             }
             (Some(CharType::Plaintext), _) => {
                 //append plaintext
-                token_stream.push(Token::Plaintext(start_idx, i)); 
+                token_stream.push(Token::Plaintext(start_idx, i));
                 reading_plaintext = false;
             }
             (_, _) => (),
         };
-        
+
         match next_char {
-            CharType::Asterisk if matches!
-                (token_stream.last(), Some(Token::Asterisk))=> {
+            CharType::Asterisk if matches!(token_stream.last(), Some(Token::Asterisk)) => {
                 //trigger double asterisk
                 token_stream.pop();
-                token_stream.push(Token::DoubleAsterisk);   
-           },
+                token_stream.push(Token::DoubleAsterisk);
+            }
             CharType::Asterisk => {
                 //push asterisk normally
                 token_stream.push(Token::Asterisk);
-            },
+            }
             CharType::Space => {
                 //push space normally
                 token_stream.push(Token::Space);
-            },
+            }
             CharType::Plaintext => {
                 //do nothing, plaintext taken care of by previous match
-            },
-
+            }
         };
         curr_section = Some(next_char);
     }
@@ -85,24 +88,43 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     token_stream
 }
 
+impl FormatText<'_> {
+    fn to_html(&self) -> String {
+        match self.formatted {
+            true => format!("<b>{}</b>", self.substring),
+            false => self.substring.to_string(),
+        }
+    }
+}
 pub fn token_parser(tokens: Vec<Token>) -> String{
+    let mut stack: Vec<FormatText> = Vec::new();
+    let mut result: String = String::new();
+    let mut parsing_formatted_text: bool = false;
+    let mut start_idx: usize = 0;
+    let mut curr_char: Option<CharType> = None; 
 
-    let mut stack: Vec<Token> = Vec::new();
+    for next_token in tokens {
+        // match (curr_char, next_token){
+
+        // }
+    }
+    stack
+        .iter()
+        .for_each(|subsection| result.push_str(&subsection.to_html()));
+    result
+
     //initial scenario:
     //if prev_token, None: append curr_token
     //else, append curr_token
 
-
     //better version:
-    // if prev_token is None, append token
-    //if (prev,curr) is (Space, asterisk), append curr
-    //if (prev,curr) is (Space, asterisk), append curr
-
-
-    // for token in tokens{
-
-    // }
-    String::new()
+    // if prev_token is None, append curr. set prev_token to curr
+    //if (prev,curr) is (Space, asterisk), append curr. set prev_token to token::asterisk
+    //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
+    //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
+    //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
+    //if (prev,curr) is (Asterisk, asterisk), append curr. set prev_token to asterisk.
+    //if (prev,curr) is (Asterisk, asterisk), append curr. set prev_token to asterisk.
 }
 #[cfg(test)]
 mod test_tokenizer {
