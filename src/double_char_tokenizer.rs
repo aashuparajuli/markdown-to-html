@@ -25,10 +25,11 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     //make it generic over any type that implements
     let mut token_stream: Vec<Token> = Vec::new();
     let mut curr_token: Option<Token> = None;
-
-    let mut start_idx: usize = 0;
+    let mut curr_section: Option<CharType> = None;
+    let mut start_idx: usize = usize::max_value();
+    let mut reading_plaintext: bool = false;
     for (i, c) in str.char_indices() {
-        let next_char = CharType::new(c);
+        let next_char: CharType = CharType::new(c);
 
         //preconditions, dealing with altering previous elements
         //if prev char is not plaintext && curr char is plaintext => set start_idx
@@ -37,37 +38,66 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
         //do nothing
 
         //otherwise, just push to stack
+        if !matches!(curr_section, Some(CharType::Plaintext))
+            && matches!(next_char, CharType::Plaintext)
+        {
+            start_idx = i;
+            reading_plaintext = true;
+        } else if matches!(curr_section, Some(CharType::Plaintext))
+            && !matches!(next_char, CharType::Plaintext)
+        {
+            //append plaintext
+            token_stream.push(Token::Plaintext);
+            reading_plaintext = false;
+        } else if matches!(curr_section, Some(CharType::Plaintext))
+            && !matches!(next_char, CharType::Plaintext)
+        {
+            //do nothing
+        }
 
-        match (curr_token, next_char) {
-            (None, _ ) => {
-                //just push the token
-                let next_token = match next_char {
-                    CharType::Asterisk => Token::Asterisk,
-                    CharType::Plaintext => Token::Plaintext ,
-                    CharType::Space => Token::Space,
-                };
-                curr_token = Some(next_token.clone());
-                token_stream.push(next_token)
-            }
-            (Some(Token::Plaintext), CharType::Plaintext) => {
-                //do nothing
-            }
-            (Some(Token::Plaintext), CharType::Asterisk) => {
-                //end plaintext, push it
-                let _tuple = (start_idx, i);
-                //push asterisk
-                token_stream.push(Token::Asterisk);
-            },
-            (Some(Token::Plaintext), CharType::Space)=>{
-                let _tuple = (start_idx, i);
-                //push space
-                token_stream.push(Token::Space);
-            }
-            (_, CharType::Asterisk) => token_stream.push(Token::Asterisk),
-            (_, CharType::Plaintext) => token_stream.push(Token::Plaintext),
-            (_, CharType::Space) => token_stream.push(Token::Space),
-        };
+        if matches!(next_char, CharType::Asterisk) {
+            token_stream.push(Token::Asterisk);
+        } else if matches!(next_char, CharType::Space) {
+            token_stream.push(Token::Space);
+        }
+
+        // match (curr_section, next_char) {
+        //     (None, _) => {
+        //         //just push the token
+        //         let next_token = match next_char {
+        //             CharType::Asterisk => Token::Asterisk,
+        //             CharType::Plaintext => Token::Plaintext,
+        //             CharType::Space => Token::Space,
+        //         };
+        //         // curr_token = Some(next_token.clone());
+        //         token_stream.push(next_token)
+        //     }
+        //     (Some(CharType::Plaintext), CharType::Plaintext) => {
+        //         //do nothing
+        //     }
+        //     (Some(CharType::Plaintext), CharType::Asterisk) => {
+        //         //end plaintext, push it
+        //         let _tuple = (start_idx, i);
+        //         //push asterisk
+        //         token_stream.push(Token::Asterisk);
+        //     }
+        //     (Some(CharType::Plaintext), CharType::Space) => {
+        //         let _tuple = (start_idx, i);
+        //         //push space
+        //         token_stream.push(Token::Space);
+        //     }
+        //     (_, CharType::Asterisk) => token_stream.push(Token::Asterisk),
+        //     (_, CharType::Plaintext) => token_stream.push(Token::Plaintext),
+        //     (_, CharType::Space) => token_stream.push(Token::Space),
+        // };
+        curr_section = Some(next_char);
     }
+    
+    //if plaintext is still open, close it, then add
+    if reading_plaintext{
+        token_stream.push(Token::Plaintext);
+    }
+    
     token_stream
 }
 
@@ -82,7 +112,6 @@ mod test_tokenizer {
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 1);
         assert!(matches!(actual_result[0], Token::Plaintext));
-
     }
     #[test]
     fn single_asterisk() {
