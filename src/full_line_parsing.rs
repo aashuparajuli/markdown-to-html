@@ -36,31 +36,31 @@ impl LineType{
         }
     }
 }
-pub fn determine_line_type(line: String) -> (String, LineType) {
+pub fn determine_line_type(line: &str) -> (&str, LineType) {
     if line.len() < 2 {
         (line, LineType::Other)
     } else if &line[0..2] == "# " {
         let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::Header1)
+        (remaining_str, LineType::Header1)
     } else if &line[0..2] == "> " {
         let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::Blockquote)
+        (remaining_str, LineType::Blockquote)
     } else if &line[0..2] == "- " {
         let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::UnorderedList)
+        (remaining_str, LineType::UnorderedList)
     } else if line.len() < 3 {
         (line, LineType::Other)
     } else if &line[0..3] == "## " {
         let remaining_str = &line[3..];
-        (remaining_str.to_string(), LineType::Header2)
+        (remaining_str, LineType::Header2)
     } else if &line[0..3] == "1. " {
         let remaining_str = &line[3..];
-        (remaining_str.to_string(), LineType::OrderedList)
+        (remaining_str, LineType::OrderedList)
     } else if line.len() < 4 {
         (line, LineType::Other)
     } else if &line[0..4] == "### " {
         let remaining_str = &line[4..];
-        (remaining_str.to_string(), LineType::Header3)
+        (remaining_str, LineType::Header3)
     } else {
         (line, LineType::Other)
     }
@@ -83,58 +83,58 @@ mod test_determine_line_type{
     use super::LineType;
     #[test]
     fn too_short() {
-        let input_str = String::from("##");
+        let input_str = "##";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("##"));
+        assert_eq!(output.0, "##");
         matches!(output.1, LineType::Other);
     }
     #[test]
     fn unordered_list() {
-        let input_str = String::from("- K");
+        let input_str = "- K";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("K"));
+        assert_eq!(output.0, "K");
         matches!(output.1, LineType::UnorderedList);
     }
     #[test]
     fn header_1() {
-        let input_str = String::from("# H");
+        let input_str = "# H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("H"));
+        assert_eq!(output.0, "H");
         matches!(output.1, LineType::Header1);
     }
     #[test]
     fn header_2() {
-        let input_str = String::from("## H");
+        let input_str = "## H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("H"));
+        assert_eq!(output.0, "H");
         matches!(output.1, LineType::Header2);
     }
     #[test]
     fn header_3() {
-        let input_str = String::from("### H");
+        let input_str = "### H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("H"));
+        assert_eq!(output.0, "H");
         matches!(output.1, LineType::Header3);
     }
     #[test]
     fn blockquote() {
-        let input_str = String::from("> H");
+        let input_str = "> H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("H"));
+        assert_eq!(output.0, "H");
         matches!(output.1, LineType::Blockquote);
     }
     #[test]
     fn ordered_list() {
-        let input_str = String::from("1. H");
+        let input_str = "1. H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("H"));
+        assert_eq!(output.0, "H");
         matches!(output.1, LineType::OrderedList);
     }
     #[test]
     fn other() {
-        let input_str = String::from("! H");
+        let input_str = "! H";
         let output = determine_line_type(input_str);
-        assert_eq!(output.0, String::from("! H"));
+        assert_eq!(output.0, "! H");
         matches!(output.1, LineType::Other);
     }
    

@@ -23,11 +23,11 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
 
     //process the current line, determine its state
     for line in lines {
-        let (parsed_line, new_line_state) = determine_line_type(line);
+        let (parsed_line, new_line_state) = determine_line_type(&line);
         //format the other text in the string
 
         //parse and format the bold
-        let parsed_line: String = bold::process_bold(parsed_line); //parse bold with italics
+        let parsed_line: String = bold::process_bold(parsed_line.to_string()); //parse bold with italics
         let parsed_line: String = parse_bold_underscore::process_bold(parsed_line); //parse bold with underscores
 
         //parse strikethrough
@@ -43,29 +43,6 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
         let parsed_line = new_line_state.format_line(prefix, &parsed_line);
-        // let parsed_line: String = match new_line_state {
-        //     LineType::UnorderedList => {
-        //         format!("{}<li>{}</li>\n", prefix, parsed_line)
-        //     }
-        //     LineType::OrderedList => {
-        //         format!("{}<li>{}</li>\n", prefix, parsed_line)
-        //     }
-        //     LineType::Header1 => {
-        //         format!("{}<h1>{}</h1>\n", prefix, parsed_line)
-        //     }
-        //     LineType::Header2 => {
-        //         format!("{}<h2>{}</h2>\n", prefix, parsed_line)
-        //     }
-        //     LineType::Header3 => {
-        //         format!("{}<h3>{}</h3>\n", prefix, parsed_line)
-        //     }
-        //     LineType::Other => {
-        //         format!("{}{}\n", prefix, parsed_line)
-        //     }
-        //     LineType::Blockquote => {
-        //         format!("{}<blockquote>{}</blockquote>\n", prefix, parsed_line)
-        //     }
-        // };
         file_access.write_line_to_file(&parsed_line);
         current_line_state = new_line_state;
     }
