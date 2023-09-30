@@ -3,7 +3,7 @@ pub enum Token {
     Plaintext(usize,usize),
     Asterisk,
     Space,
-    //DoubleAsterisk, //each character, except double asterisk gets it own character
+    DoubleAsterisk, //each character, except double asterisk gets it own character
 }
 #[derive(Clone, Copy)]
 enum CharType {
@@ -55,41 +55,18 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
             //do nothing
         }
 
-        if matches!(next_char, CharType::Asterisk) {
+        if matches!(token_stream.last(), Some(Token::Asterisk))
+            && matches!(next_char, CharType::Asterisk)
+        {
+            //trigger double asterisk
+            token_stream.pop();
+            token_stream.push(Token::DoubleAsterisk);   
+        }
+        else if matches!(next_char, CharType::Asterisk) {
             token_stream.push(Token::Asterisk);
         } else if matches!(next_char, CharType::Space) {
             token_stream.push(Token::Space);
         }
-
-        // match (curr_section, next_char) {
-        //     (None, _) => {
-        //         //just push the token
-        //         let next_token = match next_char {
-        //             CharType::Asterisk => Token::Asterisk,
-        //             CharType::Plaintext => Token::Plaintext,
-        //             CharType::Space => Token::Space,
-        //         };
-        //         // curr_token = Some(next_token.clone());
-        //         token_stream.push(next_token)
-        //     }
-        //     (Some(CharType::Plaintext), CharType::Plaintext) => {
-        //         //do nothing
-        //     }
-        //     (Some(CharType::Plaintext), CharType::Asterisk) => {
-        //         //end plaintext, push it
-        //         let _tuple = (start_idx, i);
-        //         //push asterisk
-        //         token_stream.push(Token::Asterisk);
-        //     }
-        //     (Some(CharType::Plaintext), CharType::Space) => {
-        //         let _tuple = (start_idx, i);
-        //         //push space
-        //         token_stream.push(Token::Space);
-        //     }
-        //     (_, CharType::Asterisk) => token_stream.push(Token::Asterisk),
-        //     (_, CharType::Plaintext) => token_stream.push(Token::Plaintext),
-        //     (_, CharType::Space) => token_stream.push(Token::Space),
-        // };
         curr_section = Some(next_char);
     }
     
@@ -127,11 +104,9 @@ mod test_tokenizer {
         //string with space before pound sign should not be converted
         let input_str = "some**";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
-        assert_eq!(actual_result.len(), 3);
+        assert_eq!(actual_result.len(), 2);
         assert!(matches!(actual_result[0], Token::Plaintext(0,4)));
-        assert!(matches!(actual_result[1], Token::Asterisk));
-        assert!(matches!(actual_result[2], Token::Asterisk));
-        //assert!(matches!(actual_result[2], Token::DoubleAsterisk));
+        assert!(matches!(actual_result[1], Token::DoubleAsterisk));
     }
     #[test]
     fn mixed() {
@@ -142,5 +117,17 @@ mod test_tokenizer {
         assert!(matches!(actual_result[0], Token::Plaintext(0,4)));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Asterisk));
+    }
+    #[test]
+    fn mixed_more() {
+        //string with space before pound sign should not be converted
+        let input_str = "some * here";
+        let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+        assert_eq!(actual_result.len(), 5);
+        assert!(matches!(actual_result[0], Token::Plaintext(0,4)));
+        assert!(matches!(actual_result[1], Token::Space));
+        assert!(matches!(actual_result[2], Token::Asterisk));
+        assert!(matches!(actual_result[3], Token::Space));
+        assert!(matches!(actual_result[4], Token::Plaintext(7,11)));
     }
 }
