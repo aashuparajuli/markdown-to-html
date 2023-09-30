@@ -86,6 +86,25 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     token_stream
 }
 
+pub fn token_parser(tokens: Vec<Token>) -> String{
+
+    let mut stack: Vec<Token> = Vec::new();
+    //initial scenario:
+    //if prev_token, None: append curr_token
+    //else, append curr_token
+
+
+    //better version:
+    // if prev_token is None, append token
+    //if (prev,curr) is (Space, asterisk), append curr
+    //if (prev,curr) is (Space, asterisk), append curr
+
+
+    // for token in tokens{
+
+    // }
+    String::new()
+}
 #[cfg(test)]
 mod test_tokenizer {
     use super::double_char_tokenizer;
