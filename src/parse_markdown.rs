@@ -3,7 +3,7 @@ use crate::file_io::FileWriter;
 use crate::parse_bold_underscore;
 use crate::strikethrough;
 use crate::parsers::{italics, inline_code};
-use crate::line_parsing::LineType;
+use crate::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -79,36 +79,6 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //file_io::write_directly_to_file(&parsed_line, file_access);file_io::write_line_to_file(&parsed_line, &mut proxy_file);
     }
 }
-
-fn determine_line_type(line: String) -> (String, LineType) {
-    if line.len() < 2 {
-        (line, LineType::Other)
-    } else if &line[0..2] == "# " {
-        let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::Header1)
-    } else if &line[0..2] == "> " {
-        let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::Blockquote)
-    } else if &line[0..2] == "- " {
-        let remaining_str = &line[2..];
-        (remaining_str.to_string(), LineType::UnorderedList)
-    } else if line.len() < 3 {
-        (line, LineType::Other)
-    } else if &line[0..3] == "## " {
-        let remaining_str = &line[3..];
-        (remaining_str.to_string(), LineType::Header2)
-    } else if &line[0..3] == "1. " {
-        let remaining_str = &line[3..];
-        (remaining_str.to_string(), LineType::OrderedList)
-    } else if line.len() < 4 {
-        (line, LineType::Other)
-    } else if &line[0..4] == "### " {
-        let remaining_str = &line[4..];
-        (remaining_str.to_string(), LineType::Header3)
-    } else {
-        (line, LineType::Other)
-    }
-}
 /*
 Parse all of the lines in the file
 for each line:
@@ -116,17 +86,7 @@ for each line:
     - return the struct containing the LineState
     - generate the correct string
  */
-fn insert_list_start_or_end(current_line_state: &LineType, new_state: &LineType) -> String {
-    match (current_line_state, new_state) {
-        (LineType::UnorderedList, LineType::UnorderedList) => String::new(),
-        (LineType::OrderedList, LineType::OrderedList) => String::new(),
-        (_, LineType::UnorderedList) => String::from("<ul>"),
-        (_, LineType::OrderedList) => String::from("<ol>"),
-        (LineType::UnorderedList, _) => String::from("</ul>"),
-        (LineType::OrderedList, _) => String::from("</ol>"),
-        (_, _) => String::new(),
-    }
-}
+
 
 #[cfg(test)]
 mod unordered_list_test {
