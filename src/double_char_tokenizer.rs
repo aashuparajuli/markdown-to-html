@@ -80,40 +80,38 @@ mod test_tokenizer {
         //string with space before pound sign should not be converted
         let input_str = "some";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
-        assert_eq!(actual_result.len(), 4);
+        assert_eq!(actual_result.len(), 1);
         assert!(matches!(actual_result[0], Token::Plaintext));
-        assert!(matches!(actual_result[1], Token::Plaintext));
-        assert!(matches!(actual_result[2], Token::Plaintext));
-        assert!(matches!(actual_result[3], Token::Plaintext));
+
     }
     #[test]
     fn single_asterisk() {
         //string with space before pound sign should not be converted
         let input_str = "som*";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
-        assert_eq!(actual_result.len(), 4);
+        assert_eq!(actual_result.len(), 2);
         assert!(matches!(actual_result[0], Token::Plaintext));
-        assert!(matches!(actual_result[1], Token::Plaintext));
-        assert!(matches!(actual_result[2], Token::Plaintext));
-        assert!(matches!(actual_result[3], Token::Asterisk));
+        assert!(matches!(actual_result[1], Token::Asterisk));
     }
     #[test]
     fn double_asterisk() {
         //string with space before pound sign should not be converted
         let input_str = "some**";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
-        assert_eq!(actual_result.len(), 6);
+        assert_eq!(actual_result.len(), 3);
         assert!(matches!(actual_result[0], Token::Plaintext));
-        assert!(matches!(actual_result[1], Token::Plaintext));
-        assert!(matches!(actual_result[2], Token::Plaintext));
-        assert!(matches!(actual_result[3], Token::Plaintext));
-        //assert!(matches!(actual_result[4], Token::DoubleAsterisk));
+        assert!(matches!(actual_result[1], Token::Asterisk));
+        assert!(matches!(actual_result[2], Token::Asterisk));
+        //assert!(matches!(actual_result[2], Token::DoubleAsterisk));
     }
     #[test]
     fn mixed() {
         //string with space before pound sign should not be converted
         let input_str = "some *";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
-        assert_eq!(actual_result.len(), 6)
+        assert_eq!(actual_result.len(), 3);
+        assert!(matches!(actual_result[0], Token::Plaintext));
+        assert!(matches!(actual_result[1], Token::Space));
+        assert!(matches!(actual_result[2], Token::Asterisk));
     }
 }
