@@ -38,15 +38,15 @@ pub fn determine_line_type(line: String) -> (String, LineType) {
         (line, LineType::Other)
     }
 }
-pub fn insert_list_start_or_end(current_line_state: &LineType, new_state: &LineType) -> String {
+pub fn insert_list_start_or_end<'a> (current_line_state: &'a LineType, new_state: &'a LineType) -> &'a str {
     match (current_line_state, new_state) {
-        (LineType::UnorderedList, LineType::UnorderedList) => String::new(),
-        (LineType::OrderedList, LineType::OrderedList) => String::new(),
-        (_, LineType::UnorderedList) => String::from("<ul>"),
-        (_, LineType::OrderedList) => String::from("<ol>"),
-        (LineType::UnorderedList, _) => String::from("</ul>"),
-        (LineType::OrderedList, _) => String::from("</ol>"),
-        (_, _) => String::new(),
+        (LineType::UnorderedList, LineType::UnorderedList) => "",
+        (LineType::OrderedList, LineType::OrderedList) => "",
+        (_, LineType::UnorderedList) => "<ul>",
+        (_, LineType::OrderedList) => "<ol>",
+        (LineType::UnorderedList, _) => "</ul>",
+        (LineType::OrderedList, _) => "</ol>",
+        (_, _) => "",
     }
 }
 
@@ -129,14 +129,14 @@ mod test_start_end_list{
         let first_line =  LineType::UnorderedList; 
         let second_line =LineType::UnorderedList;
         let output = insert_list_start_or_end(&first_line, &second_line);
-        assert_eq!(output, String::new());
+        assert_eq!(output, "");
     }
     #[test]
     fn ending_unordered_list() {
         let first_line = LineType::UnorderedList;
         let second_line = LineType::Header1;
         let output = insert_list_start_or_end(&first_line, &second_line);
-        assert_eq!(output, String::from("</ul>"));
+        assert_eq!(output, "</ul>");
     }
    
 
@@ -145,14 +145,14 @@ mod test_start_end_list{
         let first_line =  LineType::Header1; 
         let second_line =LineType::OrderedList;
         let output = insert_list_start_or_end(&first_line, &second_line);
-        assert_eq!(output, String::from("<ol>"));
+        assert_eq!(output,"<ol>");
     }
     #[test]
     fn in_ordered_list() {
         let first_line =  LineType::OrderedList; 
         let second_line =LineType::OrderedList;
         let output = insert_list_start_or_end(&first_line, &second_line);
-        assert_eq!(output, String::new());
+        assert_eq!(output, "");
     }
   
     #[test]
@@ -160,6 +160,6 @@ mod test_start_end_list{
         let first_line = LineType::OrderedList;
         let second_line = LineType::Header1;
         let output = insert_list_start_or_end(&first_line, &second_line);
-        assert_eq!(output, String::from("</ol>"));
+        assert_eq!(output, "</ol>");
     }
 }
