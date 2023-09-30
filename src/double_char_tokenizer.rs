@@ -52,10 +52,16 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
             (Some(Token::Plaintext), CharType::Plaintext) => {
                 //do nothing
             }
-            (Some(Token::Plaintext), CharType::Asterisk)  | (Some(Token::Plaintext), CharType::Space)=> {
+            (Some(Token::Plaintext), CharType::Asterisk) => {
                 //end plaintext, push it
                 let _tuple = (start_idx, i);
-                //push asterisk or plaintext
+                //push asterisk
+                token_stream.push(Token::Asterisk);
+            },
+            (Some(Token::Plaintext), CharType::Space)=>{
+                let _tuple = (start_idx, i);
+                //push space
+                token_stream.push(Token::Space);
             }
             (_, CharType::Asterisk) => token_stream.push(Token::Asterisk),
             (_, CharType::Plaintext) => token_stream.push(Token::Plaintext),
