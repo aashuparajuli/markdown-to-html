@@ -9,6 +9,33 @@ pub enum LineType {
     Other,
 }
 
+impl LineType{
+    pub fn format_line(&self, prefix: &str, parsed_line: &str) -> String{
+        match self {
+            LineType::UnorderedList => {
+                format!("{}<li>{}</li>\n", prefix, parsed_line)
+            }
+            LineType::OrderedList => {
+                format!("{}<li>{}</li>\n", prefix, parsed_line)
+            }
+            LineType::Header1 => {
+                format!("{}<h1>{}</h1>\n", prefix, parsed_line)
+            }
+            LineType::Header2 => {
+                format!("{}<h2>{}</h2>\n", prefix, parsed_line)
+            }
+            LineType::Header3 => {
+                format!("{}<h3>{}</h3>\n", prefix, parsed_line)
+            }
+            LineType::Other => {
+                format!("{}{}\n", prefix, parsed_line)
+            }
+            LineType::Blockquote => {
+                format!("{}<blockquote>{}</blockquote>\n", prefix, parsed_line)
+            }
+        }
+    }
+}
 pub fn determine_line_type(line: String) -> (String, LineType) {
     if line.len() < 2 {
         (line, LineType::Other)
@@ -162,4 +189,55 @@ mod test_start_end_list{
         let output = insert_list_start_or_end(&first_line, &second_line);
         assert_eq!(output, "</ol>");
     }
+}
+
+#[cfg(test)]
+mod test_format_line{
+    use super::LineType;
+
+    const prefix: &str = "";
+    const parsed_line: &str = "Hello World";
+    #[test]
+    fn unordered_list() {
+        let sample_line: LineType = LineType::UnorderedList;
+       let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<li>", "</li>"));
+    }
+    #[test]
+    fn header_1() {
+        let sample_line: LineType = LineType::Header1;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<h1>", "</h1>"));
+    }
+    #[test]
+    fn header_2() {
+        let sample_line: LineType = LineType::Header2;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<h2>", "</h2>"));
+    }
+    #[test]
+    fn header_3() {
+        let sample_line: LineType = LineType::Header3;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<h3>", "</h3>"));
+    }
+    #[test]
+    fn blockquote() {
+        let sample_line: LineType = LineType::Blockquote;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<blockquote>", "</blockquote>"));
+    }
+    #[test]
+    fn ordered_list() {
+        let sample_line: LineType = LineType::OrderedList;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "<li>", "</li>"));
+    }
+    #[test]
+    fn other() {
+        let sample_line: LineType = LineType::Other;
+        let output: String= sample_line.format_line(prefix, parsed_line);
+        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "", ""));
+    }
+
 }
