@@ -3,21 +3,11 @@ use crate::file_io::FileWriter;
 use crate::parse_bold_underscore;
 use crate::strikethrough;
 use crate::parsers::{italics, inline_code};
+use crate::line_parsing::LineType;
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
  */
-
-#[derive(PartialEq)]
-enum LineType {
-    UnorderedList,
-    OrderedList,
-    Header1,
-    Header2,
-    Header3,
-    Blockquote,
-    Other,
-}
 
 /**
  * Input: a Vec<String> - one String for each line in the input file
