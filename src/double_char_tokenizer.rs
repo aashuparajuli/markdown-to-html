@@ -1,10 +1,9 @@
-
 #[derive(Clone, Copy, Debug)]
 pub enum Token {
     Plaintext,
     Asterisk,
     Space,
-    DoubleAsterisk,//each character, except double asterisk gets it own character
+    DoubleAsterisk, //each character, except double asterisk gets it own character
 }
 #[derive(Clone, Copy)]
 enum CharType {
@@ -30,14 +29,15 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     let mut _start_idx: usize = 0;
     for (_i, c) in str.char_indices() {
         let curr_char = CharType::new(c);
-        match curr_char {
-            CharType::Asterisk if matches!(prev_char, Some(CharType::Asterisk))=> {
+        match (prev_char, curr_char) {
+            (_, CharType::Asterisk) if matches!(prev_char, Some(CharType::Asterisk)) => {
                 //remove pop token
                 token_stream.pop();
-                token_stream.push(Token::DoubleAsterisk)}
-            CharType::Asterisk => {token_stream.push(Token::Asterisk)},
-            CharType::Plaintext => {token_stream.push(Token::Plaintext)},
-            CharType::Space => {token_stream.push(Token::Space)},
+                token_stream.push(Token::DoubleAsterisk)
+            }
+            (_, CharType::Asterisk) => token_stream.push(Token::Asterisk),
+            (_, CharType::Plaintext) => token_stream.push(Token::Plaintext),
+            (_, CharType::Space) => token_stream.push(Token::Space),
         };
         prev_char = Some(curr_char.clone());
     }
