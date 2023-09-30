@@ -1,6 +1,7 @@
 #[derive(Clone, Copy, Debug)]
-pub enum Token {
-    Plaintext(usize, usize),
+pub enum Token<'a> {
+    // Plaintext(usize, usize),
+    Plaintext(&'a str),
     Asterisk,
     Space,
     DoubleAsterisk, //each character, except double asterisk gets it own character
@@ -46,7 +47,8 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
             }
             (Some(CharType::Plaintext), _) => {
                 //append plaintext
-                token_stream.push(Token::Plaintext(start_idx, i));
+                token_stream.push(Token::Plaintext(&str[start_idx..i]));
+                //token_stream.push(Token::Plaintext(start_idx, i));
                 reading_plaintext = false;
             }
             (_, _) => (),
@@ -77,7 +79,8 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
 
     //if plaintext is still open, close it, then add
     if reading_plaintext {
-        token_stream.push(Token::Plaintext(start_idx, str.len()));
+        token_stream.push(Token::Plaintext(&str[start_idx..]));
+        // token_stream.push(Token::Plaintext(start_idx, str.len()));
     }
 
     token_stream
@@ -93,7 +96,7 @@ mod test_tokenizer {
         let input_str = "some";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 1);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
     }
     #[test]
     fn single_asterisk() {
@@ -101,7 +104,7 @@ mod test_tokenizer {
         let input_str = "som*";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 2);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
+        assert!(matches!(actual_result[0], Token::Plaintext("som")));
         assert!(matches!(actual_result[1], Token::Asterisk));
     }
     #[test]
@@ -110,7 +113,7 @@ mod test_tokenizer {
         let input_str = "some**";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 2);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::DoubleAsterisk));
     }
     #[test]
@@ -119,7 +122,7 @@ mod test_tokenizer {
         let input_str = "some *";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 3);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Asterisk));
     }
@@ -129,10 +132,10 @@ mod test_tokenizer {
         let input_str = "some * here";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 5);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Asterisk));
         assert!(matches!(actual_result[3], Token::Space));
-        assert!(matches!(actual_result[4], Token::Plaintext(7, 11)));
+        assert!(matches!(actual_result[4], Token::Plaintext("here")));
     }
 }
