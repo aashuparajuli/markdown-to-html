@@ -165,6 +165,7 @@ mod tokenizer {
 }
 mod parse_tokens {
     use super::Token;
+    use super::HtmlTag;
     enum FormatSection {
         Text(String),
         Bold,
@@ -177,7 +178,7 @@ mod parse_tokens {
             }
         }
     }
-    pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
+    pub fn tokens_to_html(tokens: &Vec<Token>, tag:&HtmlTag) -> String {
         let mut result: String = String::new();
         let mut curr_format_section: Option<String> = None;
         let mut section_stack: Vec<FormatSection> = Vec::new();
@@ -197,7 +198,7 @@ mod parse_tokens {
                         //pop value from stack
                         section_stack.pop();
                         //push text formatted with the <b> tag
-                        *x = format!("<b>{x}</b>");
+                        *x = format!("{}{x}{}",tag.opening_tag, tag.closing_tag );
                         //continue building the formatted text after this
                     } else {
                         //push standard non-formatted text
@@ -247,13 +248,14 @@ mod parse_tokens {
 
     #[cfg(test)]
     mod test_token_parser {
+        use super::super::BOLD_ASTERISK_TAG;
         use super::tokens_to_html;
         use super::Token;
         #[test]
         fn one_token() {
             //string with space before pound sign should not be converted
             let tokens = vec![Token::Asterisk];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("*");
             assert_eq!(output, expected_output);
         }
@@ -261,7 +263,7 @@ mod parse_tokens {
         fn two_tokens() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("* ");
             assert_eq!(output, expected_output);
         }
@@ -269,7 +271,7 @@ mod parse_tokens {
         fn three_tokens() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext("p")];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("* p");
             assert_eq!(output, expected_output);
         }
@@ -277,7 +279,7 @@ mod parse_tokens {
         fn longer_plaintext() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::Asterisk, Token::Space];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("some* ");
             assert_eq!(output, expected_output);
         }
@@ -289,7 +291,7 @@ mod parse_tokens {
                 Token::DoubleAsterisk,
                 Token::Space,
             ];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("some** ");
             assert_eq!(output, expected_output);
         }
@@ -301,7 +303,7 @@ mod parse_tokens {
                 Token::Plaintext("some"),
                 Token::DoubleAsterisk,
             ];
-            let output: String = tokens_to_html(&tokens);
+            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("<b>some</b>");
             assert_eq!(output, expected_output);
         }
@@ -310,7 +312,7 @@ mod parse_tokens {
 
 pub fn parse_bold(s: &str)->String {
     let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, &BOLD_ASTERISK_TAG );
-    let parsed_string= parse_tokens::tokens_to_html(&tokens);
+    let parsed_string= parse_tokens::tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
 
     parsed_string
 }
