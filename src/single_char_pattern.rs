@@ -5,7 +5,7 @@
 //or user passes in a function to check if a character is a token, then that is used to build a function
 pub mod single_char_parser {
 
-    pub struct FormatText<'a> {
+    pub struct FormattedText<'a> {
         pub formatted: bool,
         pub substring: &'a str,
     }
@@ -29,9 +29,9 @@ pub mod single_char_parser {
             self.matching_char == c
         }
     }
-    impl FormatText<'_> {
-        pub fn new(formatted: bool, substring: &str) -> FormatText {
-            FormatText {
+    impl FormattedText<'_> {
+        pub fn new(formatted: bool, substring: &str) -> FormattedText {
+            FormattedText {
                 formatted,
                 substring,
             }
@@ -45,7 +45,7 @@ pub mod single_char_parser {
     }
     pub fn process_single_char_formats(str: &str, html_tag: HtmlTag) -> String {
         let mut result: String = String::new();
-        let mut stack: Vec<FormatText> = Vec::new();
+        let mut stack: Vec<FormattedText> = Vec::new();
         let mut parsing_formatted_text: bool = false;
         let mut start_idx: usize = 0;
         if str.is_empty() {
@@ -93,13 +93,15 @@ pub mod single_char_parser {
                 //either push plain FormatText or FormatText that represents a special character
                 if parsing_formatted_text {
                     //construct a FormatText struct storing TextState::Italics, append it to the stack
-                    let italics_text = FormatText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
+                    let italics_text =
+                        FormattedText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
                     stack.push(italics_text);
                     start_idx = curr_idx;
                     parsing_formatted_text = false;
                 } else {
                     //construct a FormattedText struct storing TextState::Plaintext, append it to the stack
-                    let plain_text: FormatText = FormatText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
+                    let plain_text: FormattedText =
+                        FormattedText::new(parsing_formatted_text, &str[start_idx..curr_idx]);
                     stack.push(plain_text);
                     //increment start pointer
                     start_idx = curr_idx + 1;
@@ -111,11 +113,11 @@ pub mod single_char_parser {
         //append any strings that have not been completed yet
         if parsing_formatted_text {
             //if there was an asterisk that is unmatched, then push it
-            let plain_text = FormatText::new(false, &str[start_idx - 1..]);
+            let plain_text = FormattedText::new(false, &str[start_idx - 1..]);
             stack.push(plain_text);
         } else if start_idx != str.len() - 1 {
             //if a plaintext substring reaches the end of the fullstring, then push the entire substring to the stack
-            let plain_text = FormatText::new(false, &str[start_idx..]);
+            let plain_text = FormattedText::new(false, &str[start_idx..]);
             stack.push(plain_text);
         }
         stack
