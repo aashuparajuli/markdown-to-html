@@ -109,35 +109,77 @@ enum FormatSection {
     Text(String),
     Bold,
 }
-
-pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
+impl FormatSection {
+    fn get_html(&self) -> String {
+        match self {
+            FormatSection::Text(x) => x.to_string(),
+            FormatSection::Bold => String::from("**"),
+        }
+    }
+}
+pub fn token_parser(tokens: &Vec<Token>) -> String {
     let mut subsections: Vec<FormattedText> = Vec::new();
     let mut stack: Vec<Token> = Vec::new();
     let mut result: String = String::new();
     let mut parsing_plain_text: bool = false;
-    let mut curr_format_section :Option<String> = None;//Maybe this should be Option<String>? not sure at this stage
-    //to extend format_section: 
+    let mut curr_format_section: Option<String> = None; //Maybe this should be Option<String>? not sure at this stage
+                                                        //to extend format_section:
     let mut start_idx: usize = 0;
     let mut end_idx: usize = 0;
 
+    let mut section_stack: Vec<FormatSection> = Vec::new();
     for next_token in tokens {
-        //stack will store FormatSection will be stored in 
+        //stack will store FormatSection will be stored in
         //push items into the FormatSection as we parse
-        //when the stack has the correct values, pop values, format them, push them back on 
-        
-        let mut section_stack:  Vec<FormatSection>  = Vec::new();
-        let _ = match(curr_format_section, next_token){
-            (Some(ref x), Token::Plaintext(s)) => {
-                //x.push_str()
-                todo!("extend plaintext");},
-            (Some(ref x), Token::DoubleAsterisk) => {todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");},
-            (Some(ref x), Token::Asterisk) => {todo!("push as plaintext");},
-            (Some(ref x), Token::Space) => {todo!("push as plaintext");},
-            (None, Token::Plaintext(s)) => {todo!("start new plaintext");},
-            (None, Token::Asterisk) => {todo!("start new plaintext");},
-            (None, Token::Space) => {todo!("start new plaintext");},
-            (None, Token::DoubleAsterisk) => {todo!("push double asterisk to stack");},
+        //when the stack has the correct values, pop values, format them, push them back on
+
+        match (curr_format_section.clone(), next_token) {
+            (Some(mut x), Token::Plaintext(s)) => {
+                x.push_str(s);
+                // todo!("extend plaintext");
+            }
+            (Some(mut x), Token::DoubleAsterisk) => {
+                if let Some(FormatSection::Bold) = section_stack.last() {
+                    //pop value from stack
+                    section_stack.pop();
+
+                    //push text formatted with the <b> tag
+                    x = format!("<b>{x}</b>");
+                    //can continue building the formatted text after this
+                } else {
+                    //push standard non-formatted text
+                    section_stack.push(FormatSection::Text(x));
+                    curr_format_section = None;
+                    section_stack.push(FormatSection::Bold);
+                }
+                //todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");
+            }
+            (Some(mut x), Token::Asterisk) => {
+                x.push('*');
+                // todo!("push as plaintext");
+            }
+            (Some(mut x), Token::Space) => {
+                x.push(' ');
+                //todo!("push space as plaintext");
+            }
+            (None, Token::Plaintext(s)) => {
+                curr_format_section = Some(String::from(*s));
+                //todo!("start new plaintext");
+            }
+            (None, Token::Asterisk) => {
+                curr_format_section = Some(String::from(" "));
+                // todo!("start new plaintext");
+            }
+            (None, Token::Space) => {
+                curr_format_section = Some(String::from("*"));
+                // todo!("start new plaintext");
+            }
+            (None, Token::DoubleAsterisk) => {
+                section_stack.push(FormatSection::Bold);
+                // todo!("push double asterisk to stack");
+            }
         };
+
         // match next_token {
         //     Token::Plaintext(_, _) => {
         //     // Token::Plaintext(x) => {
@@ -192,9 +234,9 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
         //     (false, Token::DoubleAsterisk) => {}
         // }
     }
-    subsections
+    section_stack
         .iter()
-        .for_each(|subsection| result.push_str(&subsection.get_html()));
+        .for_each(|section| result.push_str(&section.get_html()));
     result
 
     //initial scenario:
@@ -279,11 +321,11 @@ mod test_token_parser {
     use super::Token;
     #[test]
     fn one_token() {
-        let f1: FormatText<'_> = FormatText::new(true, "*");
+        let _f1: FormatText<'_> = FormatText::new(true, "*");
         //string with space before pound sign should not be converted
         let s: &str = "*";
         let tokens = vec![Token::Asterisk];
-        let output: String = token_parser(&tokens, s);
+        let output: String = token_parser(&tokens);
         let expected_output = String::from("*");
         assert_eq!(output, expected_output);
     }
@@ -292,7 +334,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
         let s: &str = "* ";
-        let output: String = token_parser(&tokens, s);
+        let output: String = token_parser(&tokens);
         let expected_output = String::from("");
         assert_eq!(output, expected_output);
     }
@@ -301,7 +343,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "* p";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext("p")];
-        let output: String = token_parser(&tokens, s);
+        let output: String = token_parser(&tokens);
         let expected_output = String::from("* _");
         assert_eq!(output, expected_output);
     }
@@ -310,7 +352,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "some* ";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-        let output: String = token_parser(&tokens, s);
+        let output: String = token_parser(&tokens);
         let expected_output = String::from("some* ");
         assert_eq!(output, expected_output);
     }
@@ -319,7 +361,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "*some*";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-        let output: String = token_parser(&tokens, s);
+        let output: String = token_parser(&tokens);
         let expected_output = String::from("</i>some</i>");
         assert_eq!(output, expected_output);
     }
