@@ -1,7 +1,7 @@
 #[derive(Clone, Copy, Debug)]
-pub enum Token {
+pub enum Token<'a> {
     // Plaintext(usize, usize),
-    Plaintext(usize, usize),
+    Plaintext(&'a str),
     Asterisk,
     Space,
     DoubleAsterisk, //each character, except double asterisk gets it own character
@@ -50,7 +50,8 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
             }
             (Some(CharType::Plaintext), _) => {
                 //append plaintext
-                token_stream.push(Token::Plaintext(start_idx, i));
+                //token_stream.push(Token::Plaintext(start_idx, i));
+                token_stream.push(Token::Plaintext(&str[start_idx..i]));
                 reading_plaintext = false;
             }
             (_, _) => (),
@@ -80,8 +81,8 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
 
     //if plaintext is still open, close it, then add
     if reading_plaintext {
-        token_stream.push(Token::Plaintext(start_idx, str.len()));
-        //token_stream.push(Token::Plaintext(&str[start_idx..]));
+        //token_stream.push(Token::Plaintext(start_idx, str.len()));
+        token_stream.push(Token::Plaintext(&str[start_idx..]));
     }
 
     token_stream
@@ -126,13 +127,13 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
         
         let mut section_stack:  Vec<FormatSection>  = Vec::new();
         let _ = match(curr_format_section, next_token){
-            (Some(ref x), Token::Plaintext(_, _)) => {
+            (Some(ref x), Token::Plaintext(s)) => {
                 //x.push_str()
                 todo!("extend plaintext");},
-            (Some(ref x), Token::DoubleAsterisk) => todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");,
-            (Some(ref x), Token::Asterisk) => todo!("push as plaintext");,
+            (Some(ref x), Token::DoubleAsterisk) => {todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");},
+            (Some(ref x), Token::Asterisk) => {todo!("push as plaintext");},
             (Some(ref x), Token::Space) => {todo!("push as plaintext");},
-            (None, Token::Plaintext(_, _)) => {todo!("start new plaintext");},
+            (None, Token::Plaintext(s)) => {todo!("start new plaintext");},
             (None, Token::Asterisk) => {todo!("start new plaintext");},
             (None, Token::Space) => {todo!("start new plaintext");},
             (None, Token::DoubleAsterisk) => {todo!("push double asterisk to stack");},
@@ -219,8 +220,8 @@ mod test_tokenizer {
         let input_str = "some";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 1);
-        // assert!(matches!(actual_result[0], Token::Plaintext("some")));
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
     }
     #[test]
     fn single_asterisk() {
@@ -228,8 +229,8 @@ mod test_tokenizer {
         let input_str = "som*";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 2);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
-        // assert!(matches!(actual_result[0], Token::Plaintext("som")));
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
+        assert!(matches!(actual_result[0], Token::Plaintext("som")));
         assert!(matches!(actual_result[1], Token::Asterisk));
     }
     #[test]
@@ -238,8 +239,8 @@ mod test_tokenizer {
         let input_str = "some**";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 2);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
-        //assert!(matches!(actual_result[0], Token::Plaintext("some")));
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
 
         assert!(matches!(actual_result[1], Token::DoubleAsterisk));
     }
@@ -249,8 +250,8 @@ mod test_tokenizer {
         let input_str = "some *";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 3);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
-        // assert!(matches!(actual_result[0], Token::Plaintext("some")));
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Asterisk));
     }
@@ -260,13 +261,13 @@ mod test_tokenizer {
         let input_str = "some * here";
         let actual_result: Vec<Token> = double_char_tokenizer(input_str);
         assert_eq!(actual_result.len(), 5);
-        assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
-        //assert!(matches!(actual_result[0], Token::Plaintext("some")));
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Asterisk));
         assert!(matches!(actual_result[3], Token::Space));
-        assert!(matches!(actual_result[4], Token::Plaintext(7, 11)));
-        // assert!(matches!(actual_result[4], Token::Plaintext("here")));
+        //assert!(matches!(actual_result[4], Token::Plaintext(7, 11)));
+        assert!(matches!(actual_result[4], Token::Plaintext("here")));
     }
 }
 
@@ -299,7 +300,7 @@ mod test_token_parser {
     fn three_tokens() {
         //string with space before pound sign should not be converted
         let s: &str = "* p";
-        let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext(2, 3)];
+        let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext("p")];
         let output: String = token_parser(&tokens, s);
         let expected_output = String::from("* _");
         assert_eq!(output, expected_output);
