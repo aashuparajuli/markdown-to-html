@@ -102,7 +102,7 @@ mod bold_underscore_tests {
     fn convert_bold_invalid_one() {
         //string with space before pound sign should not be converted
         let input_str = String::from("some __ text_ _");
-        let expected_result = String::from("some __ tex_ _");
+        let expected_result = String::from("some __ text_ _");
         let actual_result: String = parse_bold_underscore(&input_str);
         assert_eq!(actual_result, expected_result);
     }

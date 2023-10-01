@@ -5,7 +5,7 @@ use crate::single_char_pattern::single_char_parser::HtmlTag;
 pub enum Token<'a> {
     // Plaintext(usize, usize),
     Plaintext(&'a str),
-    Asterisk,
+    Asterisk(char),
     Space,
     DoubleAsterisk(&'a HtmlTag<'a>), //each character, except double asterisk gets it own character
 }
@@ -67,14 +67,14 @@ mod tokenizer {
             };
 
             match next_char {
-                CharType::Asterisk if matches!(token_stream.last(), Some(Token::Asterisk)) => {
+                CharType::Asterisk if matches!(token_stream.last(), Some(Token::Asterisk(_))) => {
                     //trigger double asterisk
                     token_stream.pop();
                     token_stream.push(Token::DoubleAsterisk(tag));
                 }
                 CharType::Asterisk => {
                     //push asterisk normally
-                    token_stream.push(Token::Asterisk);
+                    token_stream.push(Token::Asterisk(c));
                 }
                 CharType::Space => {
                     //push space normally
@@ -123,7 +123,7 @@ mod tokenizer {
             assert_eq!(actual_result.len(), 2);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
             assert!(matches!(actual_result[0], Token::Plaintext("som")));
-            assert!(matches!(actual_result[1], Token::Asterisk));
+            assert!(matches!(actual_result[1], Token::Asterisk('*')));
         }
         #[test]
         fn double_asterisk() {
@@ -187,7 +187,7 @@ mod tokenizer {
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
             assert!(matches!(actual_result[1], Token::Space));
-            assert!(matches!(actual_result[2], Token::Asterisk));
+            assert!(matches!(actual_result[2], Token::Asterisk('*')));
         }
         #[test]
         fn mixed_more() {
@@ -198,7 +198,7 @@ mod tokenizer {
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
             assert!(matches!(actual_result[1], Token::Space));
-            assert!(matches!(actual_result[2], Token::Asterisk));
+            assert!(matches!(actual_result[2], Token::Asterisk('*')));
             assert!(matches!(actual_result[3], Token::Space));
             //assert!(matches!(actual_result[4], Token::Plaintext(7, 11)));
             assert!(matches!(actual_result[4], Token::Plaintext("here")));
@@ -207,15 +207,16 @@ mod tokenizer {
 }
 mod parse_tokens {
     use super::Token;
+    #[derive(Clone, Debug)]
     enum FormatSection {
         Text(String),
-        Bold,
+        Bold(char),
     }
     impl FormatSection {
         fn get_html(&self) -> String {
             match self {
                 FormatSection::Text(x) => x.to_string(),
-                FormatSection::Bold => String::from("**"),
+                FormatSection::Bold(c) => format!("{c}{c}"),
             }
         }
     }
@@ -235,7 +236,7 @@ mod parse_tokens {
                     // todo!("extend plaintext");
                 }
                 (Some(x), Token::DoubleAsterisk(formatting_tag)) => {
-                    if let Some(FormatSection::Bold) = section_stack.last() {
+                    if let Some(FormatSection::Bold(_)) = section_stack.last() {
                         //pop value from stack
                         section_stack.pop();
                         //push text formatted with the <b> tag
@@ -248,49 +249,45 @@ mod parse_tokens {
                         //push standard non-formatted text
                         section_stack.push(FormatSection::Text(x.to_string()));
                         curr_format_section = None;
-                        section_stack.push(FormatSection::Bold);
+                        section_stack.push(FormatSection::Bold(formatting_tag.matching_char));
                     }
                     //todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");
                 }
-                (Some(ref mut x), Token::Asterisk) => {
-                    x.push('*');
+                (Some(ref mut x), Token::Asterisk(c)) => {
+                    x.push(*c);
                     // todo!("push as plaintext");
                 }
-                (Some(ref mut x), Token::Space)
-                    if matches!(section_stack.last(), Some(FormatSection::Bold)) =>
-                {
-                    section_stack.pop();
-                    x.push_str("** ");
-                    //todo!("push space as plaintext");
-                }
                 (Some(ref mut x), Token::Space) => {
-                    x.push(' ');
+                    let stack_last = section_stack.last_mut().cloned();
+                    if let Some(FormatSection::Bold(c)) = stack_last {
+                        section_stack.pop();
+                        x.push(c);
+                        x.push(c);
+                    };
                     //todo!("push space as plaintext");
+                    x.push(' ');
                 }
                 (None, Token::Plaintext(s)) => {
                     println!("starting a plaintext run");
                     curr_format_section = Some(String::from(*s));
                     //todo!("start new plaintext");
                 }
-                (None, Token::Asterisk) => {
-                    curr_format_section = Some(String::from("*"));
+                (None, Token::Asterisk(c)) => {
+                    curr_format_section = Some(String::from(*c));
                     // todo!("start new plaintext");
-                }
-                (None, Token::Space)
-                    if matches!(section_stack.last(), Some(FormatSection::Bold)) =>
-                {
-                    //pop bold token
-                    section_stack.pop();
-                    //create new Plaintext to start building
-                    curr_format_section = Some(String::from("** ")); //pushing the double asterisk from the escaped bold, then space
-                                                                     // todo!("start new plaintext");
                 }
                 (None, Token::Space) => {
-                    curr_format_section = Some(String::from(" "));
-                    // todo!("start new plaintext");
+                    //pop bold token
+                    if let Some(FormatSection::Bold(c)) = section_stack.pop() {
+                        //create new Plaintext to start building
+                        curr_format_section = Some(format!("{0}{0} ", c)); //pushing the double asterisk from the escaped bold, then space
+                    } else {
+                        //create new Plaintext to start building
+                        curr_format_section = Some(String::from(" ")); //pushing the double asterisk from the escaped bold, then space
+                    }
                 }
-                (None, Token::DoubleAsterisk(_)) => {
-                    section_stack.push(FormatSection::Bold);
+                (None, Token::DoubleAsterisk(tag)) => {
+                    section_stack.push(FormatSection::Bold(tag.matching_char));
                     // todo!("push double asterisk to stack");
                 }
             };
@@ -305,10 +302,10 @@ mod parse_tokens {
             .for_each(|section| result.push_str(&section.get_html()));
         result
     }
- 
+
     #[cfg(test)]
     mod test_token_parser {
-        
+
         use crate::single_char_pattern::single_char_parser::HtmlTag;
 
         use super::tokens_to_html;
@@ -316,12 +313,12 @@ mod parse_tokens {
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
             closing_tag: "</b>",
-           matching_char: '*',
-       };
+            matching_char: '*',
+        };
         #[test]
         fn one_token() {
             //string with space before pound sign should not be converted
-            let tokens = vec![Token::Asterisk];
+            let tokens = vec![Token::Asterisk('*')];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("*");
             assert_eq!(output, expected_output);
@@ -329,7 +326,7 @@ mod parse_tokens {
         #[test]
         fn two_tokens() {
             //string with space before pound sign should not be converted
-            let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
+            let tokens: Vec<Token> = vec![Token::Asterisk('*'), Token::Space];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("* ");
             assert_eq!(output, expected_output);
@@ -337,7 +334,7 @@ mod parse_tokens {
         #[test]
         fn three_tokens() {
             //string with space before pound sign should not be converted
-            let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext("p")];
+            let tokens: Vec<Token> = vec![Token::Asterisk('*'), Token::Space, Token::Plaintext("p")];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("* p");
             assert_eq!(output, expected_output);
@@ -345,7 +342,7 @@ mod parse_tokens {
         #[test]
         fn longer_plaintext() {
             //string with space before pound sign should not be converted
-            let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::Asterisk, Token::Space];
+            let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::Asterisk('*'), Token::Space];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("some* ");
             assert_eq!(output, expected_output);
@@ -377,8 +374,7 @@ mod parse_tokens {
     }
 }
 
-pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String{
- 
+pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String {
     //next step: don't want to pass BOLD_ASTERISK_TAG into
     let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, tag);
     let parsed_string = parse_tokens::tokens_to_html(&tokens);
