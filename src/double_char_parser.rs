@@ -182,6 +182,13 @@ pub mod strikethrough{
             assert_eq!(actual_result, expected_result);
         }
         #[test]
+        fn two_words() {
+            let input_str = String::from("~~some text~~");
+            let expected_result = String::from("<s>some text</s>");
+            let actual_result = parse_strikethrough(&input_str);
+            assert_eq!(actual_result, expected_result);
+        }
+        #[test]
         fn convert_strikethrough_invalid_one() {
             //string with space before pound sign should not be converted
             let input_str = String::from("some ~~ text~ ~");

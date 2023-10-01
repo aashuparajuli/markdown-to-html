@@ -1,6 +1,5 @@
 use crate::single_char_pattern::single_char_parser::HtmlTag;
 
-
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'a> {
     // Plaintext(usize, usize),
@@ -98,9 +97,9 @@ mod tokenizer {
     }
     #[cfg(test)]
     mod test_tokenizer {
-        use crate::single_char_pattern::single_char_parser::HtmlTag;
         use super::double_char_tokenizer;
         use super::Token;
+        use crate::single_char_pattern::single_char_parser::HtmlTag;
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
             closing_tag: "</b>",
@@ -124,6 +123,26 @@ mod tokenizer {
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
             assert!(matches!(actual_result[0], Token::Plaintext("som")));
             assert!(matches!(actual_result[1], Token::Asterisk('*')));
+        }
+        #[test]
+        fn valid_two_words() {
+            //string with space before pound sign should not be converted
+            let input_str = "**so me**";
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+            assert_eq!(actual_result.len(), 5);
+            assert!(matches!(
+                actual_result[0],
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)
+            ));
+            assert!(matches!(actual_result[1], Token::Plaintext("so")));
+            assert!(matches!(actual_result[2], Token::Space));
+            assert!(matches!(actual_result[3], Token::Plaintext("me")));
+            assert!(matches!(
+                actual_result[4],
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)
+            ));
+
+            //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         }
         #[test]
         fn double_asterisk() {
@@ -231,7 +250,6 @@ mod parse_tokens {
 
             match (&mut curr_format_section, next_token) {
                 (Some(x), Token::Plaintext(s)) => {
-                    println!("found a plaintext");
                     x.push_str(s);
                     // todo!("extend plaintext");
                 }
@@ -258,17 +276,10 @@ mod parse_tokens {
                     // todo!("push as plaintext");
                 }
                 (Some(ref mut x), Token::Space) => {
-                    let stack_last = section_stack.last_mut().cloned();
-                    if let Some(FormatSection::Bold(c)) = stack_last {
-                        section_stack.pop();
-                        x.push(c);
-                        x.push(c);
-                    };
                     //todo!("push space as plaintext");
                     x.push(' ');
                 }
                 (None, Token::Plaintext(s)) => {
-                    println!("starting a plaintext run");
                     curr_format_section = Some(String::from(*s));
                     //todo!("start new plaintext");
                 }
@@ -334,7 +345,8 @@ mod parse_tokens {
         #[test]
         fn three_tokens() {
             //string with space before pound sign should not be converted
-            let tokens: Vec<Token> = vec![Token::Asterisk('*'), Token::Space, Token::Plaintext("p")];
+            let tokens: Vec<Token> =
+                vec![Token::Asterisk('*'), Token::Space, Token::Plaintext("p")];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("* p");
             assert_eq!(output, expected_output);
@@ -342,7 +354,8 @@ mod parse_tokens {
         #[test]
         fn longer_plaintext() {
             //string with space before pound sign should not be converted
-            let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::Asterisk('*'), Token::Space];
+            let tokens: Vec<Token> =
+                vec![Token::Plaintext("some"), Token::Asterisk('*'), Token::Space];
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("some* ");
             assert_eq!(output, expected_output);
@@ -370,6 +383,23 @@ mod parse_tokens {
             let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("<b>some</b>");
             assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn valid_two_words() {
+            //string with space before pound sign should not be converted
+
+            let tokens: Vec<Token> = vec![
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
+                Token::Plaintext("so"),
+                Token::Space,
+                Token::Plaintext("me"),
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("<b>so me</b>");
+            assert_eq!(output, expected_output);
+
+            //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         }
     }
 }
