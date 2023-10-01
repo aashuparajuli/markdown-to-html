@@ -1,9 +1,14 @@
 use crate::bold;
+use crate::bold::process_bold;
 use crate::file_io::FileWriter;
 use crate::parse_bold_underscore;
 use crate::strikethrough;
 use crate::parsers::{italics, inline_code};
 use crate::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
+use crate::double_char_parser::strikethrough::parse_strikethrough;
+use crate::double_char_parser::bold::{parse_bold_asterisk, parse_bold_underscore};
+
+
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
@@ -27,11 +32,14 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         //format the other text in the string
 
         //parse and format the bold
-        let parsed_line: String = bold::process_bold(parsed_line.to_string()); //parse bold with italics
-        let parsed_line: String = parse_bold_underscore::process_bold(parsed_line); //parse bold with underscores
+        let parsed_line: String = parse_bold_asterisk(parsed_line); //parse bold with italics
+        let parsed_line: String = parse_bold_underscore(&parsed_line); //parse bold with underscores
+        // let parsed_line: String = bold::process_bold(parsed_line.to_string()); //parse bold with italics
+        // let parsed_line: String = parse_bold_underscore::process_bold(parsed_line); //parse bold with underscores
 
         //parse strikethrough
-        let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
+        // let parsed_line: String = strikethrough::process_strikethrough(parsed_line);
+        let parsed_line: String = parse_strikethrough(&parsed_line); //parse bold with underscores
 
         //parse italics under asterisk
         let parsed_line: String = italics::process_asterisk(&parsed_line);

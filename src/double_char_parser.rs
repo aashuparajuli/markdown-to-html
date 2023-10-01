@@ -1,7 +1,7 @@
 use crate::{
     double_char_tokenizer::parse_double_char, single_char_pattern::single_char_parser::HtmlTag,
 };
-mod bold {
+pub mod bold {
     use super::{HtmlTag, parse_double_char};
     pub fn parse_bold_asterisk(s: &str) -> String {
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
@@ -160,7 +160,7 @@ mod bold {
     
 }
 
-mod strikethrough{
+pub mod strikethrough{
     use super::{HtmlTag, parse_double_char};
     pub fn parse_strikethrough(s: &str) -> String {
         const STRIKETHROUGH_TAG: HtmlTag = HtmlTag {
