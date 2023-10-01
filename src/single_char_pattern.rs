@@ -9,9 +9,10 @@ pub mod single_char_parser {
         pub formatted: bool,
         pub substring: &'a str,
     }
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub struct HtmlTag<'a> {
         pub opening_tag: &'a str,
-        pub closing_tag: &'a str,
+        pub  closing_tag: &'a str,
         pub matching_char: char,
     }
     impl HtmlTag<'_> {

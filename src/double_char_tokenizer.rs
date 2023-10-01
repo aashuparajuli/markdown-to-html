@@ -1,8 +1,8 @@
 use crate::single_char_pattern::single_char_parser::HtmlTag;
 
-const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
-    opening_tag: "<b>",
-    closing_tag: "</b>",
+pub const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+     opening_tag: "<b>",
+     closing_tag: "</b>",
     matching_char: '*',
 };
 #[derive(Clone, Copy, Debug)]
@@ -11,7 +11,7 @@ pub enum Token<'a> {
     Plaintext(&'a str),
     Asterisk,
     Space,
-    DoubleAsterisk, //each character, except double asterisk gets it own character
+    DoubleAsterisk(&'a HtmlTag<'a>), //each character, except double asterisk gets it own character
 }
 
 mod tokenizer {
@@ -36,7 +36,7 @@ mod tokenizer {
             }
         }
     }
-    pub fn double_char_tokenizer<'a>(str: &'a str, tag: &HtmlTag) -> Vec<Token<'a>> {
+    pub fn double_char_tokenizer<'a>(str: &'a str, tag: &'a HtmlTag) -> Vec<Token<'a>> {
         if str.is_empty() {
             return Vec::new();
         }
@@ -74,7 +74,7 @@ mod tokenizer {
                 CharType::Asterisk if matches!(token_stream.last(), Some(Token::Asterisk)) => {
                     //trigger double asterisk
                     token_stream.pop();
-                    token_stream.push(Token::DoubleAsterisk);
+                    token_stream.push(Token::DoubleAsterisk(tag));
                 }
                 CharType::Asterisk => {
                     //push asterisk normally
@@ -102,10 +102,13 @@ mod tokenizer {
     }
     #[cfg(test)]
     mod test_tokenizer {
-       //use super::BOLD_ASTERISK_TAG;
+    use crate::single_char_pattern::single_char_parser::HtmlTag;
+
+    //use super::BOLD_ASTERISK_TAG;
         use super::double_char_tokenizer;
         use super::Token;
         use super::super::BOLD_ASTERISK_TAG;
+        
         #[test]
         fn basic() {
             //string with space before pound sign should not be converted
@@ -133,8 +136,13 @@ mod tokenizer {
             assert_eq!(actual_result.len(), 2);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
-
-            assert!(matches!(actual_result[1], Token::DoubleAsterisk));
+            let bold_tag: HtmlTag = HtmlTag {
+                opening_tag: "<b>",
+                closing_tag: "</b>",
+               matching_char: '*',
+           };
+            assert!(matches!(actual_result[1], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
+            //assert!(matches!(actual_result[1], Token::DoubleAsterisk("<b>","</b>")));
         }
         #[test]
         fn invalid_double_spaces() {
@@ -144,11 +152,11 @@ mod tokenizer {
             let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 5);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
-            assert!(matches!(actual_result[0], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[0], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
             assert!(matches!(actual_result[1], Token::Space));
             assert!(matches!(actual_result[2], Token::Plaintext("some")));
             assert!(matches!(actual_result[3], Token::Space));
-            assert!(matches!(actual_result[4], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[4], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
         }
         #[test]
         fn valid_double_spaces() {
@@ -158,9 +166,9 @@ mod tokenizer {
             let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 4);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
-            assert!(matches!(actual_result[0], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[0], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
             assert!(matches!(actual_result[1], Token::Plaintext("some")));
-            assert!(matches!(actual_result[2], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[2], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
             assert!(matches!(actual_result[3], Token::Space));
         }
         #[test]
@@ -220,7 +228,7 @@ mod parse_tokens {
                     x.push_str(s);
                     // todo!("extend plaintext");
                 }
-                (Some(x), Token::DoubleAsterisk) => {
+                (Some(x), Token::DoubleAsterisk(formatting_tag)) => {
                     if let Some(FormatSection::Bold) = section_stack.last() {
                         //pop value from stack
                         section_stack.pop();
@@ -268,7 +276,7 @@ mod parse_tokens {
                     curr_format_section = Some(String::from(" "));
                     // todo!("start new plaintext");
                 }
-                (None, Token::DoubleAsterisk) => {
+                (None, Token::DoubleAsterisk(x)) => {
                     section_stack.push(FormatSection::Bold);
                     // todo!("push double asterisk to stack");
                 }
@@ -327,7 +335,7 @@ mod parse_tokens {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![
                 Token::Plaintext("some"),
-                Token::DoubleAsterisk,
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
                 Token::Space,
             ];
             let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
@@ -338,9 +346,9 @@ mod parse_tokens {
         fn short_bold() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![
-                Token::DoubleAsterisk,
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
                 Token::Plaintext("some"),
-                Token::DoubleAsterisk,
+                Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
             ];
             let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
             let expected_output = String::from("<b>some</b>");
