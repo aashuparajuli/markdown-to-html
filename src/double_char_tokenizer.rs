@@ -210,7 +210,6 @@ mod tokenizer {
     }
 }
 mod parse_tokens {
-    use super::HtmlTag;
     use super::Token;
     enum FormatSection {
         Text(String),
@@ -224,7 +223,7 @@ mod parse_tokens {
             }
         }
     }
-    pub fn tokens_to_html(tokens: &Vec<Token>, tag: &HtmlTag) -> String {
+    pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
         let mut result: String = String::new();
         let mut curr_format_section: Option<String> = None;
         let mut section_stack: Vec<FormatSection> = Vec::new();
@@ -310,7 +309,7 @@ mod parse_tokens {
             .for_each(|section| result.push_str(&section.get_html()));
         result
     }
-
+ 
     #[cfg(test)]
     mod test_token_parser {
         use super::super::BOLD_ASTERISK_TAG;
@@ -320,7 +319,7 @@ mod parse_tokens {
         fn one_token() {
             //string with space before pound sign should not be converted
             let tokens = vec![Token::Asterisk];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("*");
             assert_eq!(output, expected_output);
         }
@@ -328,7 +327,7 @@ mod parse_tokens {
         fn two_tokens() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("* ");
             assert_eq!(output, expected_output);
         }
@@ -336,7 +335,7 @@ mod parse_tokens {
         fn three_tokens() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext("p")];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("* p");
             assert_eq!(output, expected_output);
         }
@@ -344,7 +343,7 @@ mod parse_tokens {
         fn longer_plaintext() {
             //string with space before pound sign should not be converted
             let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::Asterisk, Token::Space];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("some* ");
             assert_eq!(output, expected_output);
         }
@@ -356,7 +355,7 @@ mod parse_tokens {
                 Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
                 Token::Space,
             ];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("some** ");
             assert_eq!(output, expected_output);
         }
@@ -368,7 +367,7 @@ mod parse_tokens {
                 Token::Plaintext("some"),
                 Token::DoubleAsterisk(&BOLD_ASTERISK_TAG),
             ];
-            let output: String = tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+            let output: String = tokens_to_html(&tokens);
             let expected_output = String::from("<b>some</b>");
             assert_eq!(output, expected_output);
         }
@@ -378,7 +377,7 @@ mod parse_tokens {
 pub fn parse_bold(s: &str) -> String {
     //next step: don't want to pass BOLD_ASTERISK_TAG into
     let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, &BOLD_ASTERISK_TAG);
-    let parsed_string = parse_tokens::tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
+    let parsed_string = parse_tokens::tokens_to_html(&tokens);
 
     parsed_string
 }
