@@ -108,12 +108,13 @@ enum FormatSection {
     Text(String),
     Bold,
 }
+
 pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
     let mut subsections: Vec<FormattedText> = Vec::new();
     let mut stack: Vec<Token> = Vec::new();
     let mut result: String = String::new();
     let mut parsing_plain_text: bool = false;
-    //let mut curr_format_section: FormatSection
+    let mut curr_format_section :Option<String> = None;//Maybe this should be Option<String>? not sure at this stage
     //to extend format_section: 
     let mut start_idx: usize = 0;
     let mut end_idx: usize = 0;
@@ -124,18 +125,30 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
         //when the stack has the correct values, pop values, format them, push them back on 
         
         let mut section_stack:  Vec<FormatSection>  = Vec::new();
-        match next_token {
-            Token::Plaintext(_, _) => {
-            // Token::Plaintext(x) => {
-            //     section_stack.push(FormatSection::Text(String::from(x)));//isntead extract text from Plaintext
-                section_stack.push(FormatSection::Text(String::new()));//isntead extract text from Plaintext
-            },
-            Token::Asterisk => {todo!()},
-            Token::Space => todo!(),
-            Token::DoubleAsterisk => {
-                section_stack.push(FormatSection::Bold);//isntead extract text from Plaintext
-            },
-        }
+        let _ = match(curr_format_section, next_token){
+            (Some(ref x), Token::Plaintext(_, _)) => {
+                //x.push_str()
+                todo!("extend plaintext");},
+            (Some(ref x), Token::DoubleAsterisk) => todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");,
+            (Some(ref x), Token::Asterisk) => todo!("push as plaintext");,
+            (Some(ref x), Token::Space) => {todo!("push as plaintext");},
+            (None, Token::Plaintext(_, _)) => {todo!("start new plaintext");},
+            (None, Token::Asterisk) => {todo!("start new plaintext");},
+            (None, Token::Space) => {todo!("start new plaintext");},
+            (None, Token::DoubleAsterisk) => {todo!("push double asterisk to stack");},
+        };
+        // match next_token {
+        //     Token::Plaintext(_, _) => {
+        //     // Token::Plaintext(x) => {
+        //     //     section_stack.push(FormatSection::Text(String::from(x)));//isntead extract text from Plaintext
+        //         section_stack.push(FormatSection::Text(String::new()));//isntead extract text from Plaintext
+        //     },
+        //     Token::Asterisk => {todo!()},
+        //     Token::Space => todo!(),
+        //     Token::DoubleAsterisk => {
+        //         section_stack.push(FormatSection::Bold);//isntead extract text from Plaintext
+        //     },
+        // }
         /*if curr_format_section is Plaintext && next_token is (Plaintext, Asterisk, Space)
                  continue expanding plaintext
 
