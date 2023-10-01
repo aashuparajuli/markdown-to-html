@@ -1,10 +1,6 @@
 use crate::single_char_pattern::single_char_parser::HtmlTag;
 
-pub const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
-     opening_tag: "<b>",
-     closing_tag: "</b>",
-    matching_char: '*',
-};
+
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'a> {
     // Plaintext(usize, usize),
@@ -312,9 +308,16 @@ mod parse_tokens {
  
     #[cfg(test)]
     mod test_token_parser {
-        use super::super::BOLD_ASTERISK_TAG;
+        
+        use crate::single_char_pattern::single_char_parser::HtmlTag;
+
         use super::tokens_to_html;
         use super::Token;
+        const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+            opening_tag: "<b>",
+            closing_tag: "</b>",
+           matching_char: '*',
+       };
         #[test]
         fn one_token() {
             //string with space before pound sign should not be converted
@@ -374,78 +377,11 @@ mod parse_tokens {
     }
 }
 
-pub fn parse_bold(s: &str) -> String {
+fn parse_double_char(s: &str, tag: &HtmlTag) -> String{
+ 
     //next step: don't want to pass BOLD_ASTERISK_TAG into
-    let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, &BOLD_ASTERISK_TAG);
+    let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, tag);
     let parsed_string = parse_tokens::tokens_to_html(&tokens);
 
     parsed_string
-}
-
-#[cfg(test)]
-mod bold_tests {
-    use super::parse_bold;
-    #[test]
-    fn convert_bold() {
-        let input_str = String::from("some **text**");
-        let expected_result = String::from("some <b>text</b>");
-        let actual_result = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_one() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some ** text* *");
-        let expected_result = String::from("some ** text* *");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn invalid_double_spaces() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some ** text **");
-        let expected_result = String::from("some ** text **");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn valid_single_spaces() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some **text** ");
-        let expected_result = String::from("some <b>text</b> ");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_two() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some * * text**");
-        let expected_result = String::from("some * * text**");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_three() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some **text");
-        let expected_result = String::from("some **text");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_four() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some **text\n");
-        let expected_result = String::from("some **text\n");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
-    #[test]
-    fn convert_bold_invalid_five() {
-        //string with space before pound sign should not be converted
-        let input_str = String::from("some **text*\n");
-        let expected_result = String::from("some **text*\n");
-        let actual_result: String = parse_bold(&input_str);
-        assert_eq!(actual_result, expected_result);
-    }
 }
