@@ -377,7 +377,7 @@ mod parse_tokens {
     }
 }
 
-fn parse_double_char(s: &str, tag: &HtmlTag) -> String{
+pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String{
  
     //next step: don't want to pass BOLD_ASTERISK_TAG into
     let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, tag);

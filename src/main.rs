@@ -3,6 +3,7 @@
 mod bold;
 mod file_io;
 use clap::Parser;
+mod double_char_parser;
 mod double_char_tokenizer;
 mod full_line_parsing;
 mod parsers;
