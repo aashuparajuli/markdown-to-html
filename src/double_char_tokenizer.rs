@@ -137,6 +137,33 @@ mod tokenizer {
             assert!(matches!(actual_result[1], Token::DoubleAsterisk));
         }
         #[test]
+        fn invalid_double_spaces() {
+        //string with space before pound sign should not be converted
+            //string with space before pound sign should not be converted
+            let input_str = "** some **";
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
+            assert_eq!(actual_result.len(), 5);
+            //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+            assert!(matches!(actual_result[0], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[1], Token::Space));
+            assert!(matches!(actual_result[2], Token::Plaintext("some")));
+            assert!(matches!(actual_result[3], Token::Space));
+            assert!(matches!(actual_result[4], Token::DoubleAsterisk));
+        }
+        #[test]
+        fn valid_double_spaces() {
+        //string with space before pound sign should not be converted
+            //string with space before pound sign should not be converted
+            let input_str = "**some** ";
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
+            assert_eq!(actual_result.len(), 4);
+            //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+            assert!(matches!(actual_result[0], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[1], Token::Plaintext("some")));
+            assert!(matches!(actual_result[2], Token::DoubleAsterisk));
+            assert!(matches!(actual_result[3], Token::Space));
+        }
+        #[test]
         fn mixed() {
             //string with space before pound sign should not be converted
             let input_str = "some *";
@@ -212,6 +239,11 @@ mod parse_tokens {
                     x.push('*');
                     // todo!("push as plaintext");
                 }
+                (Some(ref mut x), Token::Space) if matches!(section_stack.last(), Some(FormatSection::Bold)) => {
+                    section_stack.pop();
+                    x.push_str("** ");
+                    //todo!("push space as plaintext");
+                }
                 (Some(ref mut x), Token::Space) => {
                     x.push(' ');
                     //todo!("push space as plaintext");
@@ -223,6 +255,13 @@ mod parse_tokens {
                 }
                 (None, Token::Asterisk) => {
                     curr_format_section = Some(String::from("*"));
+                    // todo!("start new plaintext");
+                }
+                (None, Token::Space) if matches!(section_stack.last(), Some(FormatSection::Bold)) => {
+                    //pop bold token
+                    section_stack.pop();
+                    //create new Plaintext to start building
+                    curr_format_section = Some(String::from("** "));//pushing the double asterisk from the escaped bold, then space
                     // todo!("start new plaintext");
                 }
                 (None, Token::Space) => {
@@ -311,6 +350,7 @@ mod parse_tokens {
 }
 
 pub fn parse_bold(s: &str)->String {
+    //next step: don't want to pass BOLD_ASTERISK_TAG into 
     let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, &BOLD_ASTERISK_TAG );
     let parsed_string= parse_tokens::tokens_to_html(&tokens, &BOLD_ASTERISK_TAG);
 
@@ -332,6 +372,22 @@ mod bold_tests {
         //string with space before pound sign should not be converted
         let input_str = String::from("some ** text* *");
         let expected_result = String::from("some ** text* *");
+        let actual_result: String = parse_bold(&input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn invalid_double_spaces() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some ** text **");
+        let expected_result = String::from("some ** text **");
+        let actual_result: String = parse_bold(&input_str);
+        assert_eq!(actual_result, expected_result);
+    }
+    #[test]
+    fn valid_single_spaces() {
+        //string with space before pound sign should not be converted
+        let input_str = String::from("some **text** ");
+        let expected_result = String::from("some <b>text</b> ");
         let actual_result: String = parse_bold(&input_str);
         assert_eq!(actual_result, expected_result);
     }
