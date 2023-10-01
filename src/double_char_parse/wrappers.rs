@@ -1,7 +1,110 @@
-use crate::double_char_parse::double_char_tokenizer::parse_double_char;
-use crate::single_char_parse::single_char_parser::HtmlTag;
+use crate::single_char_parse::tag::HtmlTag;
+use double_char_generator::parse_double_char;
+mod double_char_generator {
+    use crate::double_char_parse::generate_html;
+    use crate::double_char_parse::tokenizer;
+    use crate::double_char_parse::tokens::Token;
+    use crate::single_char_parse::tag::HtmlTag;
+    pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String {
+        //next step: don't want to pass BOLD_ASTERISK_TAG into
+        let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, tag);
+        let parsed_string = generate_html::tokens_to_html(&tokens);
+        parsed_string
+    }
 
+    #[cfg(test)]
+    mod test_token_parser {
+        use super::Token;
+        use crate::double_char_parse::generate_html::tokens_to_html;
+        use crate::single_char_parse::tag::HtmlTag;
+        const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+            opening_tag: "<b>",
+            closing_tag: "</b>",
+            matching_char: '*',
+        };
+        #[test]
+        fn one_token() {
+            //string with space before pound sign should not be converted
+            let tokens = vec![Token::SingleFormatChar('*')];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("*");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn two_tokens() {
+            //string with space before pound sign should not be converted
+            let tokens: Vec<Token> = vec![Token::SingleFormatChar('*'), Token::Space];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("* ");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn three_tokens() {
+            //string with space before pound sign should not be converted
+            let tokens: Vec<Token> = vec![
+                Token::SingleFormatChar('*'),
+                Token::Space,
+                Token::Plaintext("p"),
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("* p");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn longer_plaintext() {
+            //string with space before pound sign should not be converted
+            let tokens: Vec<Token> = vec![
+                Token::Plaintext("some"),
+                Token::SingleFormatChar('*'),
+                Token::Space,
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("some* ");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn single_double_asterisk() {
+            //string with space before pound sign should not be converted
+            let tokens: Vec<Token> = vec![
+                Token::Plaintext("some"),
+                Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+                Token::Space,
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("some** ");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn short_bold() {
+            //string with space before pound sign should not be converted
+            let tokens: Vec<Token> = vec![
+                Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+                Token::Plaintext("some"),
+                Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("<b>some</b>");
+            assert_eq!(output, expected_output);
+        }
+        #[test]
+        fn valid_two_words() {
+            //string with space before pound sign should not be converted
 
+            let tokens: Vec<Token> = vec![
+                Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+                Token::Plaintext("so"),
+                Token::Space,
+                Token::Plaintext("me"),
+                Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+            ];
+            let output: String = tokens_to_html(&tokens);
+            let expected_output = String::from("<b>so me</b>");
+            assert_eq!(output, expected_output);
+
+            //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+        }
+    }
+}
 pub mod bold {
     use super::{parse_double_char, HtmlTag};
     pub fn parse_bold_asterisk(s: &str) -> String {

@@ -1,4 +1,5 @@
 mod single_char_wrappers;
+pub mod tag;
 pub mod single_char_parser;
 pub use single_char_wrappers::inline_code::process_inline_code;
 pub use single_char_wrappers::italics::process_asterisk as italics_asterisk;

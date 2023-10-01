@@ -3,21 +3,12 @@
 
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
+use crate::single_char_parse::tag::HtmlTag;
 pub struct FormatText<'a> {
     pub formatted: bool,
     pub substring: &'a str,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct HtmlTag<'a> {
-    pub opening_tag: &'a str,
-    pub closing_tag: &'a str,
-    pub matching_char: char,
-}
-impl HtmlTag<'_> {
-    pub fn is_special_char(&self, c: char) -> bool {
-        self.matching_char == c
-    }
-}
+
 impl FormatText<'_> {
     pub fn new(formatted: bool, substring: &str) -> FormatText {
         FormatText {
@@ -129,6 +120,7 @@ pub const ITALICS_ASTERISK_TAG: HtmlTag = HtmlTag {
     closing_tag: "</i>",
     matching_char: '*',
 };
+
 #[cfg(test)]
 mod italics_underscore_test {
     use super::process_single_char_formats;
