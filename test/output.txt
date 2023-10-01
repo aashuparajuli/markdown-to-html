@@ -13,7 +13,7 @@ Blue __line
 
 <code>let x = 1;</code>
 
-<del>deleted text</del>
+<s>deleted text</s>
 
 <b>bold underscores</b>
 <b>bold asterisks</b>
