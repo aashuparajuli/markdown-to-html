@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code, unused_imports, unused_mut, unused_variables, non_upper_case_globals)]
 
 mod bold;
 mod file_io;
