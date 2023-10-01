@@ -1,5 +1,3 @@
-use crate::single_char_pattern::single_char_parser::FormattedText;
-
 #[derive(Clone, Copy, Debug)]
 pub enum Token {
     // Plaintext(usize, usize),
@@ -88,27 +86,37 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
 
     token_stream
 }
-
-enum FormatSection {
-    Text(String),
-    Bold,
+pub struct FormattedText<'a> {
+    pub formatted: bool,
+    pub substring: &'a str,
 }
 impl FormattedText<'_> {
-    fn to_html(&self) -> String {
+    pub fn new(formatted: bool, substring: &str) -> FormattedText {
+        FormattedText {
+            formatted,
+            substring,
+        }
+    }
+    fn get_html(&self) -> String {
         match self.formatted {
             true => format!("<b>{}</b>", self.substring),
             false => self.substring.to_string(),
         }
     }
 }
+enum FormatSection {
+    Text(String),
+    Bold,
+}
 pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
     let mut subsections: Vec<FormattedText> = Vec::new();
     let mut stack: Vec<Token> = Vec::new();
     let mut result: String = String::new();
     let mut parsing_plain_text: bool = false;
+    //let mut curr_format_section: FormatSection
+    //to extend format_section: 
     let mut start_idx: usize = 0;
     let mut end_idx: usize = 0;
-    let mut curr_char: Option<CharType> = None;
 
     for next_token in tokens {
         match (parsing_plain_text, next_token) {
@@ -136,15 +144,17 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
                     &str[start_idx..end_idx],
                 ))
             }
-            (false, Token::Plaintext(_, _)) => todo!(),
+            (false, Token::Plaintext(_, _)) => {
+                parsing_plain_text = true;
+                todo!()},
             (false, Token::Asterisk) => todo!(),
             (false, Token::Space) => todo!(),
             (false, Token::DoubleAsterisk) => {}
         }
     }
-    stack
+    subsections
         .iter()
-        .for_each(|subsection| result.push_str(&subsection.to_html()));
+        .for_each(|subsection| result.push_str(&subsection.get_html()));
     result
 
     //initial scenario:
@@ -223,10 +233,13 @@ mod test_tokenizer {
 
 #[cfg(test)]
 mod test_token_parser {
+    use crate::single_char_pattern::single_char_parser::FormatText;
+
     use super::token_parser;
     use super::Token;
     #[test]
     fn one_token() {
+        let f1: FormatText<'_> = FormatText::new(true, "*");
         //string with space before pound sign should not be converted
         let s: &str = "*";
         let tokens = vec![Token::Asterisk];
