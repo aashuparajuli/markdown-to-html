@@ -119,6 +119,32 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
     let mut end_idx: usize = 0;
 
     for next_token in tokens {
+        //stack will store FormatSection will be stored in 
+        //push items into the FormatSection as we parse
+        //when the stack has the correct values, pop values, format them, push them back on 
+        
+        let mut section_stack:  Vec<FormatSection>  = Vec::new();
+        match next_token {
+            Token::Plaintext(_, _) => {
+            // Token::Plaintext(x) => {
+            //     section_stack.push(FormatSection::Text(String::from(x)));//isntead extract text from Plaintext
+                section_stack.push(FormatSection::Text(String::new()));//isntead extract text from Plaintext
+            },
+            Token::Asterisk => {todo!()},
+            Token::Space => todo!(),
+            Token::DoubleAsterisk => {
+                section_stack.push(FormatSection::Bold);//isntead extract text from Plaintext
+            },
+        }
+        /*if curr_format_section is Plaintext && next_token is (Plaintext, Asterisk, Space)
+                 continue expanding plaintext
+
+        if curr_format_section is Bold && next_token is DoubleAsterisk
+                 append '****' as plaintext, we are escaping the bold character
+                 append to either current FormatSection::Text or create a new one
+        if curr_format_section is Bold && next_token is (Plaintext, Asterisk, Space)
+
+        */
         match (parsing_plain_text, next_token) {
             (true, Token::Plaintext(_, b)) => {
                 //continue plaintext
