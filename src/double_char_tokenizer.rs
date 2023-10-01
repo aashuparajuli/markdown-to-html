@@ -1,3 +1,10 @@
+use crate::single_char_pattern::single_char_parser::HtmlTag;
+
+const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+    opening_tag: "<b>",
+    closing_tag: "</b>",
+    matching_char: '*',
+};
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'a> {
     // Plaintext(usize, usize),
@@ -8,7 +15,10 @@ pub enum Token<'a> {
 }
 
 mod tokenizer {
+    use crate::single_char_pattern::single_char_parser::HtmlTag;
+
     use super::Token;
+    //use super::BOLD_ASTERISK_TAG;
     #[derive(Clone, Copy)]
     enum CharType {
         Asterisk,
@@ -16,15 +26,17 @@ mod tokenizer {
         Space,
     }
     impl CharType {
-        pub fn new(c: char) -> CharType {
-            match c {
-                '*' => CharType::Asterisk,
-                ' ' => CharType::Space,
-                _ => CharType::Plaintext,
+        pub fn new(c: char, tag: char) -> CharType {
+            if c == tag{
+                CharType::Asterisk
+            } else if c == ' '{
+                CharType::Space
+            } else{
+                CharType::Plaintext
             }
         }
     }
-    pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
+    pub fn double_char_tokenizer<'a>(str: &'a str, tag: &HtmlTag) -> Vec<Token<'a>> {
         if str.is_empty() {
             return Vec::new();
         }
@@ -34,7 +46,7 @@ mod tokenizer {
         let mut start_idx: usize = usize::max_value();
         let mut reading_plaintext: bool = false;
         for (i, c) in str.char_indices() {
-            let next_char: CharType = CharType::new(c);
+            let next_char: CharType = CharType::new(c, tag.matching_char);
 
             //preconditions, dealing with altering previous elements
             //if prev char is not plaintext && curr char is plaintext => set start_idx
@@ -90,13 +102,15 @@ mod tokenizer {
     }
     #[cfg(test)]
     mod test_tokenizer {
+       //use super::BOLD_ASTERISK_TAG;
         use super::double_char_tokenizer;
         use super::Token;
+        use super::super::BOLD_ASTERISK_TAG;
         #[test]
         fn basic() {
             //string with space before pound sign should not be converted
             let input_str = "some";
-            let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 1);
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
@@ -105,7 +119,7 @@ mod tokenizer {
         fn single_asterisk() {
             //string with space before pound sign should not be converted
             let input_str = "som*";
-            let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 2);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
             assert!(matches!(actual_result[0], Token::Plaintext("som")));
@@ -115,7 +129,7 @@ mod tokenizer {
         fn double_asterisk() {
             //string with space before pound sign should not be converted
             let input_str = "some**";
-            let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 2);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
@@ -126,7 +140,7 @@ mod tokenizer {
         fn mixed() {
             //string with space before pound sign should not be converted
             let input_str = "some *";
-            let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 3);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
@@ -137,7 +151,7 @@ mod tokenizer {
         fn mixed_more() {
             //string with space before pound sign should not be converted
             let input_str = "some * here";
-            let actual_result: Vec<Token> = double_char_tokenizer(input_str);
+            let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG );
             assert_eq!(actual_result.len(), 5);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
@@ -295,7 +309,7 @@ mod parse_tokens {
 }
 
 pub fn parse_bold(s: &str)->String {
-    let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s);
+    let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, &BOLD_ASTERISK_TAG );
     let parsed_string= parse_tokens::tokens_to_html(&tokens);
 
     parsed_string

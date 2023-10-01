@@ -15,7 +15,7 @@ pub mod single_char_parser {
         pub matching_char: char,
     }
     impl HtmlTag<'_> {
-        fn is_special_char(&self, c: char) -> bool {
+        pub fn is_special_char(&self, c: char) -> bool {
             self.matching_char == c
         }
     }
