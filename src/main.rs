@@ -1,8 +1,8 @@
 use clap::Parser;
-mod file_io;
-use file_io::FileAccess;
+use md_to_html::file_io;
+use md_to_html::parse_markdown;
 use std::path::PathBuf;
-mod parse_markdown;
+
 use std::time::{Duration, Instant};
 #[derive(Parser)]
 struct Cli {
@@ -13,8 +13,8 @@ fn main() {
     
     let start_reading_file = Instant::now();
     let args = Cli::parse();
-    let input_file_name = args.input_file_path;
-    let output_file_name = args.output_file_path;
+    let input_file_name: PathBuf = args.input_file_path;
+    let output_file_name: PathBuf = args.output_file_path;
 
     // let input_file_name = PathBuf::from("./benchmarks/benchmark1/input.txt");
     // let output_file_name =  PathBuf::from("./benchmarks/benchmark1/output.html");
@@ -24,7 +24,7 @@ fn main() {
     let reading_file_duration: Duration = start_reading_file.elapsed();
 
     let start_parsing_text = Instant::now();
-    let mut file_access: file_io::FileAccess = FileAccess::open_file(output_file_name);
+    let mut file_access: file_io::FileAccess = file_io::FileAccess::open_file(output_file_name);
     parse_markdown::parse_all_lines(input_lines, &mut file_access); //process the lines
     let parsing_text_duration = start_parsing_text.elapsed();
 

@@ -1,11 +1,8 @@
 use crate::file_io::FileWriter;
-use md_to_html::single_char_parse::parsers::{italics,inline_code};
+use crate::single_char_parse::{italics_asterisk, italics_underscore, process_inline_code};
 
-
-use md_to_html::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
-use md_to_html::double_char_parse::double_char_parser::bold::{parse_bold_asterisk, parse_bold_underscore};
-use md_to_html::double_char_parse::double_char_parser::strikethrough::parse_strikethrough;
-
+use crate::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
+use crate::double_char_parse::{parse_bold_asterisk, parse_bold_underscore,parse_strikethrough};
 
 /**
 . * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
@@ -40,11 +37,11 @@ pub fn parse_all_lines(lines: Vec<String>, file_access: &mut dyn FileWriter) {
         let parsed_line: String = parse_strikethrough(&parsed_line); //parse bold with underscores
 
         //parse italics under asterisk
-        let parsed_line: String = italics::process_asterisk(&parsed_line);
+        let parsed_line: String = italics_asterisk(&parsed_line);
         //parse italics using underscores
-        let parsed_line: String = italics::process_underscore(&parsed_line);
+        let parsed_line: String = italics_underscore(&parsed_line);
         //parse and format inline code blocks
-        let parsed_line: String = inline_code::process_inline_code(&parsed_line);
+        let parsed_line: String = process_inline_code(&parsed_line);
 
         //add the line-level tags at the end
         let prefix = insert_list_start_or_end(&current_line_state, &new_line_state);
