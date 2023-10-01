@@ -145,38 +145,38 @@ pub fn token_parser(tokens: &Vec<Token>, str: &str) -> String {
         if curr_format_section is Bold && next_token is (Plaintext, Asterisk, Space)
 
         */
-        match (parsing_plain_text, next_token) {
-            (true, Token::Plaintext(_, b)) => {
-                //continue plaintext
-                end_idx = *b;
-            }
-            (true, Token::Asterisk) => {
-                //append asterisk as plaintext
-                end_idx += 1;
-            }
-            (true, Token::Space) => {
-                //append space as plaintext
-                end_idx += 1;
-            }
-            (true, Token::DoubleAsterisk) => {
-                let mut is_formatted_italics = false;
-                if matches!(stack.last(), Some(Token::DoubleAsterisk)) {
-                    is_formatted_italics = true;
-                    stack.pop();
-                }
-                //end plaintext
-                subsections.push(FormattedText::new(
-                    is_formatted_italics,
-                    &str[start_idx..end_idx],
-                ))
-            }
-            (false, Token::Plaintext(_, _)) => {
-                parsing_plain_text = true;
-                todo!()},
-            (false, Token::Asterisk) => todo!(),
-            (false, Token::Space) => todo!(),
-            (false, Token::DoubleAsterisk) => {}
-        }
+        // match (parsing_plain_text, next_token) {
+        //     (true, Token::Plaintext(_, b)) => {
+        //         //continue plaintext
+        //         end_idx = *b;
+        //     }
+        //     (true, Token::Asterisk) => {
+        //         //append asterisk as plaintext
+        //         end_idx += 1;
+        //     }
+        //     (true, Token::Space) => {
+        //         //append space as plaintext
+        //         end_idx += 1;
+        //     }
+        //     (true, Token::DoubleAsterisk) => {
+        //         let mut is_formatted_italics = false;
+        //         if matches!(stack.last(), Some(Token::DoubleAsterisk)) {
+        //             is_formatted_italics = true;
+        //             stack.pop();
+        //         }
+        //         //end plaintext
+        //         subsections.push(FormattedText::new(
+        //             is_formatted_italics,
+        //             &str[start_idx..end_idx],
+        //         ))
+        //     }
+        //     (false, Token::Plaintext(_, _)) => {
+        //         parsing_plain_text = true;
+        //         todo!()},
+        //     (false, Token::Asterisk) => todo!(),
+        //     (false, Token::Space) => todo!(),
+        //     (false, Token::DoubleAsterisk) => {}
+        // }
     }
     subsections
         .iter()
@@ -269,7 +269,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "*";
         let tokens = vec![Token::Asterisk];
-        let output: String = token_parser(tokens, s);
+        let output: String = token_parser(&tokens, s);
         let expected_output = String::from("*");
         assert_eq!(output, expected_output);
     }
@@ -278,7 +278,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
         let s: &str = "* ";
-        let output: String = token_parser(tokens, s);
+        let output: String = token_parser(&tokens, s);
         let expected_output = String::from("");
         assert_eq!(output, expected_output);
     }
@@ -287,7 +287,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "* p";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space, Token::Plaintext(2, 3)];
-        let output: String = token_parser(tokens, s);
+        let output: String = token_parser(&tokens, s);
         let expected_output = String::from("* _");
         assert_eq!(output, expected_output);
     }
@@ -296,7 +296,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "some* ";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-        let output: String = token_parser(tokens, s);
+        let output: String = token_parser(&tokens, s);
         let expected_output = String::from("some* ");
         assert_eq!(output, expected_output);
     }
@@ -305,7 +305,7 @@ mod test_token_parser {
         //string with space before pound sign should not be converted
         let s: &str = "*some*";
         let tokens: Vec<Token> = vec![Token::Asterisk, Token::Space];
-        let output: String = token_parser(tokens, s);
+        let output: String = token_parser(&tokens, s);
         let expected_output = String::from("</i>some</i>");
         assert_eq!(output, expected_output);
     }
