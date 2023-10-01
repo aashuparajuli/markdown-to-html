@@ -151,24 +151,6 @@ mod tokenizer {
 }
 mod parse_tokens {
     use super::Token;
-    pub struct FormattedText<'a> {
-        pub formatted: bool,
-        pub substring: &'a str,
-    }
-    impl FormattedText<'_> {
-        pub fn new(formatted: bool, substring: &str) -> FormattedText {
-            FormattedText {
-                formatted,
-                substring,
-            }
-        }
-        fn get_html(&self) -> String {
-            match self.formatted {
-                true => format!("<b>{}</b>", self.substring),
-                false => self.substring.to_string(),
-            }
-        }
-    }
     enum FormatSection {
         Text(String),
         Bold,
@@ -183,7 +165,7 @@ mod parse_tokens {
     }
     pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
         let mut result: String = String::new();
-        let mut curr_format_section: Option<String> = None; //Maybe this should be Option<String>? not sure at this stage
+        let mut curr_format_section: Option<String> = None;
         let mut section_stack: Vec<FormatSection> = Vec::new();
         for next_token in tokens {
             //stack will store FormatSection will be stored in
@@ -202,7 +184,7 @@ mod parse_tokens {
                         section_stack.pop();
                         //push text formatted with the <b> tag
                         *x = format!("<b>{x}</b>");
-                        //can continue building the formatted text after this
+                        //continue building the formatted text after this
                     } else {
                         //push standard non-formatted text
                         section_stack.push(FormatSection::Text(x.to_string()));
@@ -251,8 +233,6 @@ mod parse_tokens {
 
     #[cfg(test)]
     mod test_token_parser {
-        use crate::single_char_pattern::single_char_parser::FormatText;
-
         use super::tokens_to_html;
         use super::Token;
         #[test]
