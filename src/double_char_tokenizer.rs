@@ -136,11 +136,6 @@ mod tokenizer {
             assert_eq!(actual_result.len(), 2);
             //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
             assert!(matches!(actual_result[0], Token::Plaintext("some")));
-            let bold_tag: HtmlTag = HtmlTag {
-                opening_tag: "<b>",
-                closing_tag: "</b>",
-               matching_char: '*',
-           };
             assert!(matches!(actual_result[1], Token::DoubleAsterisk(&BOLD_ASTERISK_TAG)));
             //assert!(matches!(actual_result[1], Token::DoubleAsterisk("<b>","</b>")));
         }
@@ -233,7 +228,7 @@ mod parse_tokens {
                         //pop value from stack
                         section_stack.pop();
                         //push text formatted with the <b> tag
-                        *x = format!("{}{x}{}",tag.opening_tag, tag.closing_tag );
+                        *x = format!("{}{x}{}",formatting_tag.opening_tag, formatting_tag.closing_tag );
                         //continue building the formatted text after this
                     } else {
                         //push standard non-formatted text
@@ -276,7 +271,7 @@ mod parse_tokens {
                     curr_format_section = Some(String::from(" "));
                     // todo!("start new plaintext");
                 }
-                (None, Token::DoubleAsterisk(x)) => {
+                (None, Token::DoubleAsterisk(_)) => {
                     section_stack.push(FormatSection::Bold);
                     // todo!("push double asterisk to stack");
                 }
