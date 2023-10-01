@@ -1,10 +1,14 @@
 use crate::file_io::FileWriter;
-use crate::parsers::{italics, inline_code};
-use crate::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
-use crate::double_char_parser::strikethrough::parse_strikethrough;
-use crate::double_char_parser::bold::{parse_bold_asterisk, parse_bold_underscore};
+use md_to_html::single_char_parse::parsers::{italics,inline_code};
+
+
+use md_to_html::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
+use md_to_html::double_char_parse::double_char_parser::bold::{parse_bold_asterisk, parse_bold_underscore};
+use md_to_html::double_char_parse::double_char_parser::strikethrough::parse_strikethrough;
+
+
 /**
- * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
+. * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
  */
 

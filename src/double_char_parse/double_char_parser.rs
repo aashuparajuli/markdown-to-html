@@ -1,6 +1,6 @@
-use crate::{
-    double_char_tokenizer::parse_double_char, single_char_pattern::single_char_parser::HtmlTag,
-};
+use crate::double_char_parse::double_char_tokenizer::parse_double_char;
+use crate::single_char_parse::single_char_pattern::single_char_parser::HtmlTag;
+
 pub mod bold {
     use super::{HtmlTag, parse_double_char};
     pub fn parse_bold_asterisk(s: &str) -> String {

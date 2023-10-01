@@ -1,4 +1,4 @@
-use crate::single_char_pattern::single_char_parser::HtmlTag;
+use crate::single_char_parse::single_char_pattern::single_char_parser::HtmlTag;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'a> {
@@ -10,7 +10,7 @@ pub enum Token<'a> {
 }
 
 mod tokenizer {
-    use crate::single_char_pattern::single_char_parser::HtmlTag;
+    use crate::single_char_parse::single_char_pattern::single_char_parser::HtmlTag;
 
     use super::Token;
     //use super::BOLD_ASTERISK_TAG;
@@ -99,7 +99,7 @@ mod tokenizer {
     mod test_tokenizer {
         use super::double_char_tokenizer;
         use super::Token;
-        use crate::single_char_pattern::single_char_parser::HtmlTag;
+        use super::HtmlTag;
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
             closing_tag: "</b>",
@@ -317,7 +317,7 @@ mod parse_tokens {
     #[cfg(test)]
     mod test_token_parser {
 
-        use crate::single_char_pattern::single_char_parser::HtmlTag;
+        use crate::single_char_parse::single_char_pattern::single_char_parser::HtmlTag;
 
         use super::tokens_to_html;
         use super::Token;

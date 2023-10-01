@@ -1,13 +1,8 @@
-mod file_io;
 use clap::Parser;
-mod double_char_parser;
-mod double_char_tokenizer;
-mod full_line_parsing;
-mod parsers;
-mod parse_markdown;
-mod single_char_pattern;
+mod file_io;
 use file_io::FileAccess;
 use std::path::PathBuf;
+mod parse_markdown;
 use std::time::{Duration, Instant};
 #[derive(Parser)]
 struct Cli {
