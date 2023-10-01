@@ -137,12 +137,6 @@ pub const ITALICS_ASTERISK_TAG: HtmlTag = HtmlTag {
 mod italics_underscore_test {
     use super::single_char_parser::process_single_char_formats;
     use super::ITALICS_UNDERSCORE_TAG;
-    fn is_underscore_token(c: char) -> bool {
-        match c {
-            '_' => true,
-            _ => false,
-        }
-    }
 
     #[test]
     fn convert_italics() {
@@ -187,12 +181,6 @@ mod italics_underscore_test {
 }
 #[cfg(test)]
 mod italics_asterisk_test {
-    fn is_asterisk_token(c: char) -> bool {
-        match c {
-            '*' => true,
-            _ => false,
-        }
-    }
     use super::single_char_parser::*;
     use super::ITALICS_ASTERISK_TAG;
     #[test]
@@ -248,12 +236,6 @@ mod italics_asterisk_test {
 #[cfg(test)]
 mod code_snippet_tests {
     use super::single_char_parser::*;
-    fn is_code_token(c: char) -> bool {
-        match c {
-            '`' => true,
-            _ => false,
-        }
-    }
     use super::CODE_TAG;
     #[test]
     fn convert_italics() {

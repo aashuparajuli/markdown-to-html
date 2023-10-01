@@ -193,52 +193,52 @@ mod test_start_end_list {
 mod test_format_line {
     use super::LineType;
 
-    const prefix: &str = "";
-    const parsed_line: &str = "Hello World";
+    const PREFIX: &str = "";
+    const PARSED_LINE: &str = "Hello World";
     #[test]
     fn unordered_list() {
         let sample_line: LineType = LineType::UnorderedList;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
-            format!("{prefix}{0}{parsed_line}{1}\n", "<li>", "</li>")
+            format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "<li>", "</li>")
         );
     }
     #[test]
     fn header_1() {
         let sample_line: LineType = LineType::Header1;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
-            format!("{prefix}{0}{parsed_line}{1}\n", "<h1>", "</h1>")
+            format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "<h1>", "</h1>")
         );
     }
     #[test]
     fn header_2() {
         let sample_line: LineType = LineType::Header2;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
-            format!("{prefix}{0}{parsed_line}{1}\n", "<h2>", "</h2>")
+            format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "<h2>", "</h2>")
         );
     }
     #[test]
     fn header_3() {
         let sample_line: LineType = LineType::Header3;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
-            format!("{prefix}{0}{parsed_line}{1}\n", "<h3>", "</h3>")
+            format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "<h3>", "</h3>")
         );
     }
     #[test]
     fn blockquote() {
         let sample_line: LineType = LineType::Blockquote;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
             format!(
-                "{prefix}{0}{parsed_line}{1}\n",
+                "{PREFIX}{0}{PARSED_LINE}{1}\n",
                 "<blockquote>", "</blockquote>"
             )
         );
@@ -246,16 +246,16 @@ mod test_format_line {
     #[test]
     fn ordered_list() {
         let sample_line: LineType = LineType::OrderedList;
-        let output: String = sample_line.format_line(prefix, parsed_line);
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
         assert_eq!(
             output,
-            format!("{prefix}{0}{parsed_line}{1}\n", "<li>", "</li>")
+            format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "<li>", "</li>")
         );
     }
     #[test]
     fn other() {
         let sample_line: LineType = LineType::Other;
-        let output: String = sample_line.format_line(prefix, parsed_line);
-        assert_eq!(output, format!("{prefix}{0}{parsed_line}{1}\n", "", ""));
+        let output: String = sample_line.format_line(PREFIX, PARSED_LINE);
+        assert_eq!(output, format!("{PREFIX}{0}{PARSED_LINE}{1}\n", "", ""));
     }
 }

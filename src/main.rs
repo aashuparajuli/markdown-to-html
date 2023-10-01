@@ -1,4 +1,3 @@
-#![allow(non_upper_case_globals)]
 
 mod file_io;
 use clap::Parser;

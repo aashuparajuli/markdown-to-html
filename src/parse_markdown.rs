@@ -258,6 +258,7 @@ mod blockquote_test {
         //assert_eq!(actual_result.len(), expected_result.len());
         assert_eq!(actual_html_lines[0], expecte_html_lines[0]);
     }
+    #[test]
     fn test_blockquote_invalid() {
         let mut actual_html_lines: Vec<String> = Vec::new();
         let markdown_lines: Vec<String> = vec![String::from(">Not quoted text")];
