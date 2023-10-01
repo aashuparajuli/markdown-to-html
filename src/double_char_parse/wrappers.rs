@@ -1,8 +1,9 @@
 use crate::double_char_parse::double_char_tokenizer::parse_double_char;
-use crate::single_char_parse::single_char_pattern::single_char_parser::HtmlTag;
+use crate::single_char_parse::single_char_parser::HtmlTag;
+
 
 pub mod bold {
-    use super::{HtmlTag, parse_double_char};
+    use super::{parse_double_char, HtmlTag};
     pub fn parse_bold_asterisk(s: &str) -> String {
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
@@ -79,7 +80,7 @@ pub mod bold {
             assert_eq!(actual_result, expected_result);
         }
     }
-    
+
     pub fn parse_bold_underscore(s: &str) -> String {
         const BOLD_UNDERSCORE_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
@@ -156,12 +157,10 @@ pub mod bold {
             assert_eq!(actual_result, expected_result);
         }
     }
-    
-    
 }
 
-pub mod strikethrough{
-    use super::{HtmlTag, parse_double_char};
+pub mod strikethrough {
+    use super::{parse_double_char, HtmlTag};
     pub fn parse_strikethrough(s: &str) -> String {
         const STRIKETHROUGH_TAG: HtmlTag = HtmlTag {
             opening_tag: "<s>",
@@ -228,8 +227,5 @@ pub mod strikethrough{
             let actual_result: String = parse_strikethrough(&input_str);
             assert_eq!(actual_result, expected_result);
         }
-    
     }
-    
-    
 }

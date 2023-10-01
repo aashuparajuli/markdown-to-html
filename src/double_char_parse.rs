@@ -1,7 +1,9 @@
-mod double_char_parser;
-pub use double_char_parser::bold::parse_bold_asterisk;
-pub use double_char_parser::bold::parse_bold_underscore;
-
-pub use double_char_parser::strikethrough::parse_strikethrough;
-
+mod wrappers;
 mod double_char_tokenizer;
+mod tokens;
+
+pub use wrappers::bold::parse_bold_asterisk;
+pub use wrappers::bold::parse_bold_underscore;
+
+pub use wrappers::strikethrough::parse_strikethrough;
+

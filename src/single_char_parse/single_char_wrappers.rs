@@ -1,5 +1,7 @@
-use crate::single_char_parse::single_char_pattern::single_char_parser::process_single_char_formats;
-use crate::single_char_parse::single_char_pattern::{ITALICS_ASTERISK_TAG, ITALICS_UNDERSCORE_TAG, CODE_TAG};
+use crate::single_char_parse::single_char_parser::process_single_char_formats;
+use crate::single_char_parse::single_char_parser::{
+    CODE_TAG, ITALICS_ASTERISK_TAG, ITALICS_UNDERSCORE_TAG,
+};
 
 pub mod inline_code {
     use super::process_single_char_formats;
