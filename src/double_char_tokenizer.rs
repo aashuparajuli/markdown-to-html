@@ -237,59 +237,6 @@ mod parse_tokens {
                     // todo!("push double asterisk to stack");
                 }
             };
-            // match next_token {
-            //     Token::Plaintext(_, _) => {
-            //     // Token::Plaintext(x) => {
-            //     //     section_stack.push(FormatSection::Text(String::from(x)));//isntead extract text from Plaintext
-            //         section_stack.push(FormatSection::Text(String::new()));//isntead extract text from Plaintext
-            //     },
-            //     Token::Asterisk => {todo!()},
-            //     Token::Space => todo!(),
-            //     Token::DoubleAsterisk => {
-            //         section_stack.push(FormatSection::Bold);//isntead extract text from Plaintext
-            //     },
-            // }
-            /*if curr_format_section is Plaintext && next_token is (Plaintext, Asterisk, Space)
-                     continue expanding plaintext
-
-            if curr_format_section is Bold && next_token is DoubleAsterisk
-                     append '****' as plaintext, we are escaping the bold character
-                     append to either current FormatSection::Text or create a new one
-            if curr_format_section is Bold && next_token is (Plaintext, Asterisk, Space)
-
-            */
-            // match (parsing_plain_text, next_token) {
-            //     (true, Token::Plaintext(_, b)) => {
-            //         //continue plaintext
-            //         end_idx = *b;
-            //     }
-            //     (true, Token::Asterisk) => {
-            //         //append asterisk as plaintext
-            //         end_idx += 1;
-            //     }
-            //     (true, Token::Space) => {
-            //         //append space as plaintext
-            //         end_idx += 1;
-            //     }
-            //     (true, Token::DoubleAsterisk) => {
-            //         let mut is_formatted_italics = false;
-            //         if matches!(stack.last(), Some(Token::DoubleAsterisk)) {
-            //             is_formatted_italics = true;
-            //             stack.pop();
-            //         }
-            //         //end plaintext
-            //         subsections.push(FormattedText::new(
-            //             is_formatted_italics,
-            //             &str[start_idx..end_idx],
-            //         ))
-            //     }
-            //     (false, Token::Plaintext(_, _)) => {
-            //         parsing_plain_text = true;
-            //         todo!()},
-            //     (false, Token::Asterisk) => todo!(),
-            //     (false, Token::Space) => todo!(),
-            //     (false, Token::DoubleAsterisk) => {}
-            // }
         }
         //push FormatSection if it has not been pushed
         if let Some(x) = curr_format_section {
@@ -300,19 +247,6 @@ mod parse_tokens {
             .iter()
             .for_each(|section| result.push_str(&section.get_html()));
         result
-
-        //initial scenario:
-        //if prev_token, None: append curr_token
-        //else, append curr_token
-
-        //better version:
-        // if prev_token is None, append curr. set prev_token to curr
-        //if (prev,curr) is (Space, asterisk), append curr. set prev_token to token::asterisk
-        //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
-        //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
-        //if (prev,curr) is (Plaintext, asterisk), append curr. set prev_token to asterisk.
-        //if (prev,curr) is (Asterisk, asterisk), append curr. set prev_token to asterisk.
-        //if (prev,curr) is (Asterisk, asterisk), append curr. set prev_token to asterisk.
     }
 
     #[cfg(test)]
