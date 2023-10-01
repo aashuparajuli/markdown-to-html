@@ -1,16 +1,13 @@
-#![allow(dead_code, non_upper_case_globals, unused_imports)]
+#![allow(non_upper_case_globals)]
 
-mod bold;
 mod file_io;
 use clap::Parser;
 mod double_char_parser;
 mod double_char_tokenizer;
 mod full_line_parsing;
 mod parsers;
-mod parse_bold_underscore;
 mod parse_markdown;
 mod single_char_pattern;
-mod strikethrough;
 use file_io::FileAccess;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};

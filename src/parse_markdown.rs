@@ -1,14 +1,8 @@
-use crate::bold;
-use crate::bold::process_bold;
 use crate::file_io::FileWriter;
-use crate::parse_bold_underscore;
-use crate::strikethrough;
 use crate::parsers::{italics, inline_code};
 use crate::full_line_parsing::{LineType, determine_line_type, insert_list_start_or_end};
 use crate::double_char_parser::strikethrough::parse_strikethrough;
 use crate::double_char_parser::bold::{parse_bold_asterisk, parse_bold_underscore};
-
-
 /**
  * Module to parse markdown selectors that affect the entire line: lines: Headers, list elements
  * Currently supports: h1, h2, h3, unordered list, and unordered list
