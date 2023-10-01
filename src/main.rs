@@ -1,4 +1,3 @@
-
 mod file_io;
 use clap::Parser;
 mod double_char_parser;
