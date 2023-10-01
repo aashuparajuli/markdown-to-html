@@ -15,15 +15,16 @@ struct Cli {
     output_file_path: PathBuf, 
 }
 fn main() {
+    
     let start_reading_file = Instant::now();
     let args = Cli::parse();
-    // let input_file_name = "./benchmarks/benchmark1/input.md";
-    // let output_file_name = "./benchmarks/benchmark1/output.html";
-
-    // let input_file_name = "./input/input.txt";
     let input_file_name = args.input_file_path;
     let output_file_name = args.output_file_path;
 
+    // let input_file_name = PathBuf::from("./benchmarks/benchmark1/input.txt");
+    // let output_file_name =  PathBuf::from("./benchmarks/benchmark1/output.html");
+
+  
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file
     let reading_file_duration: Duration = start_reading_file.elapsed();
 
