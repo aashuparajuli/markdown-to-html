@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_imports, unused_mut, unused_variables, non_upper_case_globals)]
+#![allow(dead_code, non_upper_case_globals)]
 
 mod bold;
 mod file_io;
@@ -16,7 +16,7 @@ use std::time::{Duration, Instant};
 #[derive(Parser)]
 struct Cli {
     input_file_path: PathBuf,
-    output_file_path: PathBuf,
+    output_file_path: PathBuf, 
 }
 fn main() {
     let start_reading_file = Instant::now();

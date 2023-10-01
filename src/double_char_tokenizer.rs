@@ -28,10 +28,8 @@ mod tokenizer {
         if str.is_empty() {
             return Vec::new();
         }
-        use Token;
         //make it generic over any type that implements
         let mut token_stream: Vec<Token> = Vec::new();
-        let mut curr_token: Option<Token> = None;
         let mut curr_section: Option<CharType> = None;
         let mut start_idx: usize = usize::max_value();
         let mut reading_plaintext: bool = false;
@@ -184,15 +182,8 @@ mod parse_tokens {
         }
     }
     pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
-        let mut subsections: Vec<FormattedText> = Vec::new();
-        let mut stack: Vec<Token> = Vec::new();
         let mut result: String = String::new();
-        let mut parsing_plain_text: bool = false;
         let mut curr_format_section: Option<String> = None; //Maybe this should be Option<String>? not sure at this stage
-                                                            //to extend format_section:
-        let mut start_idx: usize = 0;
-        let mut end_idx: usize = 0;
-
         let mut section_stack: Vec<FormatSection> = Vec::new();
         for next_token in tokens {
             //stack will store FormatSection will be stored in

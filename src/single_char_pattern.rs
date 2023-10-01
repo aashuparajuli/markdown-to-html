@@ -15,16 +15,6 @@ pub mod single_char_parser {
         pub matching_char: char,
     }
     impl HtmlTag<'_> {
-        // fn get_text(s: &str) -> String {
-        //     format!("{self.opening}{}</self.closing>", f.substring),
-        // }
-        pub fn new<'a>(opening: &'a str, closing: &'a str, matching_char: char) -> HtmlTag<'a> {
-            HtmlTag {
-                opening_tag: opening,
-                closing_tag: closing,
-                matching_char,
-            }
-        }
         fn is_special_char(&self, c: char) -> bool {
             self.matching_char == c
         }

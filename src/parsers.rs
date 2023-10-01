@@ -1,17 +1,9 @@
 use crate::single_char_pattern::single_char_parser::process_single_char_formats;
-use crate::single_char_pattern::single_char_parser::HtmlTag;
 use crate::single_char_pattern::{ITALICS_ASTERISK_TAG, ITALICS_UNDERSCORE_TAG, CODE_TAG};
 
 pub mod inline_code {
     use super::process_single_char_formats;
     use super::CODE_TAG;
-    use super::HtmlTag;
-    fn is_code_token(c: char) -> bool {
-        match c {
-            '`' => true,
-            _ => false,
-        }
-    }
     pub fn process_inline_code(str: &str) -> String {
         process_single_char_formats(str, CODE_TAG)
     }
@@ -20,20 +12,6 @@ pub mod italics {
     use super::process_single_char_formats;
     use super::ITALICS_ASTERISK_TAG;
     use super::ITALICS_UNDERSCORE_TAG;
-    use super::HtmlTag;
-    fn is_asterisk_token(c: char) -> bool {
-        match c {
-            '*' => true,
-            _ => false,
-        }
-    }
-    fn is_underscore_token(c: char) -> bool {
-        match c {
-            '_' => true,
-            _ => false,
-        }
-    }
-    
     pub fn process_asterisk(str: &str) -> String {
         process_single_char_formats(str, ITALICS_ASTERISK_TAG)
     }
