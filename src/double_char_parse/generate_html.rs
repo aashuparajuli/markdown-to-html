@@ -87,3 +87,87 @@ pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
         .for_each(|section| result.push_str(&section.get_html()));
     result
 }
+#[cfg(test)]
+mod test_token_parser {
+    use crate::inline_parsing::tag::HtmlTag;
+    use super::tokens_to_html;
+    use super::Token;
+    const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+        opening_tag: "<b>",
+        closing_tag: "</b>",
+        matching_char: '*',
+    };
+    #[test]
+    fn one_token() {
+        //string with space before pound sign should not be converted
+        let tokens = vec![Token::SingleFormatChar('*')];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("*");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn two_tokens() {
+        //string with space before pound sign should not be converted
+        let tokens: Vec<Token> = vec![Token::SingleFormatChar('*'), Token::Space];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("* ");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn three_tokens() {
+        //string with space before pound sign should not be converted
+        let tokens: Vec<Token> = vec![Token::SingleFormatChar('*'), Token::Space, Token::Plaintext("p")];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("* p");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn longer_plaintext() {
+        //string with space before pound sign should not be converted
+        let tokens: Vec<Token> = vec![Token::Plaintext("some"), Token::SingleFormatChar('*'), Token::Space];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("some* ");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn single_double_asterisk() {
+        //string with space before pound sign should not be converted
+        let tokens: Vec<Token> = vec![
+            Token::Plaintext("some"),
+            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+            Token::Space,
+        ];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("some** ");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn short_bold() {
+        //string with space before pound sign should not be converted
+        let tokens: Vec<Token> = vec![
+            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+            Token::Plaintext("some"),
+            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+        ];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("<b>some</b>");
+        assert_eq!(output, expected_output);
+    }
+    #[test]
+    fn valid_two_words() {
+        //string with space before pound sign should not be converted
+
+        let tokens: Vec<Token> = vec![
+            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+            Token::Plaintext("so"),
+            Token::Space,
+            Token::Plaintext("me"),
+            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG),
+        ];
+        let output: String = tokens_to_html(&tokens);
+        let expected_output = String::from("<b>so me</b>");
+        assert_eq!(output, expected_output);
+
+        //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
+    }
+}
