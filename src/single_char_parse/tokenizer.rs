@@ -19,7 +19,7 @@ impl CharType {
         }
     }
 }
-pub fn double_char_tokenizer<'a>(str: &'a str, tag: &'a HtmlTag) -> Vec<Token<'a>> {
+pub fn single_char_tokenizer<'a>(str: &'a str, tag: &'a HtmlTag) -> Vec<Token<'a>> {
     if str.is_empty() {
         return Vec::new();
     }
@@ -54,16 +54,9 @@ pub fn double_char_tokenizer<'a>(str: &'a str, tag: &'a HtmlTag) -> Vec<Token<'a
         };
 
         match next_char {
-            CharType::FormatChar
-                if matches!(token_stream.last(), Some(Token::SingleFormatChar(_))) =>
-            {
-                //trigger double asterisk
-                token_stream.pop();
-                token_stream.push(Token::DoubleFormatChar(tag));
-            }
             CharType::FormatChar => {
                 //push asterisk normally
-                token_stream.push(Token::SingleFormatChar(c));
+                token_stream.push(Token::SingleFormatChar(tag));
             }
             CharType::Space => {
                 //push space normally
@@ -87,10 +80,10 @@ pub fn double_char_tokenizer<'a>(str: &'a str, tag: &'a HtmlTag) -> Vec<Token<'a
 }
 #[cfg(test)]
 mod test_tokenizer {
-    use super::double_char_tokenizer;
+    use super::single_char_tokenizer;
     use super::HtmlTag;
     use super::Token;
-    const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
+    const ITALICS_ASTERISK_TAG: HtmlTag = HtmlTag {
         opening_tag: "<b>",
         closing_tag: "</b>",
         matching_char: '*',
@@ -99,7 +92,7 @@ mod test_tokenizer {
     fn basic() {
         //string with space before pound sign should not be converted
         let input_str = "some";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 1);
         assert!(matches!(actual_result[0], Token::Plaintext("some")));
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
@@ -108,28 +101,28 @@ mod test_tokenizer {
     fn single_asterisk() {
         //string with space before pound sign should not be converted
         let input_str = "som*";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 2);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 3)));
         assert!(matches!(actual_result[0], Token::Plaintext("som")));
-        assert!(matches!(actual_result[1], Token::SingleFormatChar('*')));
+        assert!(matches!(actual_result[1], Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)));
     }
     #[test]
     fn valid_two_words() {
         //string with space before pound sign should not be converted
-        let input_str = "**so me**";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let input_str = "*so me*";
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 5);
         assert!(matches!(
             actual_result[0],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
         assert!(matches!(actual_result[1], Token::Plaintext("so")));
         assert!(matches!(actual_result[2], Token::Space));
         assert!(matches!(actual_result[3], Token::Plaintext("me")));
         assert!(matches!(
             actual_result[4],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
 
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
@@ -137,14 +130,14 @@ mod test_tokenizer {
     #[test]
     fn double_asterisk() {
         //string with space before pound sign should not be converted
-        let input_str = "some**";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let input_str = "some*";
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 2);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(
             actual_result[1],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
         //assert!(matches!(actual_result[1], Token::DoubleAsterisk("<b>","</b>")));
     }
@@ -152,38 +145,38 @@ mod test_tokenizer {
     fn invalid_double_spaces() {
         //string with space before pound sign should not be converted
         //string with space before pound sign should not be converted
-        let input_str = "** some **";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let input_str = "* some *";
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 5);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         assert!(matches!(
             actual_result[0],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
         assert!(matches!(actual_result[1], Token::Space));
         assert!(matches!(actual_result[2], Token::Plaintext("some")));
         assert!(matches!(actual_result[3], Token::Space));
         assert!(matches!(
             actual_result[4],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
     }
     #[test]
     fn valid_double_spaces() {
         //string with space before pound sign should not be converted
         //string with space before pound sign should not be converted
-        let input_str = "**some** ";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let input_str = "*some* ";
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 4);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         assert!(matches!(
             actual_result[0],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
         assert!(matches!(actual_result[1], Token::Plaintext("some")));
         assert!(matches!(
             actual_result[2],
-            Token::DoubleFormatChar(&BOLD_ASTERISK_TAG)
+            Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)
         ));
         assert!(matches!(actual_result[3], Token::Space));
     }
@@ -191,23 +184,23 @@ mod test_tokenizer {
     fn mixed() {
         //string with space before pound sign should not be converted
         let input_str = "some *";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 3);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
-        assert!(matches!(actual_result[2], Token::SingleFormatChar('*')));
+        assert!(matches!(actual_result[2], Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)));
     }
     #[test]
     fn mixed_more() {
         //string with space before pound sign should not be converted
         let input_str = "some * here";
-        let actual_result: Vec<Token> = double_char_tokenizer(input_str, &BOLD_ASTERISK_TAG);
+        let actual_result: Vec<Token> = single_char_tokenizer(input_str, &ITALICS_ASTERISK_TAG);
         assert_eq!(actual_result.len(), 5);
         //assert!(matches!(actual_result[0], Token::Plaintext(0, 4)));
         assert!(matches!(actual_result[0], Token::Plaintext("some")));
         assert!(matches!(actual_result[1], Token::Space));
-        assert!(matches!(actual_result[2], Token::SingleFormatChar('*')));
+        assert!(matches!(actual_result[2], Token::SingleFormatChar(&ITALICS_ASTERISK_TAG)));
         assert!(matches!(actual_result[3], Token::Space));
         //assert!(matches!(actual_result[4], Token::Plaintext(7, 11)));
         assert!(matches!(actual_result[4], Token::Plaintext("here")));

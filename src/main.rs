@@ -12,12 +12,12 @@ struct Cli {
 fn main() {
     
     let start_reading_file = Instant::now();
-    let args = Cli::parse();
-    let input_file_name: PathBuf = args.input_file_path;
-    let output_file_name: PathBuf = args.output_file_path;
+    // let args = Cli::parse();
+    // let input_file_name: PathBuf = args.input_file_path;
+    // let output_file_name: PathBuf = args.output_file_path;
 
-    // let input_file_name = PathBuf::from("./benchmarks/benchmark1/input.txt");
-    // let output_file_name =  PathBuf::from("./benchmarks/benchmark1/output.html");
+    let input_file_name = PathBuf::from("./benchmarks/benchmark1/input.txt");
+    let output_file_name =  PathBuf::from("./benchmarks/benchmark1/output.html");
 
   
     let input_lines = file_io::get_file_lines(input_file_name); //get the lines from the file

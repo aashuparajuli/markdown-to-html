@@ -1,3 +1,5 @@
+#[allow(dead_code, unused_variables)]
+
 pub mod single_char_parse;
 pub mod double_char_parse;
 pub mod full_line_parsing;
