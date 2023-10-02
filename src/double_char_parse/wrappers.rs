@@ -3,7 +3,7 @@ use double_char_generator::parse_double_char;
 mod double_char_generator {
     use crate::double_char_parse::generate_html;
     use crate::double_char_parse::tokenizer;
-    use crate::double_char_parse::tokens::Token;
+    use crate::double_char_parse::token::Token;
     use crate::inline_parsing::tag::HtmlTag;
     pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String {
         //next step: don't want to pass BOLD_ASTERISK_TAG into

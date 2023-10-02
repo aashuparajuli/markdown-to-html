@@ -1,4 +1,4 @@
-use super::tokens::Token;
+use super::token::Token;
 
 #[derive(Clone, Debug)]
 enum FormatSection {

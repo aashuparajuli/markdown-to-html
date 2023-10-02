@@ -10,7 +10,7 @@ enum CharType {
 }
 impl CharType {
     pub fn new(c: char, tag: char) -> CharType {
-        if c == tag {
+        if c == '*' {
             CharType::FormatChar
         } else if c == ' ' {
             CharType::Space
