@@ -1,10 +1,10 @@
-use crate::single_char_parse::tag::HtmlTag;
+use crate::inline_parsing::tag::HtmlTag;
 use double_char_generator::parse_double_char;
 mod double_char_generator {
     use crate::double_char_parse::generate_html;
     use crate::double_char_parse::tokenizer;
     use crate::double_char_parse::tokens::Token;
-    use crate::single_char_parse::tag::HtmlTag;
+    use crate::inline_parsing::tag::HtmlTag;
     pub fn parse_double_char(s: &str, tag: &HtmlTag) -> String {
         //next step: don't want to pass BOLD_ASTERISK_TAG into
         let tokens: Vec<Token> = tokenizer::double_char_tokenizer(s, tag);
@@ -16,7 +16,7 @@ mod double_char_generator {
     mod test_token_parser {
         use super::Token;
         use crate::double_char_parse::generate_html::tokens_to_html;
-        use crate::single_char_parse::tag::HtmlTag;
+        use crate::inline_parsing::tag::HtmlTag;
         const BOLD_ASTERISK_TAG: HtmlTag = HtmlTag {
             opening_tag: "<b>",
             closing_tag: "</b>",

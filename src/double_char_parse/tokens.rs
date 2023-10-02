@@ -1,4 +1,4 @@
-use crate::single_char_parse::tag::HtmlTag;
+use crate::inline_parsing::tag::HtmlTag;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'a> {

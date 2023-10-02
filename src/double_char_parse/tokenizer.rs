@@ -1,6 +1,6 @@
 use super::tokens::Token;
 
-use crate::single_char_parse::tag::HtmlTag;
+use crate::inline_parsing::tag::HtmlTag;
 //use super::BOLD_ASTERISK_TAG;
 #[derive(Clone, Copy)]
 enum CharType {

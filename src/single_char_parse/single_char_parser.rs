@@ -3,7 +3,7 @@
 
 //or user passes in a character, then a TextState is built off that
 //or user passes in a function to check if a character is a token, then that is used to build a function
-use crate::single_char_parse::tag::HtmlTag;
+use crate::inline_parsing::tag::HtmlTag;
 pub struct FormatText<'a> {
     pub formatted: bool,
     pub substring: &'a str,
