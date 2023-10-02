@@ -62,7 +62,6 @@ pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
             }
             (Some(x), Token::SingleFormatChar(formatting_tag)) => {
                 let prev_token = section_stack.pop().clone();
-
                 if let Some(FormatSection::Format(formatting_tag)) = prev_token {
                     //pop value from stack
                     section_stack.pop();
@@ -81,24 +80,29 @@ pub fn tokens_to_html(tokens: &Vec<Token>) -> String {
                 }
                 //todo!("push current String to stack as FormatSection::Text, push DoubleAsterisk to stack. (Also check for the DoubleAsterisk before");
             }
-            (Some(ref mut x), Token::Space) => {
-                //todo!("push space as plaintext");
-                x.push(' ');
-            }
             (None, Token::Plaintext(s)) => {
-                curr_plaintext = Some(String::from(*s));
+                curr_plaintext.expand(*s);//expanding using Space
+                //curr_plaintext = Some(String::from(*s));
                 //todo!("start new plaintext");
             }
+            (Some(ref mut x), Token::Space) => {
+                //todo!("push space as plaintext");
+                curr_plaintext.expand(" ");//convert Token::Space into plaintext
+                //x.push(' ');
+            }
             (None, Token::Space) => {
-                let prev_token = section_stack.pop().clone();
+                let prev_token = section_stack.last().cloned();
                 //pop bold token(e)
                 if let Some(FormatSection::Format(tag)) = prev_token {
-                    //create new Plaintext to start building
-                    curr_plaintext = Some(format!("{0} ", tag.escape())); //pushing the double asterisk from the escaped bold, then space
-                } else {
-                    //create new Plaintext to start building
-                    curr_plaintext = Some(String::from(" ")); //pushing the double asterisk from the escaped bold, then space
-                }
+                    section_stack.pop(); 
+                    //Push escaped plaintext to plaintext
+                    curr_plaintext.expand(&tag.escape());//escape the FormatToken that was previously here
+                    //curr_plaintext.expand(" ");//expanding using Space
+                    // curr_plaintext = Some(format!("{0} ", tag.escape())); //pushing the double asterisk from the escaped bold, then space
+                } 
+                //add space to plaintext
+                curr_plaintext.expand(" ");
+                
             }
             (None, Token::SingleFormatChar(tag)) => {
                 section_stack.push(FormatSection::Format(tag));
