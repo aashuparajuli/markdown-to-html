@@ -9,3 +9,13 @@ impl HtmlTag<'_> {
         self.matching_char == c
     }
 }
+
+enum Tag{
+    ItalicsAsterisk,
+    ItalicsUnderscore,
+    BoldAsterisk,
+    BoldUnderscore,
+    Strikethrough,
+    InlineCode,
+    
+}
