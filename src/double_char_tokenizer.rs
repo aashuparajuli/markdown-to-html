@@ -20,6 +20,8 @@ impl CharType {
         }
     }
 }
+//Currently separates the entire text into individual character tokens, when it should group
+//runs of plaintext together
 pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
     use Token;
     //make it generic over any type that implements
@@ -39,26 +41,28 @@ pub fn double_char_tokenizer(str: &str) -> Vec<Token> {
         //otherwise, just push to stack
 
         match (curr_token, next_char) {
-            (None, _ ) => {
+            (None, _) => {
                 //just push the token
-                let next_token = match next_char {
+                let next_token: Token = match next_char {
                     CharType::Asterisk => Token::Asterisk,
-                    CharType::Plaintext => Token::Plaintext ,
+                    CharType::Plaintext => Token::Plaintext,
                     CharType::Space => Token::Space,
                 };
                 curr_token = Some(next_token.clone());
                 token_stream.push(next_token)
             }
             (Some(Token::Plaintext), CharType::Plaintext) => {
-                //do nothing
+                //push the next character
+                token_stream.push(Token::Plaintext)
             }
             (Some(Token::Plaintext), CharType::Asterisk) => {
                 //end plaintext, push it
                 let _tuple = (start_idx, i);
+                //TODO: push the current plaintext, then add the asterisk after it
                 //push asterisk
                 token_stream.push(Token::Asterisk);
-            },
-            (Some(Token::Plaintext), CharType::Space)=>{
+            }
+            (Some(Token::Plaintext), CharType::Space) => {
                 let _tuple = (start_idx, i);
                 //push space
                 token_stream.push(Token::Space);
